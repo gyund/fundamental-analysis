@@ -36,3 +36,5 @@ nav:
   - Getting Started: getting-started.md
   - Design:
       - Overview: design/overview.md
+      - Analysis: design/analysis.md
+      - Reference: design/reference.md
