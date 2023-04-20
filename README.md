@@ -1,4 +1,8 @@
 
+## Requirements
+
+- `python 3.8+`
+
 ## Getting Started 
 
 ```sh
