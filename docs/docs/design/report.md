@@ -1,0 +1,6 @@
+---
+tags:
+  - Design
+---
+
+# Report Generation
