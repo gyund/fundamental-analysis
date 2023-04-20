@@ -1,3 +1,4 @@
+[![python](https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml/badge.svg?branch=main)](https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml)
 
 ## Requirements
 
