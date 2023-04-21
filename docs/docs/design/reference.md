@@ -18,7 +18,8 @@ Fundamental analysis, at its source, starts with having a good reliable data set
 
 ## Tools
 
-| Provider | Description                                          |
-| -------- | ---------------------------------------------------- |
-| Github   | [OpenEdgar](https://github.com/LexPredict/openedgar) |
-| Github   | [YFinance](https://github.com/ranaroussi/yfinance)   |
+| Provider | Description                                          | Usage                        |
+| -------- | ---------------------------------------------------- | ---------------------------- |
+| Github   | [openedgar](https://github.com/LexPredict/openedgar) |                              |
+| Github   | [yfinance](https://github.com/ranaroussi/yfinance)   |                              |
+| Github   | [sec-edgar](https://github.com/sec-edgar/sec-edgar)  | Download appropriate reports |
