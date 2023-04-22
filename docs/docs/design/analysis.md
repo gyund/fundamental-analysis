@@ -13,6 +13,11 @@ The first problem to tackle is how to narrow down the number of companies that w
 - How is the future outlook of the company?
 - How are economic changes going to impact the growth scenario of the company?
 
+To begin processing the data we will be using
+
+!!! question "TODO"
+   Figure out what library to use
+
 ## Weed Out
 
 There are over 5000 companies traded publicly traded, but performing analysis on them all might be somewhat excessive. The first criteria to remove the following:

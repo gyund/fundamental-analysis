@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+
+import fire
+from data import source
+
+class Cli:
+    """Tools for gathering resources, analyzing data, and publishing the results."""
+
+    def analyze(self, source: str):
+        if not source:
+            source = self._default_source()
+        pass
+        
+        adapter = self._getSourceAdapter(source)
+        
+
+    def _default_source(self):
+        return "yfinance"
+    
+    def _getSourceAdapter(self, adapter_name: str) -> source.Source:
+        if not isinstance(adapter_name, str):
+            raise ValueError("adapter-type is invalid")
+        match(adapter_name):
+            case "yfinance":
+                pass 
+            case _: 
+                raise ValueError("invalid adapter-type specified")
+
+
+if __name__ == '__main__':
+    cli = Cli()
+    fire.Fire(cli)

@@ -16,7 +16,36 @@ There's is A LOT of data, and we can't download gigabytes of data. The general i
 
 ## Edgar Downloads
 
-The first thing that's required for analysis is report filed with the SEC. These can be retrieved using [sec-edgar](https://github.com/sec-edgar/sec-edgar). All this python utility does is facilitate the lookup of the desired document for the desired ticker.
+The first thing that's required for analysis is report filed with the SEC. One of the ways this can be retrieved is using [sec-edgar](https://github.com/sec-edgar/sec-edgar). All this python utility does is facilitate the lookup of the desired document for the desired ticker and download the reports.
+
+``` python title="Example"
+import secedgar as se
+import os
+from secedgar.client import NetworkClient
+from dateutil.relativedelta import relativedelta
+from datetime import date
+
+
+# SEC User Agent requirements
+my_client = NetworkClient(
+    user_agent='User (agent@someprovider.com)', backoff_factor=1, rate_limit=9)
+
+# start_date=date.today()-relativedelta(years=2
+my_start_date = date ( 2020 , 12 , 10 ) 
+my_end_date = date ( 2021 , 12 , 31 )
+
+my_filings = se.filings(cik_lookup=['aapl'],
+                            #    filing_type=se.FilingType.FILING_10Q, # quarterly
+                               filing_type=se.FilingType.FILING_10K, # annual
+                            #    count=4,
+                               client=my_client,
+                               start_date=my_start_date,
+                               end_date=my_end_date)
+
+my_filings.save(os.getcwd() + '/.edgar-filings')
+```
+
+These reports are large and not compact. In order to really get to what we want, I found the SEC [Financial Data Sets](https://www.sec.gov/dera/data/financial-statement-data-sets). Now these seem to be ordered and mapped using different files, but it's a lot more concise. However, it only includes quarterly reports, not annual.
 
 ### Notes
 
