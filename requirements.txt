@@ -1,5 +1,6 @@
 fire==0.5.0
 pytest==7.3.1
+ruff==0.0.262
 python-dateutil==2.8.2
 requests==2.28.2
 requests_cache==1.0.1

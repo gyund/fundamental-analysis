@@ -135,4 +135,3 @@ dmypy.json
 .edgar-filings/
 poc/
 *.sqlite3
-pyproject.toml
