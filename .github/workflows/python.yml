@@ -50,6 +50,9 @@ jobs:
           python -m ticker export --help
       - name: Coveralls
         uses: coverallsapp/github-action@v2
+        with:
+          flag-name: run-${{ join(matrix.*, '-') }}
+          parallel: true
       - name: Check Docstrings
         run: |
           pydoctest --config ticker/pydocktests.json
