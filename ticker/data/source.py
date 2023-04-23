@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-class Source(ABCMeta):
+class Source(metaclass=ABCMeta):
     """Interface for data retrieval"""    
 
     @abstractmethod
@@ -16,3 +16,16 @@ class Source(ABCMeta):
         pass
     
 
+class Stub(Source):
+    """Stub for the data source."""
+    
+    def getCashFlowFromOperatingActivities(self, ticker: str) -> int:
+        """get cash flow from operating activities
+
+        Args:
+            ticker (str): stock ticker
+
+        Returns:
+            int: 0 
+        """        
+        return 0
