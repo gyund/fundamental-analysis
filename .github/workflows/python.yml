@@ -39,7 +39,9 @@ jobs:
           pytest --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
       - name: Run smoke test
         run: |
-          .sfa/analyze --help
+          python -m ticker --help
+          python -m ticker analyze --help
+          python -m ticker export --help
       - name: Check Docstrings
         run: |
           pydoctest --config ticker/pydocktests.json
