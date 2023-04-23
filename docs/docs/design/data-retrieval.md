@@ -16,6 +16,38 @@ There's is A LOT of data, and we can't download gigabytes of data. The general i
 
 ## Edgar Downloads
 
+### SEC Financial Data Sets
+
+**Source:** [Financial Data Sets](https://www.sec.gov/dera/data/financial-statement-data-sets)
+
+The SEC provides data sets in the form of compressed text files. The quarterly downloads are around 50MB but they decompress to a couple hundred MB.
+
+The important parts of the zip file are as follows:
+
+- sub.txt
+- num.txt
+
+This `sub.txt` file contains contents similar to the following:
+
+``` title="sub.txt"
+0000320193-23-000006	320193	APPLE INC	3571	US	CA	CUPERTINO	95014	ONE APPLE PARK WAY		(408) 996-1010	US	CA	CUPERTINO	95014	ONE APPLE PARK WAY		US	CA	942404110	APPLE INC	20070109	1-LAF	0	0930	10-Q	20221231	2023	Q1	20230203	2023-02-02 18:02:00.0	0	1	aapl-20221231_htm.xml	1
+```
+
+The first item contains the adsh value. This essentially maps to the document that contains all the information for this report. The `cik` is the second number. This is what is commonly used to identify the company. Further down, we have a column that specifies the report. In this case, above we have a `10-Q` filing for a quarterly report. The second to last line also contains the xml file, which is conveniently prefixed with the ticker number of the company.
+
+The next document, `num.txt`, contains all the important financial information. Here's an example
+
+``` title="num.txt"
+0000320193-23-000006	AssetsCurrent	us-gaap/2022		20220930	0	USD	135405000000.0000	
+```
+
+You can see how easy it is now to pull financial information out of these data sets. In this one line, we can map the report to the value. In this case, the value corresponds to `AssetsCurrent`.
+
+!!! todo
+    See if there's any python libraries that grab and cache these reports.
+
+### sec-edgar
+
 The first thing that's required for analysis is report filed with the SEC. One of the ways this can be retrieved is using [sec-edgar](https://github.com/sec-edgar/sec-edgar). All this python utility does is facilitate the lookup of the desired document for the desired ticker and download the reports.
 
 ``` python title="Example"
@@ -47,7 +79,7 @@ my_filings.save(os.getcwd() + '/.edgar-filings')
 
 These reports are large and not compact. In order to really get to what we want, I found the SEC [Financial Data Sets](https://www.sec.gov/dera/data/financial-statement-data-sets). Now these seem to be ordered and mapped using different files, but it's a lot more concise. However, it only includes quarterly reports, not annual.
 
-### Notes
+#### Notes
 
 - We will need to use the start/end dates for this, which can be derived from existing reports. 
 - The user agent will need to be provided
