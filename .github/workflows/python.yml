@@ -35,20 +35,19 @@ jobs:
           # ruff --format=github --target-version=py37 .
       - name: Test with pytest
         run: |
-          pip install pytest pytest-cov
-          pytest --doctest-modules --junitxml=junit/test-results-${{ matrix.python-version }}.xml --cov=ticker --cov-report=xml --cov-report=html
+          pip install pytest pytest-cov coveralls
+          coverage run --source=ticker -m pytest tests/
+          coveralls
       - name: Run smoke test
         run: |
           python -m ticker --help
           python -m ticker analyze --help
           python -m ticker export --help
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
       - name: Check Docstrings
         run: |
           pydoctest --config ticker/pydocktests.json
-      - name: Code Coverage Summary Report
-        uses: irongut/CodeCoverageSummary@v1.3.0
-        with:
-          filename: junit/test-results-${{ matrix.python-version }}.xml
       - name: Upload pytest test results
         uses: actions/upload-artifact@v3
         with:
