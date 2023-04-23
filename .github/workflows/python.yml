@@ -42,21 +42,35 @@ jobs:
         run: |
           pip install pytest pytest-cov coveralls
           coverage run --source=ticker -m pytest tests/
-          coveralls --service=github
+          # coveralls --service=github
       - name: Run smoke test
         run: |
-          python -m ticker --help
-          python -m ticker analyze --help
-          python -m ticker export --help
+          coverage run -a --source=ticker -m ticker --help
+          coverage run -a --source=ticker -m ticker analyze --help
+          coverage run -a --source=ticker -m ticker export --help
       - name: Coveralls
         uses: coverallsapp/github-action@v2
+        with:
+          flag-name: run-${{ join(matrix.*, '-') }}
+          parallel: true
       - name: Check Docstrings
         run: |
           pydoctest --config ticker/pydocktests.json
-      - name: Upload pytest test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: pytest-results-${{ matrix.python-version }}
-          path: junit/test-results-${{ matrix.python-version }}.xml
-        # Use always() to always run this step to publish test results when there are test failures
-        if: ${{ always() }}
+      # - name: Upload pytest test results
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: pytest-results-${{ matrix.python-version }}
+      #     path: junit/test-results-${{ matrix.python-version }}.xml
+      #   # Use always() to always run this step to publish test results when there are test failures
+      #   if: ${{ always() }}
+
+  finish:
+    needs: build
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@v2
+      with:
+        parallel-finished: true
+        carryforward: "run-1,run-2"

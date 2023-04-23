@@ -54,6 +54,9 @@ These reports are large and not compact. In order to really get to what we want,
 
 ## Yahoo Finance
 
+!!! failure
+    This particular API failed on one of the first smoke tests implemented due to decryption issues. I'll have to see how we did this in the past, but this is also likely going to be an unreliable and less versatile approach. For now, we will document the progress but efforts will be focused on accessing this information from the [edgar reports](#edgar-downloads) .
+
 !!! important
     This library is for personal use only. Please see documentation on [yfinance](https://github.com/ranaroussi/yfinance) licensing notices regarding Yahoo's APIs. Extensive work has been made to minimize loads and requests through caching mechanisms. This project uses a sqlite cache for the results.
 
