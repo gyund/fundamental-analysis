@@ -17,7 +17,9 @@ class YFinance(Source):
         backend=SQLiteCache(db_path="yfinance.sqlite3")
     )
 
-    def __del__(self):
+    def __del__(self) -> None:
+        """ on delete
+        """        
         self.session.close()
 
     @property
