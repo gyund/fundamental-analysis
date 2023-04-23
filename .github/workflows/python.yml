@@ -10,6 +10,9 @@ jobs:
   build:
     permissions:
       pull-requests: write
+      contents: read
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
     environment: python-test
     strategy:
