@@ -22,4 +22,4 @@ fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN
 unfixable = []
 
 
-target-version = "py38"
+target-version = "py310"

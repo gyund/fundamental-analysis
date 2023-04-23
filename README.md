@@ -17,7 +17,7 @@ Additionally, the tools will utilize file based caching to limit interaction wit
 
 ## Requirements
 
-- `python 3.8+`
+- `python 3.10+`
 
 ## Getting Started 
 
