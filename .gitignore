@@ -133,5 +133,4 @@ dmypy.json
 
 # Project
 .edgar-filings/
-poc/
 *.sqlite3

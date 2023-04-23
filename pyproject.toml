@@ -23,3 +23,4 @@ unfixable = []
 
 
 target-version = "py310"
+line-length = 88

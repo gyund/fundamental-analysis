@@ -51,3 +51,10 @@ These reports are large and not compact. In order to really get to what we want,
 
 - We will need to use the start/end dates for this, which can be derived from existing reports. 
 - The user agent will need to be provided
+
+## Yahoo Finance
+
+!!! important
+    This library is for personal use only. Please see documentation on [yfinance](https://github.com/ranaroussi/yfinance) licensing notices regarding Yahoo's APIs. Extensive work has been made to minimize loads and requests through caching mechanisms. This project uses a sqlite cache for the results.
+
+For testing and for personal use until we can get [Edgar processing](#edgar-downloads) working, we will be using the [yfinance](https://github.com/ranaroussi/yfinance) python library.
