@@ -15,7 +15,8 @@ class CachedLimiterSession(CacheMixin, LimiterMixin, Session):
     pass
 
 
-@pytest.mark.skipif(os.getenv("SFA_INTEGRATION") is None, reason="env variable SFA_INTEGRATION not set")
+@pytest.mark.skipif(os.getenv("SFA_INTEGRATION") is None, 
+                    reason="env variable SFA_INTEGRATION not set")
 def test_call_yfinance():
     session = CachedLimiterSession(
         # max 2 requests per 5 seconds

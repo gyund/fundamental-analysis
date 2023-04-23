@@ -37,6 +37,12 @@ jobs:
         run: |
           pip install pytest pytest-cov
           pytest --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+      - name: Run smoke test
+        run: |
+          .sfa/analyze --help
+      - name: Check Docstrings
+        run: |
+          pydoctest --config ticker/pydocktests.json
       - name: Upload pytest test results
         uses: actions/upload-artifact@v3
         with:

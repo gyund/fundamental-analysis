@@ -1,8 +1,8 @@
 [![python](https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml/badge.svg?branch=main)](https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml)
 
-# Smart Fundamental Analysis
+# Ticker (smart stock analysis)
 
-**__UNDER DEVELOPMENT__**
+**__EARLY DEVELOPMENT__**
 
 The goal of this project is to generate data that is consumable in both human readable format as well as JSON to better analyze and make sense of the intrinsic value of publicly traded companies.
 
