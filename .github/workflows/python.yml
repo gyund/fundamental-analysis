@@ -1,14 +1,23 @@
 name: python
 
-on: [push]
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
-
+    permissions:
+      pull-requests: write
+      contents: read
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
+    environment: python-test
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.10", "3.11"]
 
     steps:
       - uses: actions/checkout@v3
@@ -24,14 +33,26 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Lint with ruff
         run: |
+          ruff . 
           # stop the build if there are Python syntax errors or undefined names
-          ruff --format=github --select=E9,F63,F7,F82 --target-version=py37 .
+          # ruff --format=github --select=E9,F63,F7,F82 --target-version=py37 .
           # default set of ruff rules with GitHub Annotations
-          ruff --format=github --target-version=py37 .
+          # ruff --format=github --target-version=py37 .
       - name: Test with pytest
         run: |
-          pip install pytest pytest-cov
-          pytest --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+          pip install pytest pytest-cov coveralls
+          coverage run --source=ticker -m pytest tests/
+          coveralls --service=github
+      - name: Run smoke test
+        run: |
+          python -m ticker --help
+          python -m ticker analyze --help
+          python -m ticker export --help
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
+      - name: Check Docstrings
+        run: |
+          pydoctest --config ticker/pydocktests.json
       - name: Upload pytest test results
         uses: actions/upload-artifact@v3
         with:
