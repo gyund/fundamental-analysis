@@ -28,6 +28,16 @@ python3 -m venv venv
 pip install -r requirements.txt
 ```
 
+### Testing
+
+Run tests by running the following:
+
+```sh
+pytest
+```
+
+The test infrastructure supports running integration tests using real network endpoints using environment flags, but this is still a work in progress and should be avoided at the moment. Documentation will be provided on how to run these once it has matured and is ready.
+
 ## Updating Dependencies
 
 ```sh
