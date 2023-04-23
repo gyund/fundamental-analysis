@@ -42,7 +42,7 @@ jobs:
         run: |
           pip install pytest pytest-cov coveralls
           coverage run --source=ticker -m pytest tests/
-          coveralls --service=github
+          # coveralls --service=github
       - name: Run smoke test
         run: |
           python -m ticker --help
