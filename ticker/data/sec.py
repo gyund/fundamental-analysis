@@ -1,9 +1,10 @@
 from diskcache import Cache
 from datetime import date
 
+
 class ReportDate:
 
-    def __init__(self, year = date.today().year, quarter = ((date.today().month-1) / 3) + 1) -> None:
+    def __init__(self, year=date.today().year, quarter=((date.today().month-1) / 3) + 1) -> None:
         """_summary_
 
         Args:
@@ -11,17 +12,23 @@ class ReportDate:
             quarter (int): _description_. Defaults to ((date.today().month-1) / 4)+1.
         """
         if year > date.today().year:
-            raise ValueError("you cannot request reports in the future...that would be illegal :)")
-        if not quarter in range(1,4):
-            raise ValueError("the value for the quarter must be a value between 1 and 4")
-        pass
+            raise ValueError(
+                "you cannot request reports in the future...that would be illegal :)")
+        if not quarter in range(1, 4):
+            raise ValueError(
+                "the value for the quarter must be a value between 1 and 4")
+        self.year = year
+        self.quarter = quarter
+
+    def __eq__(self, other):
+        return self.quarter == other.quarter and self.year == other.year
 
 class Sec:
-    
+
     # Format of zip example: 2023q1.zip
     _base_url = 'https://www.sec.gov/files/dera/data/financial-statement-data-sets/'
 
-    def update(self, tickers: list, years: int = 5, last_report : ReportDate = ReportDate()) -> None:
+    def update(self, tickers: list, years: int = 5, last_report: ReportDate = ReportDate()) -> None:
         """ Update the database with information about the following stocks.
 
         When this command runs, it will pull updates starting from 
@@ -36,7 +43,6 @@ class Sec:
         for dl in download_list:
             self._updateQuarter(dl)
             pass
-        
 
     def _updateQuarter(self, report_archive: str):
         """ Update the quarter using the provided archive
@@ -53,14 +59,14 @@ class Sec:
 
         pass
 
-    def _getDownloadList(years: int, last_report : ReportDate) -> list[str]:
+    def _getDownloadList(years: int, last_report: ReportDate) -> list[str]:
         """ Get a list of files to download for all the quarters.
 
         The list generated will include an extra quarter so that you will always be
         able to do analysis from the current quarter to the previous quarter.
 
         >>> Sec._getDownloadList(1, ReportDate(2023,2))
-        ['2023q2.zip','2023q1.zip','2022q4.zip','2022q3.zip','2022q2.zip']
+        ['2023q2.zip', '2023q1.zip', '2022q4.zip', '2022q3.zip', '2022q2.zip']
 
         Args:
             years (int): number of years to go back in time.
@@ -68,5 +74,17 @@ class Sec:
 
         Returns:
             list[str]: _description_
-        """            
-        pass
+        """
+        dl_list = list()
+        next_report = last_report
+        final_report = ReportDate(last_report.year-years, last_report.quarter)
+        while 1:
+            dl_list.append(f"{next_report.year}q{next_report.quarter}.zip")
+            if next_report == final_report:
+                break
+            if 1 == next_report.quarter:
+                next_report.quarter = 4
+                next_report.year -= 1
+            else:
+                next_report.quarter -= 1
+        return dl_list
