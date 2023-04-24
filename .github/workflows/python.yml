@@ -41,7 +41,7 @@ jobs:
       - name: Test with pytest
         run: |
           pip install pytest pytest-cov coveralls
-          coverage run --source=ticker -m pytest tests/
+          coverage run --source=ticker -m pytest --doctest-modules tests/
           # coveralls --service=github
       - name: Run smoke test
         run: |
@@ -53,9 +53,6 @@ jobs:
         with:
           flag-name: run-${{ join(matrix.*, '-') }}
           parallel: true
-      - name: Check Docstrings
-        run: |
-          pydoctest --config ticker/pydocktests.json
       # - name: Upload pytest test results
       #   uses: actions/upload-artifact@v3
       #   with:
