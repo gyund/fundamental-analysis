@@ -48,7 +48,7 @@ class Sec:
         self._updateCikMappings()
 
         # Download reports for each quarter and update records for tickers specified
-        download_list = self._getDownloadList(years, last_report)
+        download_list = Sec._getDownloadList(years, last_report)
         for dl in download_list:
             self._updateQuarter(dl)
             pass
