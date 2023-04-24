@@ -30,16 +30,26 @@ def test_reportDate():
 class TestSecHarness:
     sec = Sec()
 
-    @classmethod
-    def setup_class(cls):
-        cls.sec._downloadArchive = mock.Mock()
-        cls.sec._updateCikMappings = mock.Mock()
-        cls.sec._updateQuarter = mock.Mock()
-
-    def test_update(self):
+    def test_update_1year(self):
+        self.sec._updateCikMappings = mock.Mock()
+        self.sec._updateQuarter = mock.Mock()
         self.sec.update(['appl'], 1)
         self.sec._updateCikMappings.assert_called_once()
         assert self.sec._updateQuarter.call_count == 5
+    
+    def test_update_2year(self):
+        self.sec._updateCikMappings = mock.Mock()
+        self.sec._updateQuarter = mock.Mock()
+        self.sec.update(['appl'], 2)
+        self.sec._updateCikMappings.assert_called_once()
+        assert self.sec._updateQuarter.call_count == 9
+
+    def test_update_3year(self):
+        self.sec._updateCikMappings = mock.Mock()
+        self.sec._updateQuarter = mock.Mock()
+        self.sec.update(['appl'], 3)
+        self.sec._updateCikMappings.assert_called_once()
+        assert self.sec._updateQuarter.call_count == 13
         
     def test_processArchive(self):
         try:
