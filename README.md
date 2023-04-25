@@ -26,7 +26,12 @@ Additionally, the tools will utilize file based caching to limit interaction wit
 python3 -m venv venv
 . venv/bin/activate
 pip install -r requirements.txt
+
+# Perform analysis
+python -m ticker analyze --tickers aapl,msft
 ```
+
+More information can be found in our [documentation](https://gyund.github.io/fundamental-analysis/)
 
 ### Testing
 
@@ -37,12 +42,6 @@ pytest
 ```
 
 The test infrastructure supports running integration tests using real network endpoints using environment flags, but this is still a work in progress and should be avoided at the moment. Documentation will be provided on how to run these once it has matured and is ready.
-
-## Updating Dependencies
-
-```sh
-pip freeze > requirements.txt
-```
 
 ## Disclaimer
 

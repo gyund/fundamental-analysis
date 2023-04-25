@@ -59,3 +59,9 @@ class TestSecHarness:
             pytest.fail('should throw and exception')
         except:
             pass
+
+    @pytest.mark.skipif(os.getenv("TICKER_TEST_SEC") is None,
+                        reason="env variable TICKER_TEST_SEC not set")
+    def test_integration(self):
+        # TODO: test using the real SEC adapter
+        pass

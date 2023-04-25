@@ -1,9 +1,3 @@
----
-tags:
-  - Design
-  - In-Progress
----
-
 # The Big Picture
 
 The general approach is as follows:

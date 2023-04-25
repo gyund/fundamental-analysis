@@ -1,4 +1,4 @@
-# Welcome to Fundamental Analysis Tools
+# Overview
 
 This project is an analysis tool designed to perform fundamental analysis on publicly traded equities using a variety of methods. From various studies and research, fundamental analysis is an imperfect science. There's no "silver bullet" that tells you whether a company will be successful or and epic failure.
 

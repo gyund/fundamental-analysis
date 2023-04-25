@@ -1,7 +1,6 @@
 import pytest
 import mock
 from ticker.cli import Cli
-from ticker.data.source import Stub
 
 
 class TestCli:
@@ -20,10 +19,3 @@ class TestCli:
             self.cli.export(tickers="invalid")
         except ZeroDivisionError as exc:
             pytest.fail(exc, pytrace=True)
-
-
-class TestStub:
-    stub: Stub = Stub()
-
-    def test_calls(self):
-        assert self.stub.getCashFlowFromOperatingActivities("msft") == 0

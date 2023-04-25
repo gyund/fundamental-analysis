@@ -1,9 +1,3 @@
----
-tags:
-  - Design
-  - In-Progress
----
-
 # Data Retrieval
 
 There's is A LOT of data, and we can't download gigabytes of data. The general idea is that we:
@@ -17,6 +11,8 @@ There's is A LOT of data, and we can't download gigabytes of data. The general i
 ## Edgar Downloads
 
 ### SEC Financial Data Sets
+
+!!! success "Planned Approach"
 
 **Source:** [Financial Data Sets](https://www.sec.gov/dera/data/financial-statement-data-sets)
 
@@ -43,8 +39,7 @@ The next document, `num.txt`, contains all the important financial information. 
 
 You can see how easy it is now to pull financial information out of these data sets. In this one line, we can map the report to the value. In this case, the value corresponds to `AssetsCurrent`.
 
-!!! todo
-    See if there's any python libraries that grab and cache these reports.
+We will use [pandas](https://pandas.pydata.org/) to extract the data dumps and then filter down the data sets to contain only relevant information.
 
 ### sec-edgar
 

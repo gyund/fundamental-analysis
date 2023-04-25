@@ -1,9 +1,3 @@
----
-tags:
-  - Design
-  - In-Progress
----
-
 # Accessing the Report
 
 The general concept is that the report could be accessed locally or remotely via cached results created from the report generation. Because companies are like battleships, fundamental analysis of short term data is unlikely to have much of an impact on long-term results so generating period reports in a static format keeps the access time $O(1)$. 
