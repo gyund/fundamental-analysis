@@ -1,8 +1,10 @@
 import pytest
 import mock
+import os
 from ticker.cli import Cli
 from ticker.data.sec import Sec,ReportDate
 from datetime import date
+from pathlib import Path
 
 def test_reportDate():
     rd = ReportDate(2023,1)
@@ -28,7 +30,7 @@ def test_reportDate():
         pass
 
 class TestSecHarness:
-    sec = Sec()
+    sec = Sec(Path(os.path.dirname(os.path.realpath(__file__)))/ ".ticker-cache")
 
     def test_update_1year(self):
         self.sec._updateCikMappings = mock.Mock()

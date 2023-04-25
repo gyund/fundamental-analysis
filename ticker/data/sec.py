@@ -1,6 +1,7 @@
 from zipfile import ZipFile
 from diskcache import Cache
 from datetime import date
+from pathlib import Path
 
 
 class ReportDate:
@@ -34,6 +35,12 @@ class Sec:
     _base_url = 'https://www.sec.gov/files/dera/data/financial-statement-data-sets/'
 
     _company_tickers_url = 'https://www.sec.gov/files/company_tickers.json'
+
+    def __init__(self, storage_path: Path):
+        if not isinstance(storage_path, Path):
+            raise ValueError("storage_path is required")
+        storage_path.mkdir(parents=True, exist_ok=True)
+        self.storage_path = storage_path
 
     def update(self, tickers: list, years: int = 5, last_report: ReportDate = ReportDate()) -> None:
         """ Update the database with information about the following stocks.
@@ -142,4 +149,7 @@ class Sec:
                 # TODO: Process with pandas and filter the columns & rows
                 # print(myfile.read())
                 pass
+
+    def _getArchiveStoragePath(self, report_archive : str) -> Path:
+        return self.storage_path / report_archive
         
