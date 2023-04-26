@@ -7,9 +7,9 @@ import pandas as pd
 
 class ReportDate:
 
-    def __init__(self, 
-                 year : int = date.today().year, 
-                 quarter : int =((date.today().month-1) / 3) + 1):
+    def __init__(self,
+                 year: int = date.today().year,
+                 quarter: int = ((date.today().month-1) / 3) + 1):
         if year > date.today().year:
             raise ValueError(
                 "you cannot request reports in the future...that would be illegal :)")
@@ -19,7 +19,7 @@ class ReportDate:
         self.year = year
         self.quarter = quarter
 
-    def __eq__(self, other : 'ReportDate') -> bool:
+    def __eq__(self, other: 'ReportDate') -> bool:
         """
 
         Args:
@@ -30,6 +30,7 @@ class ReportDate:
         """
         return self.quarter == other.quarter and self.year == other.year
 
+
 class Sec:
 
     # Format of zip example: 2023q1.zip
@@ -37,7 +38,7 @@ class Sec:
 
     _company_tickers_url = 'https://www.sec.gov/files/company_tickers.json'
 
-    data : pd.DataFrame = None
+    data: pd.DataFrame = None
 
     def __init__(self, storage_path: Path):
         if not isinstance(storage_path, Path):
@@ -136,7 +137,7 @@ class Sec:
 
         Args:
             report_archive (str): name of the file w/ extension to be downloaded
-        """        
+        """
         # TODO: determine download agent
         pass
 
@@ -146,7 +147,7 @@ class Sec:
         Args:
             report_archive (str): name of the file w/ extension that was downloaded
             clk_map (pd.DataFrame): Map of CLK values to the stock ticker
-        """   
+        """
         arch_path = self._getArchiveStoragePath(report_archive)
 
         with ZipFile(arch_path) as myzip:
@@ -165,6 +166,5 @@ class Sec:
                     # TODO: Filter out the results containing only those reports
                     # TODO: Store or merge with existing data
 
-    def _getArchiveStoragePath(self, report_archive : str) -> Path:
+    def _getArchiveStoragePath(self, report_archive: str) -> Path:
         return self.storage_path / report_archive
-        
