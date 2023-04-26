@@ -2,6 +2,7 @@ from zipfile import ZipFile
 from diskcache import Cache
 from datetime import date
 from pathlib import Path
+import pandas as pd
 
 
 class ReportDate:
@@ -36,13 +37,15 @@ class Sec:
 
     _company_tickers_url = 'https://www.sec.gov/files/company_tickers.json'
 
+    data : pd.DataFrame = None
+
     def __init__(self, storage_path: Path):
         if not isinstance(storage_path, Path):
             raise ValueError("storage_path is required")
         storage_path.mkdir(parents=True, exist_ok=True)
         self.storage_path = storage_path
 
-    def update(self, tickers: list, years: int = 5, last_report: ReportDate = ReportDate()) -> None:
+    def update(self, tickers: list, years: int = 5, last_report: ReportDate = ReportDate()) -> pd.DataFrame:
         """ Update the database with information about the following stocks.
 
         When this command runs, it will pull updates starting from 
@@ -51,29 +54,32 @@ class Sec:
             tickers (list): only store and catalog information about these tickers
             years (int): number of years to go back in time. Defaults to 5.
             last_report (ReportDate): only retrieve reports from this quarter and before
+
+        Returns:
+            pd.DataFrame: with the extracted data from the report
         """
-        self._updateCikMappings()
+        clk_map = self._updateCikMappings()
 
         # Download reports for each quarter and update records for tickers specified
         download_list = Sec._getDownloadList(years, last_report)
         for dl in download_list:
-            self._updateQuarter(dl)
-            pass
+            self._updateQuarter(dl, clk_map)
+        return self.data
 
-    def _updateQuarter(self, report_archive: str) -> None:
+    def _updateQuarter(self, report_archive: str, clk_map: pd.DataFrame) -> None:
         """ Update the quarter using the provided archive
 
         Args:
             report_archive (str): name of the zip file to download with the extension
+            clk_map (pd.DataFrame): Map of CLK values to the stock ticker
         """
         # Make download request (if-needed based on file-cache)
         self._downloadArchive(report_archive)
 
         # Process Quarter (if needed - based on cache)
-        self._processArchive(report_archive)
-        pass
+        return self._processArchive(report_archive, clk_map)
 
-    def _updateCikMappings(self) -> None:
+    def _updateCikMappings(self) -> pd.DataFrame:
         """update the CIK ticker mappings. This must be done before processing reports
 
         The SEC stores the mappings of the CIK values to tickers in a JSON file.
@@ -88,9 +94,12 @@ class Sec:
         {"0":{"cik_str":320193,"ticker":"AAPL","title":"Apple Inc."},
          "1":{"cik_str":789019,"ticker":"MSFT","title":"MICROSOFT CORP"},
 
+        Returns:
+            pd.DataFrame: maps cik to stock ticker
+
         """
         # TODO: Make a cache request to _company_tickers_url
-        pass
+        return pd.DataFrame()
 
     def _getDownloadList(years: int, last_report: ReportDate) -> list[str]:
         """ Get a list of files to download for all the quarters.
@@ -131,11 +140,12 @@ class Sec:
         # TODO: determine download agent
         pass
 
-    def _processArchive(self, report_archive: str) -> None:
-        """_summary_
+    def _processArchive(self, report_archive: str, clk_map: pd.DataFrame) -> None:
+        """ Opens and extracts relevant data from a zip file archive
 
         Args:
             report_archive (str): name of the file w/ extension that was downloaded
+            clk_map (pd.DataFrame): Map of CLK values to the stock ticker
         """   
         arch_path = self._getArchiveStoragePath(report_archive)
 
@@ -144,11 +154,16 @@ class Sec:
             with myzip.open('sub.txt') as myfile:
                 # TODO: Process with pandas and filter the columns & rows
                 # print(myfile.read())
-                pass
-            with myzip.open('num.txt') as myfile:
-                # TODO: Process with pandas and filter the columns & rows
-                # print(myfile.read())
-                pass
+                report_list = pd.read_csv(myfile)
+
+                # TODO: Get reports that are 10-K or 10-Q
+
+                with myzip.open('num.txt') as myfile:
+                    # TODO: Process with pandas and filter the columns & rows
+                    # print(myfile.read())
+                    data_set = pd.read_csv(myfile)
+                    # TODO: Filter out the results containing only those reports
+                    # TODO: Store or merge with existing data
 
     def _getArchiveStoragePath(self, report_archive : str) -> Path:
         return self.storage_path / report_archive

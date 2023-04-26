@@ -31,6 +31,27 @@ pip install -r requirements.txt
 python -m ticker analyze --tickers aapl,msft
 ```
 
+If you wish to use your own analysis plugin, you simply create your own module that implements this class and interface:
+
+``` python
+class Analysis:
+    def __init__(self, data: pd.DataFrame):
+        self.data = data
+
+    def analyze(self,tickers: list[str]):
+        pass
+
+    def report(self,tickers: list[str]):
+        """ TBD Interface under development """
+        pass
+```
+
+Then call the tool in the following manner:
+
+```sh
+python -m ticker analyze --tickers aapl,msft --analysis_plugin 'mypkg.analysis'
+```
+
 More information can be found in our [documentation](https://gyund.github.io/fundamental-analysis/)
 
 ### Testing
