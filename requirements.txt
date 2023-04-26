@@ -1,8 +1,13 @@
-fire==0.5.0
+# Test & Lint
 pytest==7.3.1
 pydoctest==0.1.22
 ruff==0.0.262
+mock==5.0.2
+
+# Utilities 
 python-dateutil==2.8.2
+fire==0.5.0
+diskcache==5.6.1
 requests==2.28.2
 requests_cache==1.0.1
 requests_ratelimiter==0.4.0

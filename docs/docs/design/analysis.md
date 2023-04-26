@@ -1,9 +1,3 @@
----
-tags:
-  - Design
-  - In-Progress
----
-
 # Performing Data Analysis
 
 The first problem to tackle is how to narrow down the number of companies that would be fundamentally sound enough to invest in. To do this, we need to answer the following questions:

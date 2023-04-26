@@ -134,3 +134,5 @@ dmypy.json
 # Project
 .edgar-filings/
 *.sqlite3
+.ticker-cache
+.ticker-report

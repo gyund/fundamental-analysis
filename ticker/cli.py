@@ -1,65 +1,55 @@
-from ticker.data.source import Source, Stub
-from ticker.data.yfinance import YFinance
+from ticker.data.sec import Sec
+from pathlib import Path
+import os
+import sys
+import importlib
+import pandas as pd
 
 
 class Cli:
+
     """Tools for gathering resources, analyzing data, and publishing the results."""
 
-    def analyze(self, source: str, force: bool = False) -> None:
+    def analyze(self,
+                tickers: list[str],
+                cache_path: Path = Path(os.getcwd()) / ".ticker-cache",
+                analysis_plugin: str = 'ticker.analysis') -> None:
         """ Perform stock analysis
 
         Args:
-            source (str): adapter to use, options include: yfinance, stub
-            force (bool): override warnings the CLI gives you about certain sources
+            tickers (list[str]): tickers to include in the analysis
+            cache_path (Path): path where to cache data
+            analysis_plugin (str): module to load for analysis
         """
-        if not source:
-            source = self._default_source()
+        df = self._doUpdateFromSec(tickers, cache_path)
 
-        adapter = self._getSourceAdapter(source, force)
+        # Call analysis plugin
+        analysis_module = importlib.import_module(analysis_plugin)
+        am = analysis_module.Analysis(df)
+        am.analyze(tickers)
 
-    def export(self, source: str, file: str = None, json: str = None) -> None:
+    def _doUpdateFromSec(self, tickers: list[str], cache_path: Path) -> pd.DataFrame:
+        sec = Sec(storage_path=Path(cache_path))
+
+        return sec.update(tickers=tickers)
+
+    def export(self, tickers: list[str],
+               cache_path: Path = Path(os.getcwd()) / ".ticker-cache",
+               file: Path = None,
+               json: Path = None,
+               analysis_plugin: str = 'ticker.analysis') -> None:
         """ Create a report in one of the following formats based on data already analyzed
 
         Args:
-            source (str): adapter to use, options include: yfinance, stub
-            file (str): text file containing the report. Defaults to None.
-            json (str): directory to store the reports in individual json files. Defaults to None.
+            tickers (list[str]): tickers to include in the analysis
+            cache_path (Path): path of cached data
+            file (Path): text file containing the report. Defaults to None.
+            json (Path): directory to store the reports in individual json files. Defaults to None.
+            analysis_plugin (str): module to load for analysis
         """
-        pass
+        sec = Sec(storage_path=Path(cache_path))
 
-    def _default_source(self) -> str:
-        """ [Default data source to use if not specified]
-
-        Returns:
-            str: default source to use
-        """
-        return "yfinance"
-
-    def _getSourceAdapter(self, adapter_name: str, force: bool) -> Source:
-        """Get the object representing the specified data source
-
-        Args:
-            adapter_name (str): valid types include: yfinance, stub
-            force (bool): override warnings the CLI gives you about certain sources
-
-        Raises:
-            ValueError: the adapter_name was not valid
-            RuntimeError: if the adapter requires a --force flag
-
-        Returns:
-            Source: adapter providing the data
-        """
-
-        if not isinstance(adapter_name, str):
-            raise ValueError("adapter-type is invalid")
-        match(adapter_name):
-            case "yfinance":
-                if force:
-                    return YFinance()
-                else:
-                    raise RuntimeError(
-                        "yfinance is for personal use only. If you understand this, use the --force flag to override")
-            case "stub":
-                return Stub()
-            case _:
-                raise ValueError("invalid adapter-type specified")
+        # Call analysis plugin
+        analysis_module = importlib.import_module(analysis_plugin)
+        am = analysis_module.Analysis(sec.data)
+        am.report(tickers)
