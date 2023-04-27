@@ -55,7 +55,7 @@ jobs:
           coverage run -a --source=ticker -m ticker export --help
       - name: Coveralls
         run: |
-          coveralls --service=github --srcdir=ticker --finish
+          coveralls --service=github --srcdir=ticker
       # - name: Coveralls
       #   uses: coverallsapp/github-action@v2.1.2
       #   with:
@@ -76,7 +76,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
-      uses: coverallsapp/github-action@v2
-      with:
-        parallel-finished: true
-        carryforward: "run-1,run-2"
+      run: |
+        coveralls --service=github --finish
+      # uses: coverallsapp/github-action@v2
+      # with:
+      #   parallel-finished: true
+      #   carryforward: "run-1,run-2"
