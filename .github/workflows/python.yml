@@ -77,9 +77,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Coveralls Finished
-      run: |
-            coveralls --service=github
-  #     uses: coverallsapp/github-action@v2
-  #     with:
-  #       parallel-finished: true
-  #       carryforward: "run-1,run-2"
+      uses: coverallsapp/github-action@v2
+      with:
+        parallel-finished: true
+        # carryforward: "run-1,run-2"
