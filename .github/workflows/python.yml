@@ -13,7 +13,7 @@ jobs:
       contents: read
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # TICKER_TEST_SEC: 1
+      TICKER_TEST_SEC: 1
     runs-on: ubuntu-latest
     environment: python-test
     strategy:
@@ -56,7 +56,7 @@ jobs:
           coverage run -a --source=ticker -m ticker analyze --help
           coverage run -a --source=ticker -m ticker export --help
       - name: Coveralls
-        uses: coverallsapp/github-action@v2
+        uses: coverallsapp/github-action@v2.1.2
         with:
           flag-name: run-${{ join(matrix.*, '-') }}
           parallel: true
