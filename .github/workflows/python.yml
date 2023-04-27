@@ -55,7 +55,7 @@ jobs:
           coverage run -a --source=ticker -m ticker export --help
       - name: Coveralls
         run: |
-          coveralls --service=github --srcdir=ticker
+          coveralls --service=github
       # - name: Coveralls
       #   uses: coverallsapp/github-action@v2.1.2
       #   with:
@@ -70,15 +70,13 @@ jobs:
       #   # Use always() to always run this step to publish test results when there are test failures
       #   if: ${{ always() }}
 
-  finish:
-    needs: build
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    steps:
-    - name: Coveralls Finished
-      run: |
-        coveralls --service=github --finish
-      # uses: coverallsapp/github-action@v2
-      # with:
-      #   parallel-finished: true
-      #   carryforward: "run-1,run-2"
+  # finish:
+  #   needs: build
+  #   if: ${{ always() }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Coveralls Finished
+  #     uses: coverallsapp/github-action@v2
+  #     with:
+  #       parallel-finished: true
+  #       carryforward: "run-1,run-2"
