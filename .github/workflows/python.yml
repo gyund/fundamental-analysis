@@ -58,6 +58,7 @@ jobs:
         with:
           flag-name: run-${{ join(matrix.*, '-') }}
           parallel: true
+        if: ${{ success() }}
       # - name: Upload pytest test results
       #   uses: actions/upload-artifact@v3
       #   with:
