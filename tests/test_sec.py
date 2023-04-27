@@ -5,6 +5,8 @@ from ticker.cli import Cli
 from ticker.data.sec import Sec,ReportDate
 from datetime import date
 from pathlib import Path
+import logging
+logger = logging.getLogger(__name__)
 
 def test_reportDate():
     rd = ReportDate(2023,1)
@@ -60,8 +62,14 @@ class TestSecHarness:
         except:
             pass
 
-    @pytest.mark.skipif(os.getenv("TICKER_TEST_SEC") is None,
-                        reason="env variable TICKER_TEST_SEC not set")
-    def test_integration(self):
-        # TODO: test using the real SEC adapter
-        pass
+@pytest.mark.skipif(os.getenv("TICKER_TEST_SEC") is None,
+                    reason="env variable TICKER_TEST_SEC not set")
+def test_integration():
+    # test using the real SEC adapter
+    sec = Sec(Path(os.path.dirname(os.path.realpath(__file__)))/ ".ticker-cache")
+    df = sec._updateCikMappings()
+    result = df[df.ticker == 'AAPL']
+    logger.debug(f'{result.ticker.iloc[0]}')
+    logger.debug(f'{result.cik_str.iloc[0]}')
+    assert result.cik_str.iloc[0] == 320193
+    assert result.ticker.iloc[0] == 'AAPL'

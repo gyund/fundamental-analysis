@@ -1,9 +1,10 @@
 from zipfile import ZipFile
-from diskcache import Cache
 from datetime import date
 from pathlib import Path
 import pandas as pd
-
+from requests_cache import CachedSession, FileCache
+from datetime import timedelta
+from io import BytesIO
 
 class ReportDate:
 
@@ -45,6 +46,12 @@ class Sec:
             raise ValueError("storage_path is required")
         storage_path.mkdir(parents=True, exist_ok=True)
         self.storage_path = storage_path
+        self.data_session = CachedSession('data', backend=FileCache(storage_path/'data'), stale_if_error=True)
+        self.ticker_session = CachedSession(
+            'tickers', 
+            backend=FileCache(storage_path/'tickers'), 
+            expire_after=timedelta(days=365),
+            stale_if_error=True)
 
     def update(self, tickers: list, years: int = 5, last_report: ReportDate = ReportDate()) -> pd.DataFrame:
         """ Update the database with information about the following stocks.
@@ -99,8 +106,14 @@ class Sec:
             pd.DataFrame: maps cik to stock ticker
 
         """
-        # TODO: Make a cache request to _company_tickers_url
-        return pd.DataFrame()
+        # Make a cache request to _company_tickers_url
+        response = self.ticker_session.get(self._company_tickers_url)
+
+        if response.status_code == 200:
+            clk_df = pd.read_json(response.content.decode(),  orient='index')
+            return clk_df
+        else:
+            return pd.DataFrame()
 
     def _getDownloadList(years: int, last_report: ReportDate) -> list[str]:
         """ Get a list of files to download for all the quarters.

@@ -13,6 +13,7 @@ jobs:
       contents: read
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TICKER_TEST_SEC: 1
     runs-on: ubuntu-latest
     environment: python-test
     strategy:
