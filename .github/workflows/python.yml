@@ -38,7 +38,13 @@ jobs:
           # stop the build if there are Python syntax errors or undefined names
           # ruff --format=github --select=E9,F63,F7,F82 --target-version=py37 .
           # default set of ruff rules with GitHub Annotations
-          # ruff --format=github --target-version=py37 .
+          # ruff --format=github --target-version=py37 .  
+      - name: Cache Network Requests
+        uses: actions/cache@v3
+        with:
+          key: http_cache
+          path: |
+            tests/.ticker-cache    
       - name: Test with pytest
         run: |
           pip install pytest pytest-cov coveralls
