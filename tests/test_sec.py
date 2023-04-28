@@ -2,7 +2,7 @@ import pytest
 import mock
 import os
 from ticker.cli import Cli
-from ticker.data.sec import Sec, ReportDate
+from ticker.data.sec import Sec, ReportDate, TickerReader, DataSetReader
 from datetime import date
 from pathlib import Path
 import logging
@@ -33,36 +33,15 @@ def test_reportDate():
         pass
 
 
-class TestSecMockHarness:
-    sec = Sec(Path(os.path.dirname(os.path.realpath(__file__))) / ".ticker-cache")
-
-    def test_update_1year(self):
-        self.sec._updateCikMappings = mock.Mock()
-        self.sec._updateQuarter = mock.Mock()
-        self.sec.update(['appl'], 1)
-        self.sec._updateCikMappings.assert_called_once()
-        assert self.sec._updateQuarter.call_count == 5
-
-    def test_update_2year(self):
-        self.sec._updateCikMappings = mock.Mock()
-        self.sec._updateQuarter = mock.Mock()
-        self.sec.update(['appl'], 2)
-        self.sec._updateCikMappings.assert_called_once()
-        assert self.sec._updateQuarter.call_count == 9
-
-    def test_update_3year(self):
-        self.sec._updateCikMappings = mock.Mock()
-        self.sec._updateQuarter = mock.Mock()
-        self.sec.update(['appl'], 3)
-        self.sec._updateCikMappings.assert_called_once()
-        assert self.sec._updateQuarter.call_count == 13
-
-    def test_processArchive(self):
-        try:
-            self.sec._processArchive('bad_archive')
-            pytest.fail('should throw and exception')
-        except:
-            pass
+def test_getDownloadList_1():
+    dl_list = Sec._getDownloadList(
+        years=1, last_report=ReportDate(year=2022, quarter=4))
+    assert len(dl_list) == 5
+    assert dl_list[0] == ReportDate(year=2022, quarter=4)
+    assert dl_list[1] == ReportDate(year=2022, quarter=3)
+    assert dl_list[2] == ReportDate(year=2022, quarter=2)
+    assert dl_list[3] == ReportDate(year=2022, quarter=1)
+    assert dl_list[4] == ReportDate(year=2021, quarter=4)
 
 
 class TestSecHarness:
@@ -71,10 +50,17 @@ class TestSecHarness:
 
     @pytest.mark.skipif(os.getenv("TICKER_TEST_SEC") is None,
                         reason="env variable TICKER_TEST_SEC not set")
+    def test_getTickers(self):
+        tickers = self.sec.download_manager.getTickers()
+        assert tickers.getCik('AAPL') == 320193
+        assert tickers.getCik('aapl') == 320193
+        assert tickers.getTicker(320193) == 'AAPL'
+
     def test_updateCikMappings(self):
-        df = self.sec._updateCikMappings()
-        result = df[df.ticker == 'AAPL']
-        logger.debug(f'{result.ticker.iloc[0]}')
-        logger.debug(f'{result.cik_str.iloc[0]}')
-        assert result.cik_str.iloc[0] == 320193
-        assert result.ticker.iloc[0] == 'AAPL'
+        data = self.sec.download_manager.getData(
+            ReportDate(year=2023, quarter=1))
+        df = data.getData()
+        assert df.empty == False
+        # TODO: Verify access semantics so we can create a query API on the extracted data
+        # aapl =  df[df.adsh == '0000320193-23-000005']
+        # assert aapl.empty == False
