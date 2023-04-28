@@ -41,6 +41,7 @@ You can see how easy it is now to pull financial information out of these data s
 
 We will use [pandas](https://pandas.pydata.org/) to extract the data dumps and then filter down the data sets to contain only relevant information.
 
+<!--
 ### sec-edgar
 
 The first thing that's required for analysis is report filed with the SEC. One of the ways this can be retrieved is using [sec-edgar](https://github.com/sec-edgar/sec-edgar). All this python utility does is facilitate the lookup of the desired document for the desired ticker and download the reports.
@@ -88,3 +89,5 @@ These reports are large and not compact. In order to really get to what we want,
     This library is for personal use only. Please see documentation on [yfinance](https://github.com/ranaroussi/yfinance) licensing notices regarding Yahoo's APIs. Extensive work has been made to minimize loads and requests through caching mechanisms. This project uses a sqlite cache for the results.
 
 For testing and for personal use until we can get [Edgar processing](#edgar-downloads) working, we will be using the [yfinance](https://github.com/ranaroussi/yfinance) python library.
+
+-->
