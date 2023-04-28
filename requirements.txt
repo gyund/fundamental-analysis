@@ -14,6 +14,7 @@ requests==2.28.2
 requests_cache==1.0.1
 requests_ratelimiter==0.4.0
 pyrate_limiter==2.10.0
+pandas==2.0.0
 
 # documentation
 mkdocs==1.4.2
