@@ -194,9 +194,6 @@ class Sec:
         The list generated will include an extra quarter so that you will always be
         able to do analysis from the current quarter to the previous quarter.
 
-        >>> Sec._getDownloadList(1, ReportDate(2023,2))
-        ['2023q2.zip', '2023q1.zip', '2022q4.zip', '2022q3.zip', '2022q2.zip']
-
         Args:
             years (int): number of years to go back in time.
             last_report (ReportDate): only retrieve reports from this quarter and before

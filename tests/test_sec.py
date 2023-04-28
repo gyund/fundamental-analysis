@@ -56,7 +56,9 @@ class TestSecHarness:
         assert tickers.getCik('aapl') == 320193
         assert tickers.getTicker(320193) == 'AAPL'
 
-    def test_updateCikMappings(self):
+    @pytest.mark.skipif(os.getenv("TICKER_TEST_SEC") is None,
+                        reason="env variable TICKER_TEST_SEC not set")
+    def test_getData(self):
         data = self.sec.download_manager.getData(
             ReportDate(year=2023, quarter=1))
         df = data.getData()
