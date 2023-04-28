@@ -139,11 +139,14 @@ class DataSetCollector:
 
     """ Take care of downloading all the data sets and aggregate them into a single structure """
     def getData(self, report_dates: list[ReportDate]) -> pd.DataFrame:
-        df = pd.DataFrame
+        df = None
         for r in report_dates:
             reader = self.download_manager.getData(r)
             data = reader.getData()
-            df.merge(data)
+            if df is None:
+                df = data
+            else:
+                df.merge(right=data)
 
         return df
 
@@ -160,6 +163,7 @@ class Sec:
             'data', 
             backend=SQLiteCache(db_path=storage_path/'data'), 
             serializer='pickle',
+            expire_after=timedelta(days=365*5),
             stale_if_error=True)
         ticker_session = CachedSession(
             'tickers', 

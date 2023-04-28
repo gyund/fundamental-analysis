@@ -67,3 +67,9 @@ class TestSecHarness:
         # TODO: Verify access semantics so we can create a query API on the extracted data
         # aapl =  df[df.adsh == '0000320193-23-000005']
         # assert aapl.empty == False
+
+    @pytest.mark.skipif(os.getenv("TICKER_TEST_SEC") is None,
+                        reason="env variable TICKER_TEST_SEC not set")
+    def test_update(self):
+        df = self.sec.update(tickers=['aapl'], years=1,last_report=ReportDate(year=2023, quarter=1))
+        assert df.empty == False
