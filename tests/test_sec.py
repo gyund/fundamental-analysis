@@ -26,6 +26,7 @@ def test_reportDate():
     except ValueError as ex:
         pass
 
+    rd = ReportDate(date.today().year, 4)
     try:
         rd = ReportDate(date.today().year, 5)
         pytest.fail('should throw and exception')
