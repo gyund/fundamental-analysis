@@ -7,9 +7,6 @@ on:
     - 'docs/**'
 permissions:
   contents: write
-  
-concurrency:
-  group: ${{ github.ref }}
 
 jobs:
   deploy:
