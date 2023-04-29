@@ -28,7 +28,7 @@ def sec_instance() -> Sec:
 
 
 @pytest.fixture(scope='module')
-def sec_report() -> DataSelector:
+def sec_fake_report() -> DataSelector:
     sub_df = DataSetReader._processSubText(
         ['10-K', '10-Q'], io.StringIO(sub_txt_sample))
     num_df = DataSetReader._processNumText(
@@ -46,17 +46,17 @@ def test_DataSetReader_processSubText():
     assert '0000004457-23-000026' not in sub_df.index.get_level_values('adsh')
 
 
-def test_DataSetReader_processNumText(sec_report: DataSelector):
-    logger.debug(f'num keys: {sec_report._data.keys()}')
-    logger.debug(sec_report._data)
-    assert '0000320193-23-000006' in sec_report._data.index.get_level_values(
+def test_DataSetReader_processNumText(sec_fake_report: DataSelector):
+    logger.debug(f'num keys: {sec_fake_report._data.keys()}')
+    logger.debug(sec_fake_report._data)
+    assert '0000320193-23-000006' in sec_fake_report._data.index.get_level_values(
         'adsh')
-    assert '0000723125-23-000022' in sec_report._data.index.get_level_values(
+    assert '0000723125-23-000022' in sec_fake_report._data.index.get_level_values(
         'adsh')
 
 
-def test_Reports_getTags(sec_report: DataSelector):
-    tags = sec_report.getTags()
+def test_Reports_getTags(sec_fake_report: DataSelector):
+    tags = sec_fake_report.getTags()
     assert len(tags) == 1
     assert 'EntityCommonStockSharesOutstanding' in tags
 
