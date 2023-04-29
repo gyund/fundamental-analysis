@@ -43,7 +43,7 @@ jobs:
       - name: Cache Network Requests
         uses: actions/cache@v3
         with:
-          key: sqlite
+          key: sqlite-${{ hashFiles('**/*.sqlite') }}
           path: |
             **/*.sqlite    
       - name: Test with pytest
