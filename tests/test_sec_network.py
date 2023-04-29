@@ -10,8 +10,8 @@ from pathlib import Path
 import logging
 logger = logging.getLogger(__name__)
 
-if os.getenv("TICKER_TEST_SEC") is None:
-    pytest.skip(reason="env variable TICKER_TEST_SEC not set",
+if os.getenv("TICKER_TEST_NETWORK") is None:
+    pytest.skip(reason="env variable TICKER_TEST_NETWORK not set",
                 allow_module_level=True)
 
 
