@@ -15,22 +15,26 @@ if os.getenv("TICKER_TEST_NETWORK") is None:
                 allow_module_level=True)
 
 
-def test_DownloadManager_getTickers(sec_instance: Sec):
-    tickers = sec_instance.download_manager.getTickers()
-    assert tickers.getCik('AAPL') == 320193
-    assert tickers.getCik('aapl') == 320193
-    assert tickers.getTicker(320193) == 'AAPL'
+class TestDownloadManager:
 
+    def test_getTickers(self, sec_instance: Sec):
+        tickers = sec_instance.download_manager.getTickers()
+        assert tickers.getCik('AAPL') == 320193
+        assert tickers.getCik('aapl') == 320193
+        assert tickers.getTicker(320193) == 'AAPL'
 
-def test_DownloadManager_getData(sec_dataselector_2023q1: Sec):
-    report = sec_dataselector_2023q1
+    def test_benchmark_getTickers(self, sec_instance: Sec, benchmark):
+        benchmark(sec_instance.download_manager.getTickers)
 
-    tags = report.getTags()
-    logger.debug(f'tags({len(tags)}): {tags}')
-    assert len(tags) > 0
-    # TODO: Verify access semantics so we can create a query API on the extracted data
-    # aapl =  df[df.adsh == '0000320193-23-000005']
-    # assert aapl.empty == False
+    def test_getData(self, sec_dataselector_2023q1: Sec):
+        report: DataSelector = sec_dataselector_2023q1
+
+        tags = report.getTags()
+        logger.debug(f'tags({len(tags)}): {tags}')
+        assert len(tags) > 0
+        # TODO: Verify access semantics so we can create a query API on the extracted data
+        # aapl =  df[df.adsh == '0000320193-23-000005']
+        # assert aapl.empty == False
 
 
 def test_update(sec_instance: Sec):

@@ -32,6 +32,18 @@ def sec_fake_report() -> DataSelector:
     return DataSelector(num_df, ticker_reader)
 
 
+def test_benchmark_DataSetReader_processSubText(benchmark):
+    benchmark.pedantic(DataSetReader._processSubText,
+                       args=(['10-K', '10-Q'], io.StringIO(sub_txt_sample)))
+
+
+def test_benchmark_DataSetReader_processNumText(benchmark):
+    sub_df = DataSetReader._processSubText(
+        ['10-K', '10-Q'], io.StringIO(sub_txt_sample))
+    benchmark.pedantic(DataSetReader._processNumText,
+                       args=(io.StringIO(data_txt_sample), sub_df))
+
+
 def test_DataSetReader_processSubText():
     sub_df = DataSetReader._processSubText(
         ['10-K', '10-Q'], io.StringIO(sub_txt_sample))
