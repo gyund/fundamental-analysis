@@ -55,15 +55,15 @@ jobs:
           coverage run -a --source=ticker -m ticker --help
           coverage run -a --source=ticker -m ticker analyze --help
           coverage run -a --source=ticker -m ticker export --help
-      - name: Coveralls
-        run: |
-          coveralls --service=github
       # - name: Coveralls
-      #   uses: coverallsapp/github-action@v2.1.2
-      #   with:
-      #     flag-name: run-${{ join(matrix.*, '-') }}
-      #     parallel: true
-      #   if: ${{ success() }}
+      #   run: |
+      #     coveralls --service=github
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          flag-name: run-${{ join(matrix.*, '-') }}
+          parallel: true
+        if: ${{ success() }}
       # - name: Upload pytest test results
       #   uses: actions/upload-artifact@v3
       #   with:
