@@ -2,6 +2,7 @@ import pytest
 import mock
 import os
 import io
+from tests.fixtures.network.sec import sec_instance, sec_dataselector_2023q1
 from ticker.cli import Cli
 from ticker.data.sec import Sec, ReportDate, TickerReader, DataSetReader, DataSelector
 from datetime import date
@@ -19,12 +20,6 @@ data_txt_sample = """adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
 0000320193-23-000006	EntityCommonStockSharesOutstanding	dei/2022		20230131	0	shares	15821946000.0000	
 0000723125-23-000022	EntityCommonStockSharesOutstanding	dei/2022		20230331	0	shares	1094394354.0000	
 """
-
-
-@pytest.fixture
-def sec_instance() -> Sec:
-    # test using the real SEC adapter
-    return Sec(Cli.getDefaultCachePath())
 
 
 @pytest.fixture(scope='module')
@@ -108,12 +103,8 @@ def test_DownloadManager_getTickers(sec_instance: Sec):
 
 @pytest.mark.skipif(os.getenv("TICKER_TEST_SEC") is None,
                     reason="env variable TICKER_TEST_SEC not set")
-def test_DownloadManager_getData(sec_instance: Sec):
-    data = sec_instance.download_manager.getData(
-        ReportDate(year=2023, quarter=1))
-    df = data.processZip()
-    assert df.empty == False
-    report = DataSelector(df)
+def test_DownloadManager_getData(sec_dataselector_2023q1: Sec):
+    report = sec_dataselector_2023q1
 
     tags = report.getTags()
     logger.debug(f'tags({len(tags)}): {tags}')
