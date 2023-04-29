@@ -1,4 +1,4 @@
-from ticker.data.sec import Sec
+from ticker.data.sec import Sec, DataSelector as SecDataSelector
 from pathlib import Path
 import os
 import sys
@@ -21,14 +21,14 @@ class Cli:
             cache_path (Path): path where to cache data
             analysis_plugin (str): module to load for analysis
         """
-        df = self._doUpdateFromSec(tickers, cache_path)
+        sec_data = self._doUpdateFromSec(tickers, cache_path)
 
         # Call analysis plugin
         analysis_module = importlib.import_module(analysis_plugin)
-        am = analysis_module.Analysis(df)
+        am = analysis_module.Analysis(sec_data)
         am.analyze(tickers)
 
-    def _doUpdateFromSec(self, tickers: list[str], cache_path: Path) -> pd.DataFrame:
+    def _doUpdateFromSec(self, tickers: list[str], cache_path: Path) -> SecDataSelector:
         sec = Sec(storage_path=Path(cache_path))
 
         return sec.update(tickers=tickers)

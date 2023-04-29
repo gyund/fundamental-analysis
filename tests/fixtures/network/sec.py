@@ -11,8 +11,9 @@ def sec_instance() -> Sec:
 
 @pytest.fixture
 def sec_dataselector_2023q1(sec_instance) -> DataSelector:
+    tickers = sec_instance.download_manager.getTickers()
     data = sec_instance.download_manager.getData(
         ReportDate(year=2023, quarter=1))
     df = data.processZip()
     assert df.empty == False
-    return DataSelector(df)
+    return DataSelector(df, tickers)

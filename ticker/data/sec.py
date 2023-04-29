@@ -5,7 +5,7 @@ import pandas as pd
 from requests_cache import CachedSession, FileCache, SQLiteCache
 from datetime import timedelta
 from io import BytesIO
-from typing import Literal
+from typing import Literal, get_args
 import logging
 logger = logging.getLogger(__name__)
 
@@ -178,23 +178,42 @@ class DataSelector:
     """
     _report_types = Literal['quarterly', 'annual']
 
-    def __init__(self, data: pd.DataFrame) -> None:
-        self._data = data
+    def __init__(self, data: pd.DataFrame, ticker_reader: TickerReader) -> None:
+        self.data = data
+        self._ticker_reader = ticker_reader
 
     def getTags(self) -> pd.Index:
-        return self._data.index.get_level_values('tag').unique()
+        return self.data.index.get_level_values('tag').unique()
+
+    def _getCik(self, ticker: str):
+        return self._ticker_reader.getCik(ticker)
+
+    def _getFormType(self, report_type: _report_types):
+        assert report_type in get_args(self._report_types)
+        if 'quarterly' == report_type:
+            return '10-Q'
+        elif 'annual' == report_type:
+            return '10-K'
+
+    def filterStockByTicker(self, data: pd.DataFrame, ticker: str):
+        cik = self._getCik(ticker)
+        return data.query(f'cik == {cik}')
+
+    def filterStockByForm(self, data: pd.DataFrame, form: str):
+        return data.query(f"form == '{form.upper()}'")
 
     def select(
             self,
             report_type: _report_types,
             ticker: str,
-            ticker_reader: TickerReader,
             years: int = 0
     ) -> pd.DataFrame:
-        assert report_type in DataSelector._report_types
-        cik = self.ticker_reader.getCik(ticker)
-        # TODO: Filter out the Stock
-        # TODO: Filter out quarterly/annual
+        form = self._getFormType(report_type)
+        assert True == isinstance(ticker, str)
+        # Filter out the Stock
+        df = self.filterStockByTicker(self.data, ticker=ticker)
+        # Filter out quarterly/annual
+        df = self.filterStockByReportType(self.data, form=form)
         # TODO: Filter out the data range
 
 
@@ -247,7 +266,7 @@ class Sec:
             stale_if_error=True)
         self.download_manager = DownloadManager(ticker_session, data_session)
 
-    def update(self, tickers: list, years: int = 5, last_report: ReportDate = ReportDate()) -> pd.DataFrame:
+    def update(self, tickers: list, years: int = 5, last_report: ReportDate = ReportDate()) -> DataSelector:
         """ Update the database with information about the following stocks.
 
         When this command runs, it will pull updates starting from 
@@ -258,14 +277,14 @@ class Sec:
             last_report (ReportDate): only retrieve reports from this quarter and before
 
         Returns:
-            pd.DataFrame: with the extracted data from the report
+            DataSelector: with the extracted data from the report
         """
-        ticker_map = self.download_manager.getTickers()
-
         # Download reports for each quarter and update records for tickers specified
         download_list = Sec._getDownloadList(years, last_report)
         collector = DataSetCollector(self.download_manager)
-        return collector.getData(download_list)
+        data = collector.getData(download_list)
+        ticker_map = self.download_manager.getTickers()
+        return DataSelector(data, ticker_map)
 
     def _getDownloadList(years: int, last_report: ReportDate) -> list[ReportDate]:
         """ Get a list of files to download for all the quarters.
