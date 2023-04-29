@@ -43,9 +43,9 @@ jobs:
       - name: Cache Network Requests
         uses: actions/cache@v3
         with:
-          key: sqlite-${{ hashFiles('**/*.sqlite') }}
+          key: sqlite-${{ hashFiles('**/.ticker-cache/*.sqlite') }}
           path: |
-            **/*.sqlite    
+            **/.ticker-cache/*.sqlite    
       - name: Test with pytest
         run: |
           coverage run --source=ticker -m pytest --doctest-modules
