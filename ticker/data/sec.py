@@ -2,11 +2,13 @@ from zipfile import ZipFile
 from datetime import date
 from pathlib import Path
 import pandas as pd
-from requests_cache import CachedSession, FileCache,SQLiteCache
+from requests_cache import CachedSession, FileCache, SQLiteCache
 from datetime import timedelta
 from io import BytesIO
+from typing import Literal
 import logging
 logger = logging.getLogger(__name__)
+
 
 class ReportDate:
 
@@ -33,23 +35,42 @@ class ReportDate:
         """
         return self.quarter == other.quarter and self.year == other.year
 
+
 class TickerReader:
 
     def __init__(self, data: bytes):
         self._data = pd.read_json(data, orient='index')
 
-    def getCik(self, ticker: str):
+    def getCik(self, ticker: str) -> int:
+        """ Get the Cik from the stock ticker
+
+        Args:
+            ticker (str): stock ticker. The case does not matter.
+
+        Returns:
+            int: cik
+        """
         result = self._data[self._data.ticker == ticker.upper()]
         return result.cik_str.iloc[0]
 
-    def getTicker(self, cik: int):
+    def getTicker(self, cik: int) -> str:
+        """ Get the stock ticker from the Cik number
+
+        Args:
+            cik (int): Cik number for the stock
+
+        Returns:
+            str: stock ticker
+        """
         result = self._data[self._data.cik_str == cik]
         return result.ticker.iloc[0]
+
 
 class DataSetReader:
     """ Reads the data from a zip file retrieved from the SEC website 
     """
-    def __init__(self, zip_data : bytes) -> None:
+
+    def __init__(self, zip_data: bytes) -> None:
         self.zip_data = BytesIO(zip_data)
 
     def processZip(self) -> pd.DataFrame:
@@ -58,7 +79,7 @@ class DataSetReader:
             # Process the mapping first
             logger.debug('opening sub.txt')
             with myzip.open('sub.txt') as myfile:
-                
+
                 # Get reports that are 10-K or 10-Q
                 sub_dataframe = DataSetReader._processSubText(forms, myfile)
 
@@ -67,13 +88,14 @@ class DataSetReader:
 
     def _processNumText(filepath_or_buffer, sub_dataframe) -> pd.DataFrame:
         """ Contains the document type mapping to form id.
-                
+
             adsh	cik	name	sic	countryba	stprba	cityba	zipba	bas1	bas2	baph	countryma	
             stprma	cityma	zipma	mas1	mas2	countryinc	stprinc	ein	former	changed	afs	wksi	
             fye	form	period	fy	fp	filed	accepted	prevrpt	detail	instance	nciks	aciks
         """
         logger.debug('processing num.txt')
-        data_set = pd.read_csv(filepath_or_buffer, delimiter='\t', index_col=['adsh','tag'])
+        data_set = pd.read_csv(
+            filepath_or_buffer, delimiter='\t', index_col=['adsh', 'tag'])
         # Filter out the results containing only those reports
         logger.debug('filtering out reports')
         logger.debug(data_set.head())
@@ -86,11 +108,12 @@ class DataSetReader:
         """
         logger.debug('processing sub.txt')
         report_list = pd.read_csv(filepath_or_buffer, delimiter='\t', usecols=['adsh', 'cik', 'form'],
-                                          index_col=['adsh','cik'])
+                                  index_col=['adsh', 'cik'])
         logger.debug(f'keeping only these forms: {forms}')
         report_list = report_list[report_list.form.isin(forms)]
         logger.debug(report_list.head())
         return report_list
+
 
 class DownloadManager:
 
@@ -99,8 +122,8 @@ class DownloadManager:
 
     _company_tickers_url = 'https://www.sec.gov/files/company_tickers.json'
 
-    def __init__(self, 
-                 ticker_session : CachedSession,
+    def __init__(self,
+                 ticker_session: CachedSession,
                  data_session: CachedSession) -> None:
         self._ticker_session = ticker_session
         self._data_session = data_session
@@ -131,7 +154,7 @@ class DownloadManager:
             return TickerReader(response.content.decode())
         else:
             return TickerReader(pd.DataFrame())
-        
+
     def _createDownloadUri(self, report_date: ReportDate) -> str:
         file = f"{report_date.year}q{report_date.quarter}.zip"
         return '/'.join([self._base_url, file])
@@ -146,22 +169,46 @@ class DownloadManager:
         else:
             return DataSetReader(pd.DataFrame())
 
-class Reports:
+
+class DataSelector:
+    """ A DataSelector contains all the data we know about. 
+
+    The purpose of this class is to narrow down and select relevant subsets of the data
+    based on specific criteria. 
+    """
+    _report_types = Literal['quarterly', 'annual']
+
     def __init__(self, data: pd.DataFrame) -> None:
-        self._data =  data
+        self._data = data
 
     def getTags(self) -> pd.Index:
         return self._data.index.get_level_values('tag').unique()
-    
+
+    def select(
+            self,
+            report_type: _report_types,
+            ticker: str,
+            ticker_reader: TickerReader,
+            years: int = 0
+    ) -> pd.DataFrame:
+        assert report_type in DataSelector._report_types
+        cik = self.ticker_reader.getCik(ticker)
+        # TODO: Filter out the Stock
+        # TODO: Filter out quarterly/annual
+        # TODO: Filter out the data range
+
+
 class DataSetCollector:
 
     def __init__(self, download_manager: DownloadManager):
         self.download_manager = download_manager
 
     """ Take care of downloading all the data sets and aggregate them into a single structure """
+
     def getData(self, report_dates: list[ReportDate]) -> pd.DataFrame:
         df = None
-        logger.info(f"Creating Unified Data record for these reports: {report_dates}")
+        logger.info(
+            f"Creating Unified Data record for these reports: {report_dates}")
         for r in report_dates:
             reader = self.download_manager.getData(r)
             data = reader.processZip()
@@ -171,7 +218,8 @@ class DataSetCollector:
             else:
                 # df = pd.concat(df, data)
                 df.merge(right=data)
-        logger.info(f"Created Unified Data record for these reports: {report_dates}")
+        logger.info(
+            f"Created Unified Data record for these reports: {report_dates}")
         logger.debug(f"keys: {df.keys()}")
         logger.debug(f"Rows: {len(df)}")
         logger.debug(df.head())
@@ -187,14 +235,14 @@ class Sec:
             raise ValueError("storage_path is required")
         storage_path.mkdir(parents=True, exist_ok=True)
         data_session = CachedSession(
-            'data', 
-            backend=SQLiteCache(db_path=storage_path/'data'), 
+            'data',
+            backend=SQLiteCache(db_path=storage_path/'data'),
             serializer='pickle',
             expire_after=timedelta(days=365*5),
             stale_if_error=True)
         ticker_session = CachedSession(
-            'tickers', 
-            backend=SQLiteCache(db_path=storage_path/'tickers'), 
+            'tickers',
+            backend=SQLiteCache(db_path=storage_path/'tickers'),
             expire_after=timedelta(days=365),
             stale_if_error=True)
         self.download_manager = DownloadManager(ticker_session, data_session)
@@ -232,11 +280,12 @@ class Sec:
         Returns:
             list[ReportDate]: list of report dates to retrieve
         """
-        dl_list : list[ReportDate] = list()
+        dl_list: list[ReportDate] = list()
         next_report = last_report
         final_report = ReportDate(last_report.year-years, last_report.quarter)
         while 1:
-            dl_list.append(ReportDate(year=next_report.year, quarter=next_report.quarter))
+            dl_list.append(ReportDate(year=next_report.year,
+                           quarter=next_report.quarter))
             if next_report == final_report:
                 break
             if 1 == next_report.quarter:

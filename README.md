@@ -4,8 +4,6 @@
 
 # Ticker (smart stock analysis)
 
-**__EARLY DEVELOPMENT__**
-
 The goal of this project is to generate data that is consumable in both human readable format as well as JSON to better analyze and make sense of the intrinsic value of publicly traded companies.
 
 The tool seeks to provide extensible options for consuming data from different data sources. There are different methods for gathering data:
@@ -13,7 +11,7 @@ The tool seeks to provide extensible options for consuming data from different d
 - SEC (personal/commercial)
 - Site Scraping (only personal)
 
-Generally speaking, scraping sites is only for personal use and to vet the APIs. The tool will provide warnings when using options that may have additional restrictions to their use and will require a `--force` option to ensure that you understand the rules surrounding their use. 
+Generally speaking, scraping sites is only for personal use and to vet the APIs. The tool will provide warnings when using options that may have additional restrictions to their use and will require a `--force` option to ensure that you understand the rules surrounding their use.
 
 Additionally, the tools will utilize file based caching to limit interaction with expensive networking resources. Since fundamental analysis generally requires a long term view of companies with a proven track record, you generally will be downloading an initial history for a given equity and updating quarterly or annually based on new information.
 
@@ -21,7 +19,7 @@ Additionally, the tools will utilize file based caching to limit interaction wit
 
 - `python 3.9+`
 
-## Getting Started 
+## Getting Started
 
 ```sh
 python3 -m venv venv
@@ -34,7 +32,7 @@ python -m ticker analyze --tickers aapl,msft
 
 If you wish to use your own analysis plugin, you simply create your own module that implements this class and interface:
 
-``` python
+```python
 class Analysis:
     def __init__(self, data: pd.DataFrame):
         self.data = data
@@ -67,4 +65,4 @@ The test infrastructure supports running integration tests using real network en
 
 ## Disclaimer
 
-This projects seeks to use publicly available information about stocks and securities to help perform long term risk analysis. Results provided from this project are for academic use only and are not considered advice or recommendations. Usage of any data is at your own risk.  
+This projects seeks to use publicly available information about stocks and securities to help perform long term risk analysis. Results provided from this project are for academic use only and are not considered advice or recommendations. Usage of any data is at your own risk.

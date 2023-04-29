@@ -3,7 +3,7 @@ import mock
 import os
 import io
 from ticker.cli import Cli
-from ticker.data.sec import Sec, ReportDate, TickerReader, DataSetReader, Reports
+from ticker.data.sec import Sec, ReportDate, TickerReader, DataSetReader, DataSelector
 from datetime import date
 from pathlib import Path
 import logging
@@ -20,35 +20,46 @@ data_txt_sample = """adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
 0000723125-23-000022	EntityCommonStockSharesOutstanding	dei/2022		20230331	0	shares	1094394354.0000	
 """
 
+
 @pytest.fixture
 def sec_instance() -> Sec:
     # test using the real SEC adapter
     return Sec(Path(os.path.dirname(os.path.realpath(__file__))) / ".ticker-cache")
 
+
 @pytest.fixture(scope='module')
-def sec_report() -> Reports:
-    sub_df = DataSetReader._processSubText(['10-K', '10-Q'], io.StringIO(sub_txt_sample))
-    num_df = DataSetReader._processNumText(io.StringIO(data_txt_sample), sub_df)
-    return Reports(num_df)
+def sec_report() -> DataSelector:
+    sub_df = DataSetReader._processSubText(
+        ['10-K', '10-Q'], io.StringIO(sub_txt_sample))
+    num_df = DataSetReader._processNumText(
+        io.StringIO(data_txt_sample), sub_df)
+    return DataSelector(num_df)
+
 
 def test_DataSetReader_processSubText():
-    sub_df = DataSetReader._processSubText(['10-K', '10-Q'], io.StringIO(sub_txt_sample))
+    sub_df = DataSetReader._processSubText(
+        ['10-K', '10-Q'], io.StringIO(sub_txt_sample))
     logger.debug(f'sub keys: {sub_df.keys()}')
     logger.debug(sub_df)
     assert '0000320193-23-000006' in sub_df.index.get_level_values('adsh')
     assert '0000723125-23-000022' in sub_df.index.get_level_values('adsh')
     assert '0000004457-23-000026' not in sub_df.index.get_level_values('adsh')
 
-def test_DataSetReader_processNumText(sec_report : Reports):
+
+def test_DataSetReader_processNumText(sec_report: DataSelector):
     logger.debug(f'num keys: {sec_report._data.keys()}')
     logger.debug(sec_report._data)
-    assert '0000320193-23-000006' in sec_report._data.index.get_level_values('adsh')
-    assert '0000723125-23-000022' in sec_report._data.index.get_level_values('adsh')
+    assert '0000320193-23-000006' in sec_report._data.index.get_level_values(
+        'adsh')
+    assert '0000723125-23-000022' in sec_report._data.index.get_level_values(
+        'adsh')
 
-def test_Reports_getTags(sec_report : Reports):
+
+def test_Reports_getTags(sec_report: DataSelector):
     tags = sec_report.getTags()
     assert len(tags) == 1
     assert 'EntityCommonStockSharesOutstanding' in tags
+
 
 def test_reportDate():
     rd = ReportDate(2023, 1)
@@ -94,6 +105,7 @@ def test_DownloadManager_getTickers(sec_instance: Sec):
     assert tickers.getCik('aapl') == 320193
     assert tickers.getTicker(320193) == 'AAPL'
 
+
 @pytest.mark.skipif(os.getenv("TICKER_TEST_SEC") is None,
                     reason="env variable TICKER_TEST_SEC not set")
 def test_DownloadManager_getData(sec_instance: Sec):
@@ -101,7 +113,7 @@ def test_DownloadManager_getData(sec_instance: Sec):
         ReportDate(year=2023, quarter=1))
     df = data.processZip()
     assert df.empty == False
-    report = Reports(df)
+    report = DataSelector(df)
 
     tags = report.getTags()
     logger.debug(f'tags({len(tags)}): {tags}')
@@ -110,11 +122,13 @@ def test_DownloadManager_getData(sec_instance: Sec):
     # aapl =  df[df.adsh == '0000320193-23-000005']
     # assert aapl.empty == False
 
+
 @pytest.mark.skipif(os.getenv("TICKER_TEST_SEC") is None,
                     reason="env variable TICKER_TEST_SEC not set")
 def test_update(sec_instance: Sec):
     pytest.skip("skip until getData is verified")
-    df = sec_instance.update(tickers=['aapl'], years=1,last_report=ReportDate(year=2023, quarter=1))
+    df = sec_instance.update(
+        tickers=['aapl'], years=1, last_report=ReportDate(year=2023, quarter=1))
     assert df.empty == False
     assert 'adsh' in df.keys()
     assert 'cik' in df.keys()
