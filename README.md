@@ -1,3 +1,4 @@
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)]()
 [![python](https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml/badge.svg?)](https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml)
 [![Coverage Status](https://coveralls.io/repos/github/gyund/fundamental-analysis/badge.svg?)](https://coveralls.io/github/gyund/fundamental-analysis?branch=main)
 [![Development Status](https://img.shields.io/badge/status-early%20development-red)]()

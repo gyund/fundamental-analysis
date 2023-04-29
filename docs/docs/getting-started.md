@@ -3,18 +3,19 @@ tags:
   - Install
 ---
 
-# Getting Started 
+# Getting Started
 
-**Requirements:** python 3.10+
+**Requirements:** python 3.9+
 
 ## Install
 
-!!! info
-    This is the proposed design and approach for how the tool will function. Implementation is currently under development.
+!!! warning
+    This is the proposed design and approach for how the tool will function. Implementation is currently under development and subject to change.
 
 === "git"
+
     ```sh
-    # Clone Repository 
+    # Clone Repository
     git clone https://github.com/gyund/fundamental-analysis.git
     cd fundamental-analysis.git
 
