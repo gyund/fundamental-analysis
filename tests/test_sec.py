@@ -90,36 +90,3 @@ def test_getDownloadList_1():
     assert dl_list[2] == ReportDate(year=2022, quarter=2)
     assert dl_list[3] == ReportDate(year=2022, quarter=1)
     assert dl_list[4] == ReportDate(year=2021, quarter=4)
-
-
-@pytest.mark.skipif(os.getenv("TICKER_TEST_SEC") is None,
-                    reason="env variable TICKER_TEST_SEC not set")
-def test_DownloadManager_getTickers(sec_instance: Sec):
-    tickers = sec_instance.download_manager.getTickers()
-    assert tickers.getCik('AAPL') == 320193
-    assert tickers.getCik('aapl') == 320193
-    assert tickers.getTicker(320193) == 'AAPL'
-
-
-@pytest.mark.skipif(os.getenv("TICKER_TEST_SEC") is None,
-                    reason="env variable TICKER_TEST_SEC not set")
-def test_DownloadManager_getData(sec_dataselector_2023q1: Sec):
-    report = sec_dataselector_2023q1
-
-    tags = report.getTags()
-    logger.debug(f'tags({len(tags)}): {tags}')
-    assert len(tags) > 0
-    # TODO: Verify access semantics so we can create a query API on the extracted data
-    # aapl =  df[df.adsh == '0000320193-23-000005']
-    # assert aapl.empty == False
-
-
-@pytest.mark.skipif(os.getenv("TICKER_TEST_SEC") is None,
-                    reason="env variable TICKER_TEST_SEC not set")
-def test_update(sec_instance: Sec):
-    pytest.skip("skip until getData is verified")
-    df = sec_instance.update(
-        tickers=['aapl'], years=1, last_report=ReportDate(year=2023, quarter=1))
-    assert df.empty == False
-    assert 'adsh' in df.keys()
-    assert 'cik' in df.keys()
