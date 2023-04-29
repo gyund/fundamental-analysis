@@ -47,35 +47,50 @@ class TickerReader:
         return result.ticker.iloc[0]
 
 class DataSetReader:
+    """ Reads the data from a zip file retrieved from the SEC website 
+    """
     def __init__(self, zip_data : bytes) -> None:
         self.zip_data = BytesIO(zip_data)
 
-    def getData(self) -> pd.DataFrame:
+    def processZip(self) -> pd.DataFrame:
         forms = ['10-K', '10-Q']
         with ZipFile(self.zip_data) as myzip:
             # Process the mapping first
+            logger.debug('opening sub.txt')
             with myzip.open('sub.txt') as myfile:
-                """ Contains the document type mapping to form id.
                 
-                adsh	cik	name	sic	countryba	stprba	cityba	zipba	bas1	bas2	baph	countryma	
-                stprma	cityma	zipma	mas1	mas2	countryinc	stprinc	ein	former	changed	afs	wksi	
-                fye	form	period	fy	fp	filed	accepted	prevrpt	detail	instance	nciks	aciks
-                """
                 # Get reports that are 10-K or 10-Q
-                report_list = pd.read_csv(myfile, delimiter='\t', usecols=['adsh', 'cik', 'form'])
-                report_list = report_list[report_list.form.isin(forms)]
+                sub_dataframe = DataSetReader._processSubText(forms, myfile)
 
                 with myzip.open('num.txt') as myfile:
-                    """ Contains the data
-                    adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
-                    """
-                    # TODO: Process with pandas and filter the columns & rows
-                    # print(myfile.read())
-                    data_set = pd.read_csv(myfile, delimiter='\t')
-                    # Filter out the results containing only those reports
-                    data_set = data_set[data_set.adsh.isin(report_list.adsh)]
-                    # TODO: Store or merge with existing data
-                    return data_set
+                    return DataSetReader._processNumText(myfile, sub_dataframe)
+
+    def _processNumText(filepath_or_buffer, sub_dataframe) -> pd.DataFrame:
+        """ Contains the document type mapping to form id.
+                
+            adsh	cik	name	sic	countryba	stprba	cityba	zipba	bas1	bas2	baph	countryma	
+            stprma	cityma	zipma	mas1	mas2	countryinc	stprinc	ein	former	changed	afs	wksi	
+            fye	form	period	fy	fp	filed	accepted	prevrpt	detail	instance	nciks	aciks
+        """
+        logger.debug('processing num.txt')
+        data_set = pd.read_csv(filepath_or_buffer, delimiter='\t', index_col=['adsh','tag'])
+        # Filter out the results containing only those reports
+        logger.debug('filtering out reports')
+        logger.debug(data_set.head())
+        # We want only the tables in left if they join on the key, so inner it is
+        return data_set.join(sub_dataframe, how='inner')
+
+    def _processSubText(forms, filepath_or_buffer) -> pd.DataFrame:
+        """ Contains the data
+            adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
+        """
+        logger.debug('processing sub.txt')
+        report_list = pd.read_csv(filepath_or_buffer, delimiter='\t', usecols=['adsh', 'cik', 'form'],
+                                          index_col=['adsh','cik'])
+        logger.debug(f'keeping only these forms: {forms}')
+        report_list = report_list[report_list.form.isin(forms)]
+        logger.debug(report_list.head())
+        return report_list
 
 class DownloadManager:
 
@@ -130,7 +145,13 @@ class DownloadManager:
             return DataSetReader(response.content)
         else:
             return DataSetReader(pd.DataFrame())
-        
+
+class Reports:
+    def __init__(self, data: pd.DataFrame) -> None:
+        self._data =  data
+
+    def getTags(self) -> pd.Index:
+        return self._data.index.get_level_values('tag').unique()
     
 class DataSetCollector:
 
@@ -140,14 +161,20 @@ class DataSetCollector:
     """ Take care of downloading all the data sets and aggregate them into a single structure """
     def getData(self, report_dates: list[ReportDate]) -> pd.DataFrame:
         df = None
+        logger.info(f"Creating Unified Data record for these reports: {report_dates}")
         for r in report_dates:
             reader = self.download_manager.getData(r)
-            data = reader.getData()
+            data = reader.processZip()
             if df is None:
+                logger.debug(f"keys: {data.keys()}")
                 df = data
             else:
+                # df = pd.concat(df, data)
                 df.merge(right=data)
-
+        logger.info(f"Created Unified Data record for these reports: {report_dates}")
+        logger.debug(f"keys: {df.keys()}")
+        logger.debug(f"Rows: {len(df)}")
+        logger.debug(df.head())
         return df
 
 
