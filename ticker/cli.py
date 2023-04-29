@@ -33,8 +33,11 @@ class Cli:
 
         return sec.update(tickers=tickers)
 
+    def getDefaultCachePath():
+        return Path(os.getcwd()) / ".ticker-cache"
+
     def export(self, tickers: list[str],
-               cache_path: Path = Path(os.getcwd()) / ".ticker-cache",
+               cache_path: Path = getDefaultCachePath(),
                file: Path = None,
                json: Path = None,
                analysis_plugin: str = 'ticker.analysis') -> None:

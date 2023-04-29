@@ -24,7 +24,7 @@ data_txt_sample = """adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
 @pytest.fixture
 def sec_instance() -> Sec:
     # test using the real SEC adapter
-    return Sec(Path(os.path.dirname(os.path.realpath(__file__))) / ".ticker-cache")
+    return Sec(Cli.getDefaultCachePath())
 
 
 @pytest.fixture(scope='module')
