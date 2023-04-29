@@ -177,6 +177,7 @@ class DataSelector:
     based on specific criteria. 
     """
     _report_types = Literal['quarterly', 'annual']
+    _period_focus = Literal['FY', 'Q1', 'Q2', 'Q3', 'Q4']
 
     def __init__(self, data: pd.DataFrame, ticker_reader: TickerReader) -> None:
         self.data = data
@@ -206,15 +207,28 @@ class DataSelector:
             self,
             report_type: _report_types,
             ticker: str,
-            years: int = 0
+            period_focus: _period_focus = None
     ) -> pd.DataFrame:
+        """_summary_
+
+        Args:
+            report_type (_report_types): type of report can be 'yearly' or 'quarterly'
+            ticker (str): ticker symbol for the company
+            period_focus (_period_focus): Focus of the report can be 'FY' = Yearly, Q1,Q2,Q3,Q4
+
+        Returns:
+            pd.DataFrame: filtered DataFrame
+        """
         form = self._getFormType(report_type)
         assert True == isinstance(ticker, str)
         # Filter out the Stock
         df = self.filterStockByTicker(self.data, ticker=ticker)
         # Filter out quarterly/annual
-        df = self.filterStockByReportType(self.data, form=form)
-        # TODO: Filter out the data range
+        df = self.filterStockByForm(self.data, form=form)
+        # # Filter out the data range
+        # if period_focus is not None:
+        #     return
+        return df
 
 
 class DataSetCollector:

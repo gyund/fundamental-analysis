@@ -85,7 +85,7 @@ class TestDataSelector:
         sec_fake_report._ticker_reader.getTicker = mock.Mock(
             return_value=320193)
         df = sec_fake_report.select(
-            report_type="quarterly", ticker='AAPL', years=0)
+            report_type="quarterly", ticker='AAPL')
         assert df is not None
 
 
