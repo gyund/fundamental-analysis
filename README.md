@@ -30,7 +30,7 @@ python3 -m venv venv
 . venv/bin/activate
 pip install -r requirements.txt
 
-# Perform analysis
+# Perform analysis (not supported yet)
 python -m ticker analyze --tickers aapl,msft
 ```
 
@@ -52,6 +52,7 @@ class Analysis:
 Then call the tool in the following manner:
 
 ```sh
+# Not yet supported 
 python -m ticker analyze --tickers aapl,msft --analysis_plugin 'mypkg.analysis'
 ```
 
