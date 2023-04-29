@@ -1,9 +1,9 @@
-[![python](https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml/badge.svg?branch=main)](https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml)
-[![Coverage Status](https://coveralls.io/repos/github/gyund/fundamental-analysis/badge.png?branch=main)](https://coveralls.io/github/gyund/fundamental-analysis?branch=main)
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)]()
+[![python](https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml/badge.svg?)](https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml)
+[![Coverage Status](https://coveralls.io/repos/github/gyund/fundamental-analysis/badge.svg?)](https://coveralls.io/github/gyund/fundamental-analysis?branch=main)
+[![Development Status](https://img.shields.io/badge/status-early%20development-red)]()
 
 # Ticker (smart stock analysis)
-
-**__EARLY DEVELOPMENT__**
 
 The goal of this project is to generate data that is consumable in both human readable format as well as JSON to better analyze and make sense of the intrinsic value of publicly traded companies.
 
@@ -12,15 +12,15 @@ The tool seeks to provide extensible options for consuming data from different d
 - SEC (personal/commercial)
 - Site Scraping (only personal)
 
-Generally speaking, scraping sites is only for personal use and to vet the APIs. The tool will provide warnings when using options that may have additional restrictions to their use and will require a `--force` option to ensure that you understand the rules surrounding their use. 
+Generally speaking, scraping sites is only for personal use and to vet the APIs. The tool will provide warnings when using options that may have additional restrictions to their use and will require a `--force` option to ensure that you understand the rules surrounding their use.
 
 Additionally, the tools will utilize file based caching to limit interaction with expensive networking resources. Since fundamental analysis generally requires a long term view of companies with a proven track record, you generally will be downloading an initial history for a given equity and updating quarterly or annually based on new information.
 
 ## Requirements
 
-- `python 3.10+`
+- `python 3.9+`
 
-## Getting Started 
+## Getting Started
 
 ```sh
 python3 -m venv venv
@@ -33,7 +33,7 @@ python -m ticker analyze --tickers aapl,msft
 
 If you wish to use your own analysis plugin, you simply create your own module that implements this class and interface:
 
-``` python
+```python
 class Analysis:
     def __init__(self, data: pd.DataFrame):
         self.data = data
@@ -62,8 +62,14 @@ Run tests by running the following:
 pytest
 ```
 
-The test infrastructure supports running integration tests using real network endpoints using environment flags, but this is still a work in progress and should be avoided at the moment. Documentation will be provided on how to run these once it has matured and is ready.
+If you wish to run tests using real network resources, such as downloading real reports and processing them, run the following:
+
+```sh
+TICKER_TEST_NETWORK=1 pytest
+```
+
+Note that all data sets will be cached in the directory `${cwd}/.ticker-cache/` for both real and test runs. Expiry for quarterly reports are cached for 5 years and ticker mappings for `CIK -> Ticker` conversion are cached on a yearly basis. You generally won't be researching companies with less than a year's worth of reports though this could cause recently listed companies to lack `CIK -> Ticker` conversions for up to two years from poor timing. Just delete `${cwd}/.ticker-cache/tickers.sqlite` to get the latest.
 
 ## Disclaimer
 
-This projects seeks to use publicly available information about stocks and securities to help perform long term risk analysis. Results provided from this project are for academic use only and are not considered advice or recommendations. Usage of any data is at your own risk.  
+This projects seeks to use publicly available information about stocks and securities to help perform long term risk analysis. Results provided from this project are for academic use only and are not considered advice or recommendations. Usage of any data is at your own risk.

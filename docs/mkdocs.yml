@@ -55,6 +55,7 @@ nav:
   - Design:
       - Overview: design/overview.md
       - Data Retrieval: design/data-retrieval.md
-      - Analysis: design/analysis.md
-      - Report: design/report.md
+      # - Analysis: design/analysis.md
+      # - Report: design/report.md
+      - Caching: design/caching.md
       - Reference: design/reference.md

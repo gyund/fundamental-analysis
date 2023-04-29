@@ -39,8 +39,33 @@ The next document, `num.txt`, contains all the important financial information. 
 
 You can see how easy it is now to pull financial information out of these data sets. In this one line, we can map the report to the value. In this case, the value corresponds to `AssetsCurrent`.
 
-We will use [pandas](https://pandas.pydata.org/) to extract the data dumps and then filter down the data sets to contain only relevant information.
+### Data Storage
 
+Our design will attempt to use [pandas](https://pandas.pydata.org/) to extract the data dumps and then filter down the data sets to contain only relevant information. There are important points to identify as part of R&D in this area.
+
+!!! warning "Warning - There be dragons!!!"
+
+First, large data sets are a problem for various databases, pandas included. In our initial design we tried to push the limits of pandas by loading as much data inside the DataFrame except for a few useless columns. After about 3-4 quarters worth of data from over 7000 ticker symbols, the panda cried uncle with a glorified, but not so glorified:
+
+```sh
+tests/test_sec.py ss........                                                                                    [ 58%]
+tests/test_sec_network.py .s.Killed
+```
+
+The `Killed` message is a signal from the OS that you've successfully exhausted all the memory of the system and they're *ending you* unceremoniously with a `kill -9`. 
+
+So what's next? Well we're still going to try and use [pandas](https://pandas.pydata.org/), just for the sake of trying to do a few things:
+
+- Solve interesting algorithmic problems
+- Keep our storage size small
+- Use as much native python code as possible for simplifying usage and analysis for the end-user
+- Avoid taking the easy way out by just throwing more memory and storage at the problem
+
+This means that we'll need to refactor the processing a bit so that we can pass a set of analytics to collect while looking at a particular stock ticker. This will allow us to scrape a very small subset of information about a company without unpacking these 50MB compressed archives (which can easily take 0.5 GB of storage per quarter uncompressed)
+
+
+
+<!--
 ### sec-edgar
 
 The first thing that's required for analysis is report filed with the SEC. One of the ways this can be retrieved is using [sec-edgar](https://github.com/sec-edgar/sec-edgar). All this python utility does is facilitate the lookup of the desired document for the desired ticker and download the reports.
@@ -88,3 +113,5 @@ These reports are large and not compact. In order to really get to what we want,
     This library is for personal use only. Please see documentation on [yfinance](https://github.com/ranaroussi/yfinance) licensing notices regarding Yahoo's APIs. Extensive work has been made to minimize loads and requests through caching mechanisms. This project uses a sqlite cache for the results.
 
 For testing and for personal use until we can get [Edgar processing](#edgar-downloads) working, we will be using the [yfinance](https://github.com/ranaroussi/yfinance) python library.
+
+-->

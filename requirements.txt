@@ -3,6 +3,9 @@ pytest==7.3.1
 pydoctest==0.1.22
 ruff==0.0.262
 mock==5.0.2
+coveralls==3.3.1
+pytest-cov==4.0.0
+pytest-benchmark==4.0.0
 
 # Utilities 
 python-dateutil==2.8.2
@@ -12,6 +15,7 @@ requests==2.28.2
 requests_cache==1.0.1
 requests_ratelimiter==0.4.0
 pyrate_limiter==2.10.0
+pandas==2.0.0
 
 # documentation
 mkdocs==1.4.2
@@ -19,5 +23,5 @@ mkdocs-material==9.1.6
 mkdocs-material-extensions==1.1.1
 
 # data sources
-secedgar==0.5.0
-yfinance==0.2.18
+# secedgar==0.5.0
+# yfinance==0.2.18
