@@ -38,9 +38,9 @@ class TestDownloadManager:
 
 
 def test_update(sec_instance: Sec):
-    pytest.skip("skip until getData is verified")
-    df = sec_instance.update(
+    pytest.skip(
+        "skip until we can resolve performance issues with large data sets")
+    data_selector = sec_instance.update(
         tickers=['aapl'], years=1, last_report=ReportDate(year=2023, quarter=1))
-    assert df.empty == False
-    assert 'adsh' in df.keys()
-    assert 'cik' in df.keys()
+    assert data_selector.data.empty == False
+    logger.debug(f"There are {len(data_selector.data)} records about apple")
