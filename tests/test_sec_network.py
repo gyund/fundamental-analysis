@@ -53,7 +53,13 @@ def test_update(sec_instance: Sec, filter_aapl: Filter.Selectors):
     )
     assert data_selector.data.empty == False
     logger.debug(f"There are {len(data_selector.data)} records about apple")
-    logger.debug(data_selector.data.to_markdown())
+    logger.debug(data_selector.data)
+    # logger.debug(data_selector.data.to_markdown())
 
     # There should only be one record based on the filter
-    assert len(data_selector.data) == 1
+    EntityCommonStockSharesOutstanding = data_selector.data.query("cik == 320193 and tag == 'EntityCommonStockSharesOutstanding'")
+    eo_series = EntityCommonStockSharesOutstanding.value
+    
+    assert len(eo_series) == 1
+    assert eo_series[0] == 15821946000
+    assert True == len(data_selector.data) == 1
