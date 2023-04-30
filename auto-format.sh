@@ -4,5 +4,5 @@ dir=`dirname $0`
 
 pushd $dir > /dev/null
 ruff check --fix .
-pydoctest --config ticker/pydocktests.json
+pydoctest --config pydocktest.json
 popd > /dev/null
