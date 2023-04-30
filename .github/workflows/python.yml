@@ -62,15 +62,17 @@ jobs:
           flag-name: run-${{ join(matrix.*, '-') }}
           parallel: true
         if: ${{ success() }}
-      - name: Lint
+      - name: Lint - Ruff 
         run: |
           ruff . 
+        if: ${{ always() }}
+      - name: Lint - Black
+        run: |
           black --check ticker/ tests/
+        if: ${{ always() }}
+      - name: Lint - isort
+        run: |
           isort --check ticker/ tests/
-          # stop the build if there are Python syntax errors or undefined names
-          # ruff --format=github --select=E9,F63,F7,F82 --target-version=py37 .
-          # default set of ruff rules with GitHub Annotations
-          # ruff --format=github --target-version=py37 .  
         if: ${{ always() }}
       # - name: Upload pytest test results
       #   uses: actions/upload-artifact@v3
