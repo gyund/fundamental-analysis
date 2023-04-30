@@ -5,7 +5,7 @@ tags:
 
 # Getting Started
 
-**Requirements:** python 3.9+
+**Requirements:** python 3.10+
 
 ## Install
 

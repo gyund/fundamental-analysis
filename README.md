@@ -1,6 +1,6 @@
 <p align="center">
     <a href='https://github.com/gyund/fundamental-analysis/blob/main/LICENSE'><img alt="License" src="https://img.shields.io/github/license/gyund/fundamental-analysis"></a>
-    <img alt="License" src="https://img.shields.io/badge/python-3.9%2B-blue">
+    <img alt="License" src="https://img.shields.io/badge/python-3.10%2B-blue">
     <a href='https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml'><img alt="Test Status" src="https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml/badge.svg?service=github"></a>
     <a href='https://coveralls.io/github/gyund/fundamental-analysis?branch=main'><img src='https://coveralls.io/repos/github/gyund/fundamental-analysis/badge.svg?branch=main&service=github' alt='Coverage Status' /></a>
     <img alt="Development Status" src="https://img.shields.io/badge/status-early%20development-red">
@@ -21,7 +21,7 @@ Additionally, the tools will utilize file based caching to limit interaction wit
 
 ## Requirements
 
-- `python 3.9+`
+- `python 3.10+`
 
 ## Getting Started
 
@@ -34,19 +34,18 @@ pip install -r requirements.txt
 python -m ticker analyze --tickers aapl,msft
 ```
 
-If you wish to use your own analysis plugin, you simply create your own module that implements this class and interface:
+If you wish to use your own analysis plugin, you simply create your own module that implements this interface:
 
 ```python
-class Analysis:
-    def __init__(self, data: pd.DataFrame):
-        self.data = data
+from ticker.cli import Options, ReportOptions
+from ticker.data.sec import DataSelector as SecDataSelector
+from ticker.filter import Selectors,SecFilter
 
-    def analyze(self,tickers: list[str]):
-        pass
+def analyze(options: Options) -> None:
+    print("This is where we would start to process information, but we're not right now")
 
-    def report(self,tickers: list[str]):
-        """ TBD Interface under development """
-        pass
+def report(options: ReportOptions) -> None: 
+    print("This is where we would report our findings, but we're not right now")
 ```
 
 Then call the tool in the following manner:
