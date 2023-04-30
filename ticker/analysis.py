@@ -1,13 +1,12 @@
 import pandas as pd
+from ticker.cli import Options, ReportOptions
 from ticker.data.sec import DataSelector as SecDataSelector
+from ticker.filter import Entry
+import logging
+logger = logging.getLogger(__name__)
 
+def analyze(options: Options):
+    print("This is where we would start to process information, but we're not right now")
 
-class Analysis:
-    def __init__(self, data: SecDataSelector):
-        self.secData = data
-
-    def analyze(self, tickers: list[str]):
-        pass
-
-    def report(self, tickers: list[str]):
-        pass
+def report(options: ReportOptions):
+    print("This is where we would report our findings, but we're not right now")
