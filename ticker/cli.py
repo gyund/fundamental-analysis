@@ -24,7 +24,12 @@ class Cli:
 
     default_analysis_module = 'ticker.analysis.stub'
 
-    def getDefaultCachePath():
+    def getDefaultCachePath() -> Path:
+        """Get the default path for caching data
+
+        Returns:
+            Path: path to cache data
+        """        
         return Path(os.getcwd()) / ".ticker-cache"
 
     def analyze(self,
