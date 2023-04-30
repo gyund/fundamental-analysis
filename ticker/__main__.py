@@ -2,6 +2,7 @@
 
 
 import fire
+
 from ticker.cli import Cli
 
 if __name__ == "__main__":

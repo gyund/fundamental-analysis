@@ -1,7 +1,9 @@
-import pytest
-import mock
-from ticker.cli import Cli, Options, ReportOptions
 import logging
+
+import mock
+import pytest
+
+from ticker.cli import Cli, Options, ReportOptions
 
 logger = logging.getLogger(__name__)
 

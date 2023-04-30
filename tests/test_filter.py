@@ -1,6 +1,7 @@
+import pytest
+
 import ticker.filter as Filter
 from ticker.data.sec import Filter as SecFilter
-import pytest
 
 
 def test_Selectors_init():

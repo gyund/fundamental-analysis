@@ -1,18 +1,18 @@
-import pytest
-import mock
-import os
 import io
-import ticker.filter as Filter
-from tests.fixtures.network.sec import (
-    sec_instance,
-    sec_dataselector_2023q1,
-    filter_aapl,
-)
-from ticker.cli import Cli
-from ticker.data.sec import Sec, ReportDate, TickerReader, DataSetReader, DataSelector
+import logging
+import os
 from datetime import date
 from pathlib import Path
-import logging
+
+import mock
+import pytest
+
+import ticker.filter as Filter
+from tests.fixtures.network.sec import (filter_aapl, sec_dataselector_2023q1,
+                                        sec_instance)
+from ticker.cli import Cli
+from ticker.data.sec import (DataSelector, DataSetReader, ReportDate, Sec,
+                             TickerReader)
 
 logger = logging.getLogger(__name__)
 
