@@ -40,11 +40,15 @@ def sec_fake_report(filter_aapl: Filter.Selectors) -> DataSelector:
 
 
 def test_benchmark_DataSetReader_processSubText(benchmark,filter_aapl:Filter.Selectors):
+    filter_aapl.sec_filter._cik_list = set()
+    filter_aapl.sec_filter._cik_list.add(320193)
     benchmark.pedantic(DataSetReader._processSubText,
                        args=(io.StringIO(sub_txt_sample),filter_aapl.sec_filter))
 
 
 def test_benchmark_DataSetReader_processNumText(benchmark, filter_aapl:Filter.Selectors):
+    filter_aapl.sec_filter._cik_list = set()
+    filter_aapl.sec_filter._cik_list.add(320193)
     sub_df = DataSetReader._processSubText(
         filepath_or_buffer=io.StringIO(sub_txt_sample),
         filter=filter_aapl.sec_filter)
