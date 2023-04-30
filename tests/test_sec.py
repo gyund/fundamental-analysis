@@ -93,11 +93,11 @@ class TestDataSelector:
         assert len(tags) == 1
         assert 'EntityCommonStockSharesOutstanding' in tags
 
-    def test_filterStockByTicker(self, sec_fake_report: DataSelector):
+    def test_filterByTicker(self, sec_fake_report: DataSelector):
         # Create a sample set of typical queries one might make with the DataSelector
         sec_fake_report._getCik = mock.Mock(
             return_value=320193)
-        df = sec_fake_report.filterStockByTicker(
+        df = sec_fake_report.filterByTicker(
             sec_fake_report.data, ticker='AAPL')
         assert df is not None
         assert 1 == len(df)
