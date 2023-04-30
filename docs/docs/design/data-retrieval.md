@@ -63,7 +63,99 @@ So what's next? Well we're still going to try and use [pandas](https://pandas.py
 
 This means that we'll need to refactor the processing a bit so that we can pass a set of analytics to collect while looking at a particular stock ticker. This will allow us to scrape a very small subset of information about a company without unpacking these 50MB compressed archives (which can easily take 0.5 GB of storage per quarter uncompressed)
 
+Here is an example of the data scraped from AAPL for q after the refactoring.
 
+```python
+# Filter used in test
+def filter_aapl() -> Filter.Selectors:
+    return Filter.Selectors(
+        ticker_filter={"aapl"},
+        sec_filter=Filter.SecFilter(
+            tags=["EntityCommonStockSharesOutstanding"],
+            years=0,  # Just want the current
+            last_report=ReportDate(year=2023, quarter=1),
+            only_annual=False,
+        ),  # We want the 10-Q
+    )
+
+There are 67 records about apple (test_sec_network.py:55)
+2023-04-30 17:53:05 [   DEBUG]
+```
+
+!!! bug
+    Note there's a bug in the filtering in this example. The `tags` field should have reduced this to one row, but it did not.
+
+```markdown
+|                                                                                                                                                    | uom    |         value |   fy | fp   |
+|:---------------------------------------------------------------------------------------------------------------------------------------------------|:-------|--------------:|-----:|:-----|
+| ('0000320193-23-000006', 'EntityCommonStockSharesOutstanding', 320193)                                                                             | shares |   1.58219e+10 | 2023 | Q1   |
+| ('0000320193-23-000006', 'AccountsPayableCurrent', 320193)                                                                                         | USD    |   5.7918e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'AccountsPayableCurrent', 320193)                                                                                         | USD    |   6.4115e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'AccountsReceivableNetCurrent', 320193)                                                                                   | USD    |   2.3752e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'AccountsReceivableNetCurrent', 320193)                                                                                   | USD    |   2.8184e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment', 320193)                                       | USD    |   6.8044e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'AccumulatedDepreciationDepletionAndAmortizationPropertyPlantAndEquipment', 320193)                                       | USD    |   7.234e+10   | 2023 | Q1   |
+| ('0000320193-23-000006', 'AccumulatedOtherComprehensiveIncomeLossNetOfTax', 320193)                                                                | USD    |  -1.2912e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'AccumulatedOtherComprehensiveIncomeLossNetOfTax', 320193)                                                                | USD    |  -1.1109e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'AllocatedShareBasedCompensationExpense', 320193)                                                                         | USD    |   2.905e+09   | 2023 | Q1   |
+| ('0000320193-23-000006', 'AllocatedShareBasedCompensationExpense', 320193)                                                                         | USD    |   2.265e+09   | 2023 | Q1   |
+| ('0000320193-23-000006', 'Assets', 320193)                                                                                                         | USD    |   3.52755e+11 | 2023 | Q1   |
+| ('0000320193-23-000006', 'Assets', 320193)                                                                                                         | USD    |   3.46747e+11 | 2023 | Q1   |
+| ('0000320193-23-000006', 'AssetsCurrent', 320193)                                                                                                  | USD    |   1.35405e+11 | 2023 | Q1   |
+| ('0000320193-23-000006', 'AssetsCurrent', 320193)                                                                                                  | USD    |   1.28777e+11 | 2023 | Q1   |
+| ('0000320193-23-000006', 'AssetsNoncurrent', 320193)                                                                                               | USD    |   2.1735e+11  | 2023 | Q1   |
+| ('0000320193-23-000006', 'AssetsNoncurrent', 320193)                                                                                               | USD    |   2.1797e+11  | 2023 | Q1   |
+| ('0000320193-23-000006', 'AvailableForSaleSecuritiesDebtMaturitiesRollingAfterYearTenFairValue', 320193)                                           | USD    |   1.7355e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'AvailableForSaleSecuritiesDebtMaturitiesRollingYearSixThroughTenFairValue', 320193)                                      | USD    |   1.4243e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'AvailableForSaleSecuritiesDebtMaturitiesRollingYearTwoThroughFiveFairValue', 320193)                                     | USD    |   8.2497e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'AvailableForSaleSecuritiesDebtMaturitiesSingleMaturityDate', 320193)                                                     | USD    |   1.14095e+11 | 2023 | Q1   |
+| ('0000320193-23-000006', 'CashAndCashEquivalentsAtCarryingValue', 320193)                                                                          | USD    |   2.3646e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'CashAndCashEquivalentsAtCarryingValue', 320193)                                                                          | USD    |   2.0535e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents', 320193)                                                  | USD    |   3.5929e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents', 320193)                                                  | USD    |   3.863e+10   | 2023 | Q1   |
+| ('0000320193-23-000006', 'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents', 320193)                                                  | USD    |   2.4977e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents', 320193)                                                  | USD    |   2.1974e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect', 320193) | USD    |   2.701e+09   | 2023 | Q1   |
+| ('0000320193-23-000006', 'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect', 320193) | USD    |  -3.003e+09   | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommercialPaper', 320193)                                                                                                | USD    |   9.982e+09   | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommercialPaper', 320193)                                                                                                | USD    |   1.743e+09   | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommitmentsAndContingencies', 320193)                                                                                    | USD    | nan           | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommitmentsAndContingencies', 320193)                                                                                    | USD    | nan           | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommonStockDividendsPerShareDeclared', 320193)                                                                           | USD    |   0.22        | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommonStockDividendsPerShareDeclared', 320193)                                                                           | USD    |   0.23        | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommonStockParOrStatedValuePerShare', 320193)                                                                            | USD    |   0           | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommonStockParOrStatedValuePerShare', 320193)                                                                            | USD    |   0           | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommonStockSharesAuthorized', 320193)                                                                                    | shares |   5.04e+10    | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommonStockSharesAuthorized', 320193)                                                                                    | shares |   5.04e+10    | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommonStockSharesIssued', 320193)                                                                                        | shares |   1.59434e+10 | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommonStockSharesIssued', 320193)                                                                                        | shares |   1.58424e+10 | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommonStockSharesOutstanding', 320193)                                                                                   | shares |   1.59434e+10 | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommonStockSharesOutstanding', 320193)                                                                                   | shares |   1.58424e+10 | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommonStocksIncludingAdditionalPaidInCapital', 320193)                                                                   | USD    |   6.4849e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'CommonStocksIncludingAdditionalPaidInCapital', 320193)                                                                   | USD    |   6.6399e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'ComprehensiveIncomeNetOfTax', 320193)                                                                                    | USD    |   3.354e+10   | 2023 | Q1   |
+| ('0000320193-23-000006', 'ComprehensiveIncomeNetOfTax', 320193)                                                                                    | USD    |   2.8195e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'ContractWithCustomerLiability', 320193)                                                                                  | USD    |   1.24e+10    | 2023 | Q1   |
+| ('0000320193-23-000006', 'ContractWithCustomerLiability', 320193)                                                                                  | USD    |   1.26e+10    | 2023 | Q1   |
+| ('0000320193-23-000006', 'ContractWithCustomerLiabilityCurrent', 320193)                                                                           | USD    |   7.912e+09   | 2023 | Q1   |
+| ('0000320193-23-000006', 'ContractWithCustomerLiabilityCurrent', 320193)                                                                           | USD    |   7.992e+09   | 2023 | Q1   |
+| ('0000320193-23-000006', 'ContractWithCustomerLiabilityRevenueRecognized', 320193)                                                                 | USD    |   3e+09       | 2023 | Q1   |
+| ('0000320193-23-000006', 'ContractWithCustomerLiabilityRevenueRecognized', 320193)                                                                 | USD    |   3.4e+09     | 2023 | Q1   |
+| ('0000320193-23-000006', 'CostOfGoodsAndServicesSold', 320193)                                                                                     | USD    |   6.9702e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'CostOfGoodsAndServicesSold', 320193)                                                                                     | USD    |   6.6822e+10  | 2023 | Q1   |
+| ('0000320193-23-000006', 'DebtSecuritiesAvailableForSaleRestricted', 320193)                                                                       | USD    |   1.27e+10    | 2023 | Q1   |
+| ('0000320193-23-000006', 'DebtSecuritiesAvailableForSaleRestricted', 320193)                                                                       | USD    |   1.36e+10    | 2023 | Q1   |
+| ('0000320193-23-000006', 'DepreciationDepletionAndAmortization', 320193)                                                                           | USD    |   2.697e+09   | 2023 | Q1   |
+| ('0000320193-23-000006', 'DepreciationDepletionAndAmortization', 320193)                                                                           | USD    |   2.916e+09   | 2023 | Q1   |
+| ('0000320193-23-000006', 'DerivativeFairValueOfDerivativeNet', 320193)                                                                             | USD    |   4.12e+08    | 2023 | Q1   |
+| ('0000320193-23-000006', 'EarningsPerShareBasic', 320193)                                                                                          | USD    |   2.11        | 2023 | Q1   |
+| ('0000320193-23-000006', 'EarningsPerShareBasic', 320193)                                                                                          | USD    |   1.89        | 2023 | Q1   |
+| ('0000320193-23-000006', 'EarningsPerShareDiluted', 320193)                                                                                        | USD    |   2.1         | 2023 | Q1   |
+| ('0000320193-23-000006', 'EarningsPerShareDiluted', 320193)                                                                                        | USD    |   1.88        | 2023 | Q1   |
+| ('0000320193-23-000006', 'EmployeeServiceShareBasedCompensationNonvestedAwardsTotalCompensationCostNotYetRecognized', 320193)                      | USD    |   2.55e+10    | 2023 | Q1   |
+| ('0000320193-23-000006', 'EmployeeServiceShareBasedCompensationTaxBenefitFromCompensationExpense', 320193)                                         | USD    |   1.536e+09   | 2023 | Q1   |
+| ('0000320193-23-000006', 'EmployeeServiceShareBasedCompensationTaxBenefitFromCompensationExpense', 320193)                                         | USD    |   1.178e+09   | 2023 | Q1   |
+```
 
 <!--
 ### sec-edgar

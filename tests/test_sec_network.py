@@ -53,3 +53,4 @@ def test_update(sec_instance: Sec, filter_aapl: Filter.Selectors):
     )
     assert data_selector.data.empty == False
     logger.debug(f"There are {len(data_selector.data)} records about apple")
+    logger.debug(data_selector.data.to_markdown())
