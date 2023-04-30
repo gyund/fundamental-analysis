@@ -10,6 +10,7 @@ from requests_cache import CachedSession, FileCache, SQLiteCache
 
 logger = logging.getLogger(__name__)
 
+default_chunk_size=1000000
 
 class ReportDate:
     def __init__(
@@ -212,15 +213,18 @@ class DataSetReader:
     def _processNumText(
         filepath_or_buffer, filter: Filter, sub_dataframe: pd.DataFrame
     ) -> pd.DataFrame:
-        """Contains the document type mapping to form id.
+        """Contains the numerical data
 
-        adsh	cik	name	sic	countryba	stprba	cityba	zipba	bas1	bas2	baph	countryma
-        stprma	cityma	zipma	mas1	mas2	countryinc	stprinc	ein	former	changed	afs	wksi
-        fye	form	period	fy	fp	filed	accepted	prevrpt	detail	instance	nciks	aciks
+        adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
+        
         """
         logger.debug("processing num.txt")
         reader = pd.read_csv(
-            filepath_or_buffer, delimiter="\t", index_col=["adsh", "tag"], chunksize=500
+            filepath_or_buffer, 
+            delimiter="\t", 
+            usecols=['adsh','tag', "uom", "value"],
+            index_col=["adsh", "tag"], 
+            chunksize=default_chunk_size
         )
 
         filtered_data: pd.DataFrame() = None
@@ -241,8 +245,11 @@ class DataSetReader:
         return filtered_data
 
     def _processSubText(filepath_or_buffer, filter: Filter) -> pd.DataFrame:
-        """Contains the data
-        adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
+        """Contains the submissions
+        
+        adsh	cik	name	sic	countryba	stprba	cityba	zipba	bas1	bas2	baph	countryma
+        stprma	cityma	zipma	mas1	mas2	countryinc	stprinc	ein	former	changed	afs	wksi
+        fye	form	period	fy	fp	filed	accepted	prevrpt	detail	instance	nciks	aciks
         """
         assert True == isinstance(filter, Filter)
         logger.debug("processing sub.txt")
@@ -251,9 +258,9 @@ class DataSetReader:
         reader = pd.read_csv(
             filepath_or_buffer,
             delimiter="\t",
-            usecols=["adsh", "cik", "fp"],
+            usecols=["adsh", "cik", "fy", "fp"],
             index_col=["adsh", "cik"],
-            chunksize=500,
+            chunksize=default_chunk_size,
         )
 
         logger.debug(f"keeping only these focus periods: {focus_periods}")
