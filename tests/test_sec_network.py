@@ -2,7 +2,8 @@ import pytest
 import mock
 import os
 import io
-from tests.fixtures.network.sec import sec_instance, sec_dataselector_2023q1
+import ticker.filter as Filter
+from tests.fixtures.network.sec import sec_instance, sec_dataselector_2023q1, filter_aapl
 from ticker.cli import Cli
 from ticker.data.sec import Sec, ReportDate, TickerReader, DataSetReader, DataSelector
 from datetime import date
@@ -37,10 +38,9 @@ class TestDownloadManager:
         # assert aapl.empty == False
 
 
-def test_update(sec_instance: Sec):
-    pytest.skip(
-        "skip until we can resolve performance issues with large data sets")
-    data_selector = sec_instance.update(
-        tickers=['aapl'], years=1, last_report=ReportDate(year=2023, quarter=1))
+def test_update(sec_instance: Sec, filter_aapl: Filter.Selectors):
+    # pytest.skip(
+    #     "skip until we can resolve performance issues with large data sets")
+    data_selector = sec_instance.getData(tickers=['aapl'], filter=filter_aapl.sec_filter)
     assert data_selector.data.empty == False
     logger.debug(f"There are {len(data_selector.data)} records about apple")

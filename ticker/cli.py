@@ -22,13 +22,15 @@ class Cli:
 
     """Tools for gathering resources, analyzing data, and publishing the results."""
 
+    default_analysis_module = 'ticker.analysis.stub'
+
     def getDefaultCachePath():
         return Path(os.getcwd()) / ".ticker-cache"
 
     def analyze(self,
                 tickers: list[str],
                 cache_path: Path = getDefaultCachePath(),
-                analysis_plugin: str = 'ticker.analysis') -> None:
+                analysis_plugin: str = default_analysis_module) -> None:
         """ Perform stock analysis
 
         Args:
@@ -45,7 +47,7 @@ class Cli:
                cache_path: Path = getDefaultCachePath(),
                file: Path = None,
                json: Path = None,
-               analysis_plugin: str = 'ticker.analysis') -> None:
+               analysis_plugin: str = default_analysis_module) -> None:
         """ Create a report in one of the following formats based on data already analyzed
 
         Args:

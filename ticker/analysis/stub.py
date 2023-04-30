@@ -1,7 +1,7 @@
 import pandas as pd
 from ticker.cli import Options, ReportOptions
 from ticker.data.sec import DataSelector as SecDataSelector
-from ticker.filter import Entry
+from ticker.filter import Selectors,SecFilter
 import logging
 logger = logging.getLogger(__name__)
 
