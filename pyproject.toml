@@ -26,3 +26,6 @@ format = "github"
 
 target-version = "py310"
 line-length = 88
+
+[tool.isort] 
+profile = "black"
