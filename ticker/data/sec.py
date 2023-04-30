@@ -10,7 +10,8 @@ from requests_cache import CachedSession, FileCache, SQLiteCache
 
 logger = logging.getLogger(__name__)
 
-default_chunk_size=1000000
+default_chunk_size = 1000000
+
 
 class ReportDate:
     def __init__(
@@ -216,15 +217,15 @@ class DataSetReader:
         """Contains the numerical data
 
         adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
-        
+
         """
         logger.debug("processing num.txt")
         reader = pd.read_csv(
-            filepath_or_buffer, 
-            delimiter="\t", 
-            usecols=['adsh','tag', "uom", "value"],
-            index_col=["adsh", "tag"], 
-            chunksize=default_chunk_size
+            filepath_or_buffer,
+            delimiter="\t",
+            usecols=["adsh", "tag", "uom", "value"],
+            index_col=["adsh", "tag"],
+            chunksize=default_chunk_size,
         )
 
         filtered_data: pd.DataFrame() = None
@@ -246,7 +247,7 @@ class DataSetReader:
 
     def _processSubText(filepath_or_buffer, filter: Filter) -> pd.DataFrame:
         """Contains the submissions
-        
+
         adsh	cik	name	sic	countryba	stprba	cityba	zipba	bas1	bas2	baph	countryma
         stprma	cityma	zipma	mas1	mas2	countryinc	stprinc	ein	former	changed	afs	wksi
         fye	form	period	fy	fp	filed	accepted	prevrpt	detail	instance	nciks	aciks

@@ -57,9 +57,11 @@ def test_update(sec_instance: Sec, filter_aapl: Filter.Selectors):
     # logger.debug(data_selector.data.to_markdown())
 
     # There should only be one record based on the filter
-    EntityCommonStockSharesOutstanding = data_selector.data.query("cik == 320193 and tag == 'EntityCommonStockSharesOutstanding'")
+    EntityCommonStockSharesOutstanding = data_selector.data.query(
+        "cik == 320193 and tag == 'EntityCommonStockSharesOutstanding'"
+    )
     eo_series = EntityCommonStockSharesOutstanding.value
-    
+
     assert len(eo_series) == 1
     assert eo_series[0] == 15821946000
     assert True == len(data_selector.data) == 1
