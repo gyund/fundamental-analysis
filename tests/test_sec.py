@@ -39,10 +39,11 @@ def sec_fake_report(filter_aapl: Filter.Selectors) -> DataSelector:
     )
     num_df = DataSetReader._processNumText(
         filepath_or_buffer=io.StringIO(data_txt_sample),
-        filter=filter_aapl,
+        filter=filter_aapl.sec_filter,
         sub_dataframe=sub_df,
     )
     ticker_reader = mock.MagicMock()
+    assert not num_df.empty
     return DataSelector(num_df, ticker_reader)
 
 
