@@ -226,7 +226,7 @@ class DataSetReader:
             usecols=["adsh", "tag", "ddate", "uom", "value"],
             index_col=["adsh", "tag"],
             chunksize=default_chunk_size,
-            parse_dates=['ddate']
+            parse_dates=["ddate"],
         )
 
         filtered_data: pd.DataFrame() = None
@@ -266,7 +266,7 @@ class DataSetReader:
             usecols=["adsh", "cik", "period", "fy", "fp"],
             index_col=["adsh", "cik"],
             chunksize=default_chunk_size,
-            parse_dates=['period']
+            parse_dates=["period"],
         )
         logger.debug(f"keeping only these focus periods: {focus_periods}")
         filtered_data: pd.DataFrame = None
@@ -282,6 +282,7 @@ class DataSetReader:
         if filtered_data is not None:
             logger.debug(f"Filtered Records (head+5):\n{filtered_data.head()}")
         return filtered_data
+
 
 class DownloadManager:
     # Format of zip example: 2023q1.zip
