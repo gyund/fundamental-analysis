@@ -92,6 +92,14 @@ jobs:
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+        cache: 'pip'
+    - name: Install dependencies
+      run: |
+        pip install coveralls
     - name: Coveralls Finished
       run: |
         coveralls --service=github --finish
