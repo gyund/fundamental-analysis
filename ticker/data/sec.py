@@ -223,9 +223,10 @@ class DataSetReader:
         reader = pd.read_csv(
             filepath_or_buffer,
             delimiter="\t",
-            usecols=["adsh", "tag", "uom", "value"],
+            usecols=["adsh", "tag", "ddate", "uom", "value"],
             index_col=["adsh", "tag"],
             chunksize=default_chunk_size,
+            parse_dates=['ddate']
         )
 
         filtered_data: pd.DataFrame() = None
@@ -234,6 +235,8 @@ class DataSetReader:
             # We want only the tables in left if they join on the key, so inner it is
             data = chunk.join(sub_dataframe, how="inner")
             if data.empty:
+                logger.debug(f"chunk:\n{chunk}")
+                logger.debug(f"sub_dataframe:\n{sub_dataframe}")
                 continue
 
             if filtered_data is None:
@@ -242,7 +245,8 @@ class DataSetReader:
                 filtered_data.merge(data)
 
             filtered_data.merge(data)
-        logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
+        if filtered_data is not None:
+            logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
         return filtered_data
 
     def _processSubText(filepath_or_buffer, filter: Filter) -> pd.DataFrame:
@@ -259,29 +263,25 @@ class DataSetReader:
         reader = pd.read_csv(
             filepath_or_buffer,
             delimiter="\t",
-            usecols=["adsh", "cik", "fy", "fp"],
+            usecols=["adsh", "cik", "period", "fy", "fp"],
             index_col=["adsh", "cik"],
             chunksize=default_chunk_size,
+            parse_dates=['period']
         )
-
         logger.debug(f"keeping only these focus periods: {focus_periods}")
         filtered_data: pd.DataFrame = None
         chunk: pd.DataFrame
         for chunk in reader:
             data = chunk.query("cik in @cik_list and fp in @focus_periods")
-
             if data.empty:
                 continue
-
             if filtered_data is None:
                 filtered_data = data
             else:
                 filtered_data.merge(data)
-
-        logger.debug(f"Filtered Records (head+5): {data.head()}")
-
+        if filtered_data is not None:
+            logger.debug(f"Filtered Records (head+5):\n{filtered_data.head()}")
         return filtered_data
-
 
 class DownloadManager:
     # Format of zip example: 2023q1.zip
