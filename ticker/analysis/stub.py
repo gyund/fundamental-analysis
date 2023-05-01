@@ -9,6 +9,10 @@ from ticker.filter import SecFilter, Selectors
 logger = logging.getLogger(__name__)
 
 
+def uncalled_function():
+    pass
+
+
 def analyze(options: Options) -> None:
     """Analyze the report
 
