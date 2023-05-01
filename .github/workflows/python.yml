@@ -45,13 +45,16 @@ jobs:
       - name: Test with pytest
         run: |
           coverage run -m pytest --doctest-modules
+          coverage report
           pydoctest --config pydocktest.json
+          coverage report
           # coveralls --service=github
       - name: Run smoke test
         run: |
           coverage run -a -m ticker --help
           coverage run -a -m ticker analyze --help
           coverage run -a -m ticker export --help
+          coverage report
       # - name: Coveralls
       #   run: |
       #     coveralls --service=github
