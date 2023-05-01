@@ -234,6 +234,8 @@ class DataSetReader:
         for chunk in reader:
             # We want only the tables in left if they join on the key, so inner it is
             data = chunk.join(sub_dataframe, how="inner")
+            tag_list = filter.tags
+            data = data.query("tag in @tag_list")
             if data.empty:
                 logger.debug(f"chunk:\n{chunk}")
                 logger.debug(f"sub_dataframe:\n{sub_dataframe}")
