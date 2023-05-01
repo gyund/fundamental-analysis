@@ -1,4 +1,5 @@
 import logging
+import math
 from datetime import date, timedelta
 from io import BytesIO
 from pathlib import Path
@@ -17,7 +18,7 @@ class ReportDate:
     def __init__(
         self,
         year: int = date.today().year,
-        quarter: int = ((date.today().month - 1) / 3) + 1,
+        quarter: int = math.floor((date.today().month - 1) / 3) + 1,
     ):
         if year > date.today().year:
             raise ValueError(
