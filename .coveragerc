@@ -1,6 +1,2 @@
 [run]
 branch = True
-
-[report]
-
-omit = */.ticker-cache/*
