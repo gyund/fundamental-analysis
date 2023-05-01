@@ -20,6 +20,13 @@ edit_uri: edit/main/docs/docs/
 plugins:
   - search
   - tags
+  - gen-files:
+      scripts:
+      - docs/gen_ref_pages.py 
+  - mkdocstrings
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - section-index
 markdown_extensions:
   - tables
   - admonition
@@ -59,3 +66,4 @@ nav:
       # - Report: design/report.md
       - Caching: design/caching.md
       - Reference: design/reference.md
+  - Code Reference: reference/
