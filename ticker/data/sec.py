@@ -25,7 +25,7 @@ class ReportDate:
             )
         if not quarter in range(1, 5):
             raise ValueError(
-                "the value for the quarter must be a value between 1 and 4"
+                f"the quarter must be a value between 1 and 4 - given: {quarter}"
             )
         self.year = year
         self.quarter = quarter
