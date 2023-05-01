@@ -29,3 +29,7 @@ line-length = 88
 
 [tool.isort] 
 profile = "black"
+
+[tool.coverage.run]
+branch = true
+source = ["ticker/"]
