@@ -64,6 +64,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: run-${{ join(matrix.*, '-') }}
           parallel: true
+          format: python
         if: ${{ success() }}
       - name: Lint - Ruff 
         run: |
