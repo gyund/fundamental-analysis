@@ -6,13 +6,20 @@ theme:
     primary: green
   icon:
     repo: fontawesome/brands/github
+    edit: material/pencil 
+    view: material/eye
   features:
     - content.action.edit
     - navigation.instant
     - navigation.tracking
-    - navigation.tabs
+    - navigation.sections
+    # - navigation.indexes
+    - toc.follow
+    - toc.integrate
+    # - navigation.expand
+    # - navigation.tabs
     - navigation.top
-    - header.autohide
+    # - header.autohide
 repo_url: https://github.com/gyund/fundamental-analysis
 repo_name: gyund/fundamental-analysis
 edit_uri: edit/main/docs/docs/
@@ -56,11 +63,21 @@ extra_javascript:
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
+extra:
+  social:
+    - icon: fontawesome/brands/github 
+      link: https://github.com/gyund
+      name: Gary Yund on Github
+    - icon: fontawesome/brands/linkedin 
+      link: https://www.linkedin.com/in/garyyund/
+      name: Gary Yund on LinkedIn
+copyright: Copyright &copy; 2023 Gary Yund
+
 nav:
-  - Home: index.md
+  - Welcome: index.md
   - Getting Started: getting-started.md
   - Design:
-      - Overview: design/overview.md
+      - design/index.md
       - Data Retrieval: design/data-retrieval.md
       # - Analysis: design/analysis.md
       # - Report: design/report.md
