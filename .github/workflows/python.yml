@@ -46,7 +46,7 @@ jobs:
       - name: Test with pytest
         run: |
           coverage run --source=ticker -m pytest --doctest-modules
-          pydoctest --cov-append --config pydocktest.json
+          pydoctest --config pydocktest.json
           # coveralls --service=github
       - name: Run smoke test
         run: |
