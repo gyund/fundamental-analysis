@@ -45,14 +45,14 @@ jobs:
             **/.ticker-cache/*.sqlite
       - name: Test with pytest
         run: |
-          coverage run --source=ticker -m pytest --doctest-modules
+          coverage run --branch --source=ticker -m pytest --doctest-modules
           pydoctest --config pydocktest.json
           # coveralls --service=github
       - name: Run smoke test
         run: |
-          coverage run -a --source=ticker -m ticker --help
-          coverage run -a --source=ticker -m ticker analyze --help
-          coverage run -a --source=ticker -m ticker export --help
+          coverage run -a --branch --source=ticker -m ticker --help
+          coverage run -a --branch --source=ticker -m ticker analyze --help
+          coverage run -a --branch --source=ticker -m ticker export --help
       # - name: Coveralls
       #   run: |
       #     coveralls --service=github
