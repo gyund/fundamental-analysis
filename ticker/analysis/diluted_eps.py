@@ -54,9 +54,12 @@ def analyze(options: Options) -> None:
     results = list[tuple[str, int]]
     for t in options.tickers:
         ticker_ds = data_selector.select(ticker=t)
-        eps_diluted = ticker_ds.EarningsPerShareDiluted
-        trend = trendline(data=eps_diluted)
-        results.append((t, trend))
+        try:
+            eps_diluted = ticker_ds.EarningsPerShareDiluted
+            trend = trendline(data=eps_diluted)
+            results.append((t, trend))
+        except AttributeError as ex:
+            logger.warning(f"{t}: {ex}")
 
     print(f"Trends:\n{results}")
 
