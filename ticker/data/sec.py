@@ -457,7 +457,7 @@ class DataSetCollector:
                     # df = pd.concat(df, data)
                     df.merge(right=data)
             except ImportError as e:
-                # Note, when searching for annual reports, this will generally occur 1/4 times 
+                # Note, when searching for annual reports, this will generally occur 1/4 times
                 # if we're only searching for one stock's tags
                 logger.warning(f"{r} did not have any matches for the provided filter")
         logger.info(f"Created Unified Data record for these reports: {report_dates}")

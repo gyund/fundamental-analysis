@@ -12,7 +12,7 @@ from ticker.data.sec import Sec as SecDataSource
 logger = logging.getLogger(__name__)
 
 
-def trendline(data: pd.Series, order:int=1) -> float:
+def trendline(data: pd.Series, order: int = 1) -> float:
     """Calculate the trend of a series
 
     >>> trendline((1,2,3))
@@ -24,7 +24,7 @@ def trendline(data: pd.Series, order:int=1) -> float:
 
     Returns:
         float: slope of the trend line
-    """    
+    """
     coeffs = np.polyfit(data.index.values, list(data), order)
     slope = coeffs[-2]
     return float(slope)

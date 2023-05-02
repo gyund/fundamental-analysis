@@ -23,6 +23,7 @@ from ticker.data.sec import TickerReader
 
 logger = logging.getLogger(__name__)
 
+
 @pytest.mark.webtest
 class TestDownloadManager:
     def test_getTickers(self, sec_instance: Sec):
@@ -43,6 +44,7 @@ class TestDownloadManager:
         # TODO: Verify access semantics so we can create a query API on the extracted data
         # aapl =  df[df.adsh == '0000320193-23-000005']
         # assert aapl.empty == False
+
 
 @pytest.mark.webtest
 def test_update(sec_instance: Sec, filter_aapl: Filter.Selectors):
@@ -65,6 +67,7 @@ def test_update(sec_instance: Sec, filter_aapl: Filter.Selectors):
     assert len(eo_series) == 1
     assert eo_series[0] == 15821946000
     assert True == len(data_selector.data) == 1
+
 
 @pytest.mark.webtest
 def test_multi_stock_request_over_1year(sec_instance: SecDataSource):
