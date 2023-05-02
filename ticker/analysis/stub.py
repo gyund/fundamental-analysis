@@ -3,8 +3,6 @@ import logging
 import pandas as pd
 
 from ticker.cli import Options, ReportOptions
-from ticker.data.sec import DataSelector as SecDataSelector
-from ticker.filter import SecFilter, Selectors
 
 logger = logging.getLogger(__name__)
 

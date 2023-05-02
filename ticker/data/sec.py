@@ -199,6 +199,9 @@ class DataSetReader:
         Args:
             filter (Filter): results to filter out of the zip archive
 
+        Raises:
+            ImportError: the filter doesn't match anything
+
         Returns:
             pd.DataFrame: filtered data
         """
@@ -208,6 +211,9 @@ class DataSetReader:
             with myzip.open("sub.txt") as myfile:
                 # Get reports that are 10-K or 10-Q
                 sub_dataframe = DataSetReader._processSubText(myfile, filter)
+
+                if sub_dataframe is None or sub_dataframe.empty:
+                    raise ImportError("nothing found in sub.txt matching the filter")
 
                 with myzip.open("num.txt") as myfile:
                     return DataSetReader._processNumText(myfile, filter, sub_dataframe)
@@ -371,8 +377,8 @@ class DataSelector:
             data (pd.DataFrame): Filtered data from processing
             ticker_reader (TickerReader): Reader that helps convert tickers to CIKs
         """
-        self.data = data
-        self._ticker_reader = ticker_reader
+        self.data: pd.DataFrame = data
+        self._ticker_reader: TickerReader = ticker_reader
 
     def getTags(self) -> pd.Index:
         """Get a list of the tag values filtered from the results
@@ -385,17 +391,23 @@ class DataSelector:
     def _getCik(self, ticker: str):
         return self._ticker_reader.getCik(ticker)
 
-    def filterByTicker(self, data: pd.DataFrame, ticker: str) -> pd.DataFrame:
-        """Filter results using the ticker symbol
+    def filterByTicker(self, ticker: str, data: pd.DataFrame = None) -> pd.DataFrame:
+        """Filter results using the ticker symbol.
 
         Args:
-            data (pd.DataFrame): _description_
-            ticker (str): _description_
+            ticker (str): ticker to select
+            data (pd.DataFrame): alternate data to use for filtering. Use this if you've previously filtered the data and are using this in addition.
 
         Returns:
             pd.DataFrame: Filtered result containing ticker results
         """
+        assert isinstance(ticker, str)
+        assert data is None or isinstance(data, pd.DataFrame)
         cik = self._getCik(ticker)
+
+        # Supply the object default if not provided in the method
+        if data is None or data.empty:
+            data = self.data
         return data.query(f"cik == {cik}")
 
     def select(
@@ -412,7 +424,7 @@ class DataSelector:
         """
         assert True == isinstance(ticker, str)
         # Filter out the Stock
-        df = self.filterByTicker(self.data, ticker=ticker)
+        df = self.filterByTicker(ticker=ticker)
         return df
 
 
@@ -436,13 +448,18 @@ class DataSetCollector:
         logger.info(f"Creating Unified Data record for these reports: {report_dates}")
         for r in report_dates:
             reader = self.download_manager.getData(r)
-            data = reader.processZip(filter)
-            if df is None:
-                logger.debug(f"keys: {data.keys()}")
-                df = data
-            else:
-                # df = pd.concat(df, data)
-                df.merge(right=data)
+            try:
+                data = reader.processZip(filter)
+                if df is None:
+                    logger.debug(f"keys: {data.keys()}")
+                    df = data
+                else:
+                    # df = pd.concat(df, data)
+                    df.merge(right=data)
+            except ImportError as e:
+                # Note, when searching for annual reports, this will generally occur 1/4 times 
+                # if we're only searching for one stock's tags
+                logger.warning(f"{r} did not have any matches for the provided filter")
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
         logger.debug(f"keys: {df.keys()}")
         logger.debug(f"Rows: {len(df)}")

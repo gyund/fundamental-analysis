@@ -14,7 +14,12 @@ from tests.fixtures.network.sec import (
     sec_instance,
 )
 from ticker.cli import Cli
-from ticker.data.sec import DataSelector, DataSetReader, ReportDate, Sec, TickerReader
+from ticker.data.sec import DataSelector, DataSetReader
+from ticker.data.sec import Filter as SecFilter
+from ticker.data.sec import ReportDate
+from ticker.data.sec import Sec
+from ticker.data.sec import Sec as SecDataSource
+from ticker.data.sec import TickerReader
 
 logger = logging.getLogger(__name__)
 
@@ -65,3 +70,17 @@ def test_update(sec_instance: Sec, filter_aapl: Filter.Selectors):
     assert len(eo_series) == 1
     assert eo_series[0] == 15821946000
     assert True == len(data_selector.data) == 1
+
+
+def test_multi_stock_request_over_1year(sec_instance: SecDataSource):
+    # Create the filter we'll use to scrape the results
+    sec_filter = SecFilter(
+        tags=["EarningsPerShareDiluted"],
+        years=1,  # Over the past 5 years
+        last_report=ReportDate(year=2023, quarter=1),
+        only_annual=True,  # We only want the 10-K
+    )
+    tickers = ["aapl", "msft", "goog", "tmo"]
+    data_selector = sec_instance.getData(tickers=tickers, filter=sec_filter)
+    logger.debug(data_selector)
+    # TODO: assert something

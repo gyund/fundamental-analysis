@@ -118,7 +118,7 @@ class TestDataSelector:
     def test_filterByTicker(self, sec_fake_report: DataSelector):
         # Create a sample set of typical queries one might make with the DataSelector
         sec_fake_report._getCik = mock.Mock(return_value=320193)
-        df = sec_fake_report.filterByTicker(sec_fake_report.data, ticker="AAPL")
+        df = sec_fake_report.filterByTicker(ticker="AAPL", data=sec_fake_report.data)
         assert df is not None
         assert 1 == len(df)
 
