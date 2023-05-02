@@ -1,30 +1,37 @@
-from zipfile import ZipFile
-from datetime import date
+import logging
+import math
+from datetime import date, timedelta
+from io import BytesIO
 from pathlib import Path
+from typing import Literal, get_args
+from zipfile import ZipFile
+
 import pandas as pd
 from requests_cache import CachedSession, FileCache, SQLiteCache
-from datetime import timedelta
-from io import BytesIO
-from typing import Literal, get_args
-import logging
+
 logger = logging.getLogger(__name__)
+
+default_chunk_size = 1000000
 
 
 class ReportDate:
-
-    def __init__(self,
-                 year: int = date.today().year,
-                 quarter: int = ((date.today().month-1) / 3) + 1):
+    def __init__(
+        self,
+        year: int = date.today().year,
+        quarter: int = math.floor((date.today().month - 1) / 3) + 1,
+    ):
         if year > date.today().year:
             raise ValueError(
-                "you cannot request reports in the future...that would be illegal :)")
+                "you cannot request reports in the future...that would be illegal :)"
+            )
         if not quarter in range(1, 5):
             raise ValueError(
-                "the value for the quarter must be a value between 1 and 4")
+                f"the quarter must be a value between 1 and 4 - given: {quarter}"
+            )
         self.year = year
         self.quarter = quarter
 
-    def __eq__(self, other: 'ReportDate') -> bool:
+    def __eq__(self, other: "ReportDate") -> bool:
         """
 
         Args:
@@ -37,12 +44,11 @@ class ReportDate:
 
 
 class TickerReader:
-
     def __init__(self, data: bytes):
-        self._data = pd.read_json(data, orient='index')
+        self._data = pd.read_json(data, orient="index")
 
     def getCik(self, ticker: str) -> int:
-        """ Get the Cik from the stock ticker
+        """Get the Cik from the stock ticker
 
         Args:
             ticker (str): stock ticker. The case does not matter.
@@ -54,7 +60,7 @@ class TickerReader:
         return result.cik_str.iloc[0]
 
     def getTicker(self, cik: int) -> str:
-        """ Get the stock ticker from the Cik number
+        """Get the stock ticker from the Cik number
 
         Args:
             cik (int): Cik number for the stock
@@ -66,65 +72,236 @@ class TickerReader:
         return result.ticker.iloc[0]
 
 
+period_focus_options = Literal["FY", "Q1", "Q2", "Q3", "Q4"]
+
+
+class Filter:
+    def __init__(
+        self,
+        tags: list[str],
+        years: int = 5,
+        last_report: ReportDate = ReportDate(),
+        only_annual: bool = True,
+    ) -> None:
+        """Filter for SEC tools to scrape relevant information when processing records.
+
+        This is an important concept to dealing with large data sets. It allows us to chunk processing
+        into batches and find/locate only records of interest. Without these filters, the tool would
+        require absurd amounts of memory and storage to process.
+
+        Args:
+            tags (list[str]): list of tags found in the SEC report, such as 'EntityCommonStockSharesOutstanding'
+            years (int): years of reports desired. Defaults to 5.
+            last_report (ReportDate): most recent SEC data dump identified by the year an quarter. Defaults to ReportDate().
+            only_annual (bool): If true, only scrape the annual reports. Defaults to True.
+        """
+        self.tags = tags
+        self.years = years
+        self.last_report = last_report
+        self.only_annual = only_annual
+        self._cik_list: set[int] = None
+
+    def getCikList(self) -> set[int]:
+        """Retrieves a list of CIK values corresponding to the tickers being looked up
+
+        The SEC object will call populateCikList to generate this information. This helps
+        with dependency injection by avoiding the Filter having to maintain references to
+        these helper objects for temporary processing. It also lets us stub out the information
+        provided without having to involve heavier utilities or network access.
+
+        Raises:
+            LookupError: _description_
+
+        Returns:
+            set[int]: Set containing all the CIKs that are being filtered out
+        """
+        if self._cik_list is None:
+            raise LookupError(
+                "Filter was not provided a mapping of cik's based on the tickers."
+            )
+        return self._cik_list
+
+    def populateCikList(self, tickers: list[str], ticker_reader: TickerReader) -> None:
+        """Populates the filter's CIK list to be used for filtering.
+
+        The Filter doesn't need the ticker symbols. If we expand to other data sources,
+        we would have to repeat ticker symbols. For now, the only info we need in the
+        report is the CIK values to find the corresponding stocks.
+
+        Args:
+            tickers (list[str]): ticker symbols to search for
+            ticker_reader (TickerReader): reader to convert ticker symbols to CIK values
+        """
+        self._cik_list = set()
+        for ticker in tickers:
+            cik = ticker_reader.getCik(ticker)
+            self._cik_list.add(cik)
+
+    def getFocusPeriod(self) -> list[str]:
+        """Get the focus period for the report
+
+        Companies file quarterly reports. The annual report replaces the quarterly
+        report depending on when that is reported. Typically Q4 is replaced with FY
+        for the annual reports. For example:
+
+        >>> getFocusPeriod()
+        ['FY']
+
+        Returns:
+            list[str]: list of focus periods to use for the filter
+        """
+        if self.only_annual:
+            return ["FY"]
+        else:
+            return ["FY", "Q1", "Q2", "Q3", "Q4"]
+
+    def getRequiredReports(self) -> list[ReportDate]:
+        """Get a list of required reports to download for all the quarters.
+
+        The list generated will include an extra quarter so that you will always be
+        able to do analysis from the current quarter to the previous quarter.
+
+        Also note that it doesn't matter if you specify only_annual=True. Because
+        companies don't have the same fiscal year, we have to check every quarterly
+        report just to see if their annual report is in there.
+
+        Returns:
+            list[ReportDate]: list of report dates to retrieve
+        """
+        dl_list: list[ReportDate] = list()
+        next_report = self.last_report
+        final_report = ReportDate(
+            self.last_report.year - self.years, self.last_report.quarter
+        )
+        while 1:
+            dl_list.append(
+                ReportDate(year=next_report.year, quarter=next_report.quarter)
+            )
+            if next_report == final_report:
+                break
+            if 1 == next_report.quarter:
+                next_report.quarter = 4
+                next_report.year -= 1
+            else:
+                next_report.quarter -= 1
+        return dl_list
+
+
 class DataSetReader:
-    """ Reads the data from a zip file retrieved from the SEC website 
-    """
+    """Reads the data from a zip file retrieved from the SEC website"""
 
     def __init__(self, zip_data: bytes) -> None:
         self.zip_data = BytesIO(zip_data)
 
-    def processZip(self) -> pd.DataFrame:
-        forms = ['10-K', '10-Q']
+    def processZip(self, filter: Filter) -> pd.DataFrame:
+        """Process a zip archive with the provided filter
+
+        Args:
+            filter (Filter): results to filter out of the zip archive
+
+        Raises:
+            ImportError: the filter doesn't match anything
+
+        Returns:
+            pd.DataFrame: filtered data
+        """
         with ZipFile(self.zip_data) as myzip:
             # Process the mapping first
-            logger.debug('opening sub.txt')
-            with myzip.open('sub.txt') as myfile:
-
+            logger.debug("opening sub.txt")
+            with myzip.open("sub.txt") as myfile:
                 # Get reports that are 10-K or 10-Q
-                sub_dataframe = DataSetReader._processSubText(forms, myfile)
+                sub_dataframe = DataSetReader._processSubText(myfile, filter)
 
-                with myzip.open('num.txt') as myfile:
-                    return DataSetReader._processNumText(myfile, sub_dataframe)
+                if sub_dataframe is None or sub_dataframe.empty:
+                    raise ImportError("nothing found in sub.txt matching the filter")
 
-    def _processNumText(filepath_or_buffer, sub_dataframe) -> pd.DataFrame:
-        """ Contains the document type mapping to form id.
+                with myzip.open("num.txt") as myfile:
+                    return DataSetReader._processNumText(myfile, filter, sub_dataframe)
 
-            adsh	cik	name	sic	countryba	stprba	cityba	zipba	bas1	bas2	baph	countryma	
-            stprma	cityma	zipma	mas1	mas2	countryinc	stprinc	ein	former	changed	afs	wksi	
-            fye	form	period	fy	fp	filed	accepted	prevrpt	detail	instance	nciks	aciks
+    def _processNumText(
+        filepath_or_buffer, filter: Filter, sub_dataframe: pd.DataFrame
+    ) -> pd.DataFrame:
+        """Contains the numerical data
+
+        adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
+
         """
-        logger.debug('processing num.txt')
-        data_set = pd.read_csv(
-            filepath_or_buffer, delimiter='\t', index_col=['adsh', 'tag'])
-        # Filter out the results containing only those reports
-        logger.debug('filtering out reports')
-        logger.debug(data_set.head())
-        # We want only the tables in left if they join on the key, so inner it is
-        return data_set.join(sub_dataframe, how='inner')
+        logger.debug("processing num.txt")
+        reader = pd.read_csv(
+            filepath_or_buffer,
+            delimiter="\t",
+            usecols=["adsh", "tag", "ddate", "uom", "value"],
+            index_col=["adsh", "tag"],
+            chunksize=default_chunk_size,
+            parse_dates=["ddate"],
+        )
 
-    def _processSubText(forms, filepath_or_buffer) -> pd.DataFrame:
-        """ Contains the data
-            adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
+        filtered_data: pd.DataFrame = None
+        chunk: pd.DataFrame
+        for chunk in reader:
+            # We want only the tables in left if they join on the key, so inner it is
+            data = chunk.join(sub_dataframe, how="inner")
+            tag_list = filter.tags
+            data = data.query("tag in @tag_list")
+            if data.empty:  # pragma: no cover
+                logger.debug(f"chunk:\n{chunk}")
+                logger.debug(f"sub_dataframe:\n{sub_dataframe}")
+                continue
+
+            if filtered_data is None:
+                filtered_data = data
+            else:
+                filtered_data.merge(data)
+
+            filtered_data.merge(data)
+        if filtered_data is not None:  # pragma: no cover
+            logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
+        return filtered_data
+
+    def _processSubText(filepath_or_buffer, filter: Filter) -> pd.DataFrame:
+        """Contains the submissions
+
+        adsh	cik	name	sic	countryba	stprba	cityba	zipba	bas1	bas2	baph	countryma
+        stprma	cityma	zipma	mas1	mas2	countryinc	stprinc	ein	former	changed	afs	wksi
+        fye	form	period	fy	fp	filed	accepted	prevrpt	detail	instance	nciks	aciks
         """
-        logger.debug('processing sub.txt')
-        report_list = pd.read_csv(filepath_or_buffer, delimiter='\t', usecols=['adsh', 'cik', 'form'],
-                                  index_col=['adsh', 'cik'])
-        logger.debug(f'keeping only these forms: {forms}')
-        report_list = report_list[report_list.form.isin(forms)]
-        logger.debug(report_list.head())
-        return report_list
+        assert True == isinstance(filter, Filter)
+        logger.debug("processing sub.txt")
+        focus_periods = filter.getFocusPeriod()
+        cik_list = filter.getCikList()
+        reader = pd.read_csv(
+            filepath_or_buffer,
+            delimiter="\t",
+            usecols=["adsh", "cik", "period", "fy", "fp"],
+            index_col=["adsh", "cik"],
+            chunksize=default_chunk_size,
+            parse_dates=["period"],
+        )
+        logger.debug(f"keeping only these focus periods: {focus_periods}")
+        filtered_data: pd.DataFrame = None
+        chunk: pd.DataFrame
+        for chunk in reader:
+            data = chunk.query("cik in @cik_list and fp in @focus_periods")
+            if data.empty:
+                continue
+            if filtered_data is None:
+                filtered_data = data
+            else:
+                filtered_data.merge(data)
+        if filtered_data is not None:
+            logger.debug(f"Filtered Records (head+5):\n{filtered_data.head()}")
+        return filtered_data
 
 
 class DownloadManager:
-
     # Format of zip example: 2023q1.zip
-    _base_url = 'https://www.sec.gov/files/dera/data/financial-statement-data-sets'
+    _base_url = "https://www.sec.gov/files/dera/data/financial-statement-data-sets"
 
-    _company_tickers_url = 'https://www.sec.gov/files/company_tickers.json'
+    _company_tickers_url = "https://www.sec.gov/files/company_tickers.json"
 
-    def __init__(self,
-                 ticker_session: CachedSession,
-                 data_session: CachedSession) -> None:
+    def __init__(
+        self, ticker_session: CachedSession, data_session: CachedSession
+    ) -> None:
         self._ticker_session = ticker_session
         self._data_session = data_session
 
@@ -132,9 +309,9 @@ class DownloadManager:
         """Get the CIK ticker mappings. This must be done before processing reports
 
         The SEC stores the mappings of the CIK values to tickers in a JSON file.
-        We can download and cache this information essentially for a year. We're 
-        not interested in companies that recently listed because they don't have a 
-        long regulated record of reported earnings. When we process the records, we can 
+        We can download and cache this information essentially for a year. We're
+        not interested in companies that recently listed because they don't have a
+        long regulated record of reported earnings. When we process the records, we can
         ignore cik values that are not in this list.
 
 
@@ -148,18 +325,29 @@ class DownloadManager:
 
         """
         response = self._ticker_session.get(self._company_tickers_url)
-        if response.from_cache:
+        if response.from_cache:  # pragma: no cover
             logger.info("Retrieved tickers->cik mapping from cache")
-        if response.status_code == 200:
+        if response.status_code == 200:  # pragma: no cover
             return TickerReader(response.content.decode())
-        else:
+        else:  # pragma: no cover
             return TickerReader(pd.DataFrame())
 
     def _createDownloadUri(self, report_date: ReportDate) -> str:
         file = f"{report_date.year}q{report_date.quarter}.zip"
-        return '/'.join([self._base_url, file])
+        return "/".join([self._base_url, file])
 
     def getData(self, report_date: ReportDate) -> DataSetReader:
+        """Retrieves from a cache or makes a request to retrieve archived quarterly data.
+
+        This allows us to download data independent of actually processing it, allowing
+        us to prefetch information we need if we like.
+
+        Args:
+            report_date (ReportDate): information specifying the quarterly dump to retrieve
+
+        Returns:
+            DataSetReader: this object helps process the data received more granularly
+        """
         request = self._createDownloadUri(report_date)
         response = self._data_session.get(request)
         if response.from_cache:
@@ -171,88 +359,108 @@ class DownloadManager:
 
 
 class DataSelector:
-    """ A DataSelector contains all the data we know about. 
+    """A DataSelector contains all the data we know about.
 
     The purpose of this class is to narrow down and select relevant subsets of the data
-    based on specific criteria. 
+    based on specific criteria.
     """
-    _report_types = Literal['quarterly', 'annual']
-    _period_focus = Literal['FY', 'Q1', 'Q2', 'Q3', 'Q4']
+
+    _report_types = Literal["quarterly", "annual"]
+    _period_focus = Literal["FY", "Q1", "Q2", "Q3", "Q4"]
 
     def __init__(self, data: pd.DataFrame, ticker_reader: TickerReader) -> None:
-        self.data = data
-        self._ticker_reader = ticker_reader
+        """Class for helping select data
+
+        This helps the user to some extent avoid some specifics about the pandas table structure.
+
+        Args:
+            data (pd.DataFrame): Filtered data from processing
+            ticker_reader (TickerReader): Reader that helps convert tickers to CIKs
+        """
+        self.data: pd.DataFrame = data
+        self._ticker_reader: TickerReader = ticker_reader
 
     def getTags(self) -> pd.Index:
-        return self.data.index.get_level_values('tag').unique()
+        """Get a list of the tag values filtered from the results
+
+        Returns:
+            pd.Index: tag values
+        """
+        return self.data.index.get_level_values("tag").unique()
 
     def _getCik(self, ticker: str):
         return self._ticker_reader.getCik(ticker)
 
-    def _getFormType(self, report_type: _report_types):
-        assert report_type in get_args(self._report_types)
-        if 'quarterly' == report_type:
-            return '10-Q'
-        elif 'annual' == report_type:
-            return '10-K'
-
-    def filterStockByTicker(self, data: pd.DataFrame, ticker: str):
-        cik = self._getCik(ticker)
-        return data.query(f'cik == {cik}')
-
-    def filterStockByForm(self, data: pd.DataFrame, form: str):
-        return data.query(f"form == '{form.upper()}'")
-
-    def select(
-            self,
-            report_type: _report_types,
-            ticker: str,
-            period_focus: _period_focus = None
-    ) -> pd.DataFrame:
-        """_summary_
+    def filterByTicker(self, ticker: str, data: pd.DataFrame = None) -> pd.DataFrame:
+        """Filter results using the ticker symbol.
 
         Args:
-            report_type (_report_types): type of report can be 'yearly' or 'quarterly'
+            ticker (str): ticker to select
+            data (pd.DataFrame): alternate data to use for filtering. Use this if you've previously filtered the data and are using this in addition.
+
+        Returns:
+            pd.DataFrame: Filtered result containing ticker results
+        """
+        assert isinstance(ticker, str)
+        assert data is None or isinstance(data, pd.DataFrame)
+        cik = self._getCik(ticker)
+
+        # Supply the object default if not provided in the method
+        if data is None or data.empty:
+            data = self.data
+        return data.query(f"cik == {cik}")
+
+    def select(
+        self,
+        ticker: str,
+    ) -> pd.DataFrame:
+        """Select only a subset of the data matching the specified criteria
+
+        Args:
             ticker (str): ticker symbol for the company
-            period_focus (_period_focus): Focus of the report can be 'FY' = Yearly, Q1,Q2,Q3,Q4
 
         Returns:
             pd.DataFrame: filtered DataFrame
         """
-        form = self._getFormType(report_type)
         assert True == isinstance(ticker, str)
         # Filter out the Stock
-        df = self.filterStockByTicker(self.data, ticker=ticker)
-        # Filter out quarterly/annual
-        df = self.filterStockByForm(self.data, form=form)
-        # # Filter out the data range
-        # if period_focus is not None:
-        #     return
+        df = self.filterByTicker(ticker=ticker)
         return df
 
 
 class DataSetCollector:
-
     def __init__(self, download_manager: DownloadManager):
         self.download_manager = download_manager
 
     """ Take care of downloading all the data sets and aggregate them into a single structure """
 
-    def getData(self, report_dates: list[ReportDate]) -> pd.DataFrame:
+    def getData(self, filter: Filter) -> pd.DataFrame:
+        """Collect data based on the provided filter
+
+        Args:
+            filter (Filter): SEC specific filter of how to filter the results
+
+        Returns:
+            pd.DataFrame: filtered results
+        """
         df = None
-        logger.info(
-            f"Creating Unified Data record for these reports: {report_dates}")
+        report_dates = filter.getRequiredReports()
+        logger.info(f"Creating Unified Data record for these reports: {report_dates}")
         for r in report_dates:
             reader = self.download_manager.getData(r)
-            data = reader.processZip()
-            if df is None:
-                logger.debug(f"keys: {data.keys()}")
-                df = data
-            else:
-                # df = pd.concat(df, data)
-                df.merge(right=data)
-        logger.info(
-            f"Created Unified Data record for these reports: {report_dates}")
+            try:
+                data = reader.processZip(filter)
+                if df is None:
+                    logger.debug(f"keys: {data.keys()}")
+                    df = data
+                else:
+                    # df = pd.concat(df, data)
+                    df.merge(right=data)
+            except ImportError as e:
+                # Note, when searching for annual reports, this will generally occur 1/4 times
+                # if we're only searching for one stock's tags
+                logger.warning(f"{r} did not have any matches for the provided filter")
+        logger.info(f"Created Unified Data record for these reports: {report_dates}")
         logger.debug(f"keys: {df.keys()}")
         logger.debug(f"Rows: {len(df)}")
         logger.debug(df.head())
@@ -260,70 +468,57 @@ class DataSetCollector:
 
 
 class Sec:
-
-    data: pd.DataFrame = None
-
     def __init__(self, storage_path: Path):
         if not isinstance(storage_path, Path):
             raise ValueError("storage_path is required")
         storage_path.mkdir(parents=True, exist_ok=True)
         data_session = CachedSession(
-            'data',
-            backend=SQLiteCache(db_path=storage_path/'data'),
-            serializer='pickle',
-            expire_after=timedelta(days=365*5),
-            stale_if_error=True)
+            "data",
+            backend=SQLiteCache(db_path=storage_path / "data"),
+            serializer="pickle",
+            expire_after=timedelta(days=365 * 5),
+            stale_if_error=True,
+        )
         ticker_session = CachedSession(
-            'tickers',
-            backend=SQLiteCache(db_path=storage_path/'tickers'),
+            "tickers",
+            backend=SQLiteCache(db_path=storage_path / "tickers"),
             expire_after=timedelta(days=365),
-            stale_if_error=True)
+            stale_if_error=True,
+        )
         self.download_manager = DownloadManager(ticker_session, data_session)
 
-    def update(self, tickers: list, years: int = 5, last_report: ReportDate = ReportDate()) -> DataSelector:
-        """ Update the database with information about the following stocks.
-
-        When this command runs, it will pull updates starting from 
+    def getData(self, tickers: list[str], filter: Filter) -> DataSelector:
+        """Initiate the retrieval of ticker information based on the provided filters.
 
         Args:
-            tickers (list): only store and catalog information about these tickers
-            years (int): number of years to go back in time. Defaults to 5.
-            last_report (ReportDate): only retrieve reports from this quarter and before
+            tickers (list[str]): ticker symbols you want information about
+            filter (Filter): SEC specific data to scrape from the reports
 
         Returns:
-            DataSelector: with the extracted data from the report
+            DataSelector: Helper for processing the filtered results
         """
-        # Download reports for each quarter and update records for tickers specified
-        download_list = Sec._getDownloadList(years, last_report)
         collector = DataSetCollector(self.download_manager)
-        data = collector.getData(download_list)
         ticker_map = self.download_manager.getTickers()
-        return DataSelector(data, ticker_map)
+        filter.populateCikList(tickers=tickers, ticker_reader=ticker_map)
+        filtered_data = collector.getData(filter)
+        return DataSelector(data=filtered_data, ticker_reader=ticker_map)
 
-    def _getDownloadList(years: int, last_report: ReportDate) -> list[ReportDate]:
-        """ Get a list of files to download for all the quarters.
+    # def update(self, tickers: list, years: int = 5, last_report: ReportDate = ReportDate()) -> DataSelector:
+    #     """ Update the database with information about the following stocks.
 
-        The list generated will include an extra quarter so that you will always be
-        able to do analysis from the current quarter to the previous quarter.
+    #     When this command runs, it will pull updates starting from
 
-        Args:
-            years (int): number of years to go back in time.
-            last_report (ReportDate): only retrieve reports from this quarter and before
+    #     Args:
+    #         tickers (list): only store and catalog information about these tickers
+    #         years (int): number of years to go back in time. Defaults to 5.
+    #         last_report (ReportDate): only retrieve reports from this quarter and before
 
-        Returns:
-            list[ReportDate]: list of report dates to retrieve
-        """
-        dl_list: list[ReportDate] = list()
-        next_report = last_report
-        final_report = ReportDate(last_report.year-years, last_report.quarter)
-        while 1:
-            dl_list.append(ReportDate(year=next_report.year,
-                           quarter=next_report.quarter))
-            if next_report == final_report:
-                break
-            if 1 == next_report.quarter:
-                next_report.quarter = 4
-                next_report.year -= 1
-            else:
-                next_report.quarter -= 1
-        return dl_list
+    #     Returns:
+    #         DataSelector: with the extracted data from the report
+    #     """
+    #     # Download reports for each quarter and update records for tickers specified
+    #     download_list = Sec._getDownloadList(years, last_report)
+    #     collector = DataSetCollector(self.download_manager)
+    #     data = collector.getData(download_list)
+    #     ticker_map = self.download_manager.getTickers()
+    #     return DataSelector(data, ticker_map)

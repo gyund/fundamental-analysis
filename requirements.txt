@@ -6,6 +6,8 @@ mock==5.0.2
 coveralls==3.3.1
 pytest-cov==4.0.0
 pytest-benchmark==4.0.0
+black==23.3.0
+isort==5.12.0
 
 # Utilities 
 python-dateutil==2.8.2
@@ -16,11 +18,16 @@ requests_cache==1.0.1
 requests_ratelimiter==0.4.0
 pyrate_limiter==2.10.0
 pandas==2.0.0
+tabulate==0.9.0
 
 # documentation
 mkdocs==1.4.2
 mkdocs-material==9.1.6
 mkdocs-material-extensions==1.1.1
+mkdocstrings-python==0.9.0
+mkdocs-gen-files==0.5.0
+mkdocs-literate-nav==0.6.0
+mkdocs-section-index==0.3.5
 
 # data sources
 # secedgar==0.5.0

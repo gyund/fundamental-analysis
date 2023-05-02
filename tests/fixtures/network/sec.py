@@ -1,6 +1,9 @@
+import pandas as pd
 import pytest
+
+import ticker.filter as Filter
 from ticker.cli import Cli
-from ticker.data.sec import Sec, ReportDate, TickerReader, DataSetReader, DataSelector
+from ticker.data.sec import DataSelector, ReportDate, Sec
 
 
 @pytest.fixture
@@ -10,10 +13,22 @@ def sec_instance() -> Sec:
 
 
 @pytest.fixture
-def sec_dataselector_2023q1(sec_instance) -> DataSelector:
-    tickers = sec_instance.download_manager.getTickers()
-    data = sec_instance.download_manager.getData(
-        ReportDate(year=2023, quarter=1))
-    df = data.processZip()
-    assert df.empty == False
-    return DataSelector(df, tickers)
+def filter_aapl() -> Filter.Selectors:
+    return Filter.Selectors(
+        ticker_filter={"aapl"},
+        sec_filter=Filter.SecFilter(
+            tags=["EntityCommonStockSharesOutstanding"],
+            years=0,  # Just want the current
+            last_report=ReportDate(year=2023, quarter=1),
+            only_annual=False,
+        ),  # We want the 10-Q
+    )
+
+
+@pytest.fixture
+def sec_dataselector_2023q1(
+    sec_instance: Sec, filter_aapl: Filter.Selectors
+) -> DataSelector:
+    return sec_instance.getData(
+        tickers=filter_aapl.ticker_filter, filter=filter_aapl.sec_filter
+    )
