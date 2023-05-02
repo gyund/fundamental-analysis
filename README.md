@@ -6,18 +6,14 @@
     <img alt="Development Status" src="https://img.shields.io/badge/status-early%20development-red">
 </p>
 
-# Ticker (smart stock analysis)
+# Ticker - Stock Analysis Framework
 
-The goal of this project is to generate data that is consumable in both human readable format as well as JSON to better analyze and make sense of the intrinsic value of publicly traded companies.
+The goal of this project is aggregate a variety of ways to consume information about a particular equity traded on the US stock market and provide a modular mechanism to process it. Core tenants of this project include:
 
-The tool seeks to provide extensible options for consuming data from different data sources. There are different methods for gathering data:
-
-- SEC (personal/commercial)
-- Site Scraping (only personal)
-
-Generally speaking, scraping sites is only for personal use and to vet the APIs. The tool will provide warnings when using options that may have additional restrictions to their use and will require a `--force` option to ensure that you understand the rules surrounding their use.
-
-Additionally, the tools will utilize file based caching to limit interaction with expensive networking resources. Since fundamental analysis generally requires a long term view of companies with a proven track record, you generally will be downloading an initial history for a given equity and updating quarterly or annually based on new information.
+- **Heavy data caching** - don't download static data more than once
+- **Efficient use of storage** - leave data compressed while not in use
+- **Batch Processing** - We can't store all information in memory, so break problems up
+- **Speed** - Find and avoid bottlenecks of big data processing
 
 ## Requirements
 
@@ -34,45 +30,12 @@ pip install -r requirements.txt
 python -m ticker analyze --tickers aapl,msft
 ```
 
-If you wish to use your own analysis plugin, you simply create your own module that implements this interface:
-
-```python
-from ticker.cli import Options, ReportOptions
-from ticker.data.sec import DataSelector as SecDataSelector
-from ticker.filter import Selectors,SecFilter
-
-def analyze(options: Options) -> None:
-    print("This is where we would start to process information, but we're not right now")
-
-def report(options: ReportOptions) -> None: 
-    print("This is where we would report our findings, but we're not right now")
-```
-
-Then call the tool in the following manner:
-
-```sh
-# Not yet supported 
-python -m ticker analyze --tickers aapl,msft --analysis_plugin 'mypkg.analysis'
-```
-
 More information can be found in our [documentation](https://gyund.github.io/fundamental-analysis/)
-
-### Testing
-
-Run tests by running the following:
-
-```sh
-pytest
-```
-
-If you wish to run tests using real network resources, such as downloading real reports and processing them, run the following:
-
-```sh
-pytest --run-webtest
-```
-
-Note that all data sets will be cached in the directory `${cwd}/.ticker-cache/` for both real and test runs. Expiry for quarterly reports are cached for 5 years and ticker mappings for `CIK -> Ticker` conversion are cached on a yearly basis. You generally won't be researching companies with less than a year's worth of reports though this could cause recently listed companies to lack `CIK -> Ticker` conversions for up to two years from poor timing. Just delete `${cwd}/.ticker-cache/tickers.sqlite` to get the latest.
 
 ## Disclaimer
 
-This projects seeks to use publicly available information about stocks and securities to help perform long term risk analysis. Results provided from this project are for academic use only and are not considered advice or recommendations. Usage of any data is at your own risk.
+This project seeks to use publicly available information to perform security analysis and
+help perform long term risk analysis. Results provided from this project are generally for 
+academic use only and are not considered advice or recommendations. This project makes no
+performance claims or guarantees. Please read the [license](LICENSE) 
+for this project. Usage of any data is at your own risk.
