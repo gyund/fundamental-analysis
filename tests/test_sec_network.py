@@ -23,12 +23,7 @@ from ticker.data.sec import TickerReader
 
 logger = logging.getLogger(__name__)
 
-if os.getenv("TICKER_TEST_NETWORK") is None:
-    pytest.skip(
-        reason="env variable TICKER_TEST_NETWORK not set", allow_module_level=True
-    )
-
-
+@pytest.mark.webtest
 class TestDownloadManager:
     def test_getTickers(self, sec_instance: Sec):
         tickers = sec_instance.download_manager.getTickers()
@@ -49,7 +44,7 @@ class TestDownloadManager:
         # aapl =  df[df.adsh == '0000320193-23-000005']
         # assert aapl.empty == False
 
-
+@pytest.mark.webtest
 def test_update(sec_instance: Sec, filter_aapl: Filter.Selectors):
     # pytest.skip(
     #     "skip until we can resolve performance issues with large data sets")
@@ -71,7 +66,7 @@ def test_update(sec_instance: Sec, filter_aapl: Filter.Selectors):
     assert eo_series[0] == 15821946000
     assert True == len(data_selector.data) == 1
 
-
+@pytest.mark.webtest
 def test_multi_stock_request_over_1year(sec_instance: SecDataSource):
     # Create the filter we'll use to scrape the results
     sec_filter = SecFilter(

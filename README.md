@@ -68,7 +68,7 @@ pytest
 If you wish to run tests using real network resources, such as downloading real reports and processing them, run the following:
 
 ```sh
-TICKER_TEST_NETWORK=1 pytest
+pytest --run-webtest
 ```
 
 Note that all data sets will be cached in the directory `${cwd}/.ticker-cache/` for both real and test runs. Expiry for quarterly reports are cached for 5 years and ticker mappings for `CIK -> Ticker` conversion are cached on a yearly basis. You generally won't be researching companies with less than a year's worth of reports though this could cause recently listed companies to lack `CIK -> Ticker` conversions for up to two years from poor timing. Just delete `${cwd}/.ticker-cache/tickers.sqlite` to get the latest.

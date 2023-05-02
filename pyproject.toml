@@ -7,6 +7,11 @@ testpaths = [
     "tests",
 ]
 
+markers =[
+    "webtest: mark a test as a webtest. These kinds of tests can trigger downloads or other network interactions.",
+    "slow: mark test as slow."
+    ]
+
 [tool.ruff]
 
 select = [
