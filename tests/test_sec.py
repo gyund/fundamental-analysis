@@ -47,6 +47,11 @@ def sec_fake_report(filter_aapl: Filter.Selectors) -> DataSelector:
     return DataSelector(num_df, ticker_reader)
 
 
+def test_Sec_init():
+    with pytest.raises(ValueError, match="storage_path is required"):
+        Sec("")
+
+
 def test_benchmark_DataSetReader_processSubText(
     benchmark, filter_aapl: Filter.Selectors
 ):

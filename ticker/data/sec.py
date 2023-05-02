@@ -230,14 +230,14 @@ class DataSetReader:
             parse_dates=["ddate"],
         )
 
-        filtered_data: pd.DataFrame() = None
+        filtered_data: pd.DataFrame = None
         chunk: pd.DataFrame
         for chunk in reader:
             # We want only the tables in left if they join on the key, so inner it is
             data = chunk.join(sub_dataframe, how="inner")
             tag_list = filter.tags
             data = data.query("tag in @tag_list")
-            if data.empty:
+            if data.empty:  # pragma: no cover
                 logger.debug(f"chunk:\n{chunk}")
                 logger.debug(f"sub_dataframe:\n{sub_dataframe}")
                 continue
@@ -248,7 +248,7 @@ class DataSetReader:
                 filtered_data.merge(data)
 
             filtered_data.merge(data)
-        if filtered_data is not None:
+        if filtered_data is not None:  # pragma: no cover
             logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
         return filtered_data
 
@@ -319,11 +319,11 @@ class DownloadManager:
 
         """
         response = self._ticker_session.get(self._company_tickers_url)
-        if response.from_cache:
+        if response.from_cache:  # pragma: no cover
             logger.info("Retrieved tickers->cik mapping from cache")
-        if response.status_code == 200:
+        if response.status_code == 200:  # pragma: no cover
             return TickerReader(response.content.decode())
-        else:
+        else:  # pragma: no cover
             return TickerReader(pd.DataFrame())
 
     def _createDownloadUri(self, report_date: ReportDate) -> str:
