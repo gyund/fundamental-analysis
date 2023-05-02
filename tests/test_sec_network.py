@@ -81,4 +81,9 @@ def test_multi_stock_request_over_1year(sec_instance: SecDataSource):
     tickers = ["aapl", "msft", "goog", "tmo"]
     data_selector = sec_instance.getData(tickers=tickers, filter=sec_filter)
     logger.debug(data_selector)
-    # TODO: assert something
+    # Get series for data and make sure they're all yearly-focus(YF)/annual reports
+    yearly_focus_periods = "FY"
+    quarterly_focus_periods = ("Q1", "Q2", "Q3", "Q4")
+    assert False == data_selector.data.query("fp in @yearly_focus_periods").empty
+    qfp_results = data_selector.data.query("fp in @quarterly_focus_periods")
+    assert True == qfp_results.empty
