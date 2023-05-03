@@ -1,3 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "stocktracer"
+version = "0.1.0"
+authors = [
+  { name="Gary Yund", email="gary.yund@gmail.com" },
+]
+description = "Tools for aggregating efficient ways to consume and process publically traded equities on the US stock market. Includes caching SEC data dump processing."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+keywords = [ "sec-tools", "fundamental analysis", "stocks" ]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Intended Audience :: Science/Research",
+    "Development Status :: 2 - Pre-Alpha",
+]
+
+[project.urls]
+"Homepage" = "https://gyund.github.io/fundamental-analysis/"
+"Bug Tracker" = "https://github.com/gyund/fundamental-analysis/issues"
+
+# [project.scripts]
+# ticker = "ticker:main_cli"
+
 [tool.pytest.ini_options]
 # log_cli = true
 log_cli_level = "INFO"
