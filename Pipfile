@@ -28,6 +28,7 @@ mkdocstrings-python = "*"
 mkdocs-gen-files = "*"
 mkdocs-literate-nav = "*"
 mkdocs-section-index = "*"
+build = "*"
 
 [requires]
 python_version = "3.10"
