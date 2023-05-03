@@ -1,7 +1,7 @@
 {
     "parser": "google",
     "fail_on_missing_docstring": true,
-    "include_paths": [ "ticker/**/*.py"],
+    "include_paths": [ "src/ticker/**/*.py"],
     "exclude_methods": ["__*", "_*"],
     "exclude_functions": ["__*", "_*"]
 }
