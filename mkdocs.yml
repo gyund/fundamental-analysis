@@ -13,11 +13,12 @@ theme:
     - navigation.instant
     - navigation.tracking
     - navigation.sections
+    - navigation.footer
     # - navigation.indexes
     - toc.follow
     - toc.integrate
     # - navigation.expand
-    # - navigation.tabs
+    - navigation.tabs
     - navigation.top
     # - header.autohide
 repo_url: https://github.com/gyund/fundamental-analysis
