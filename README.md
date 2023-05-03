@@ -22,12 +22,17 @@ The goal of this project is aggregate a variety of ways to consume information a
 ## Getting Started
 
 ```sh
-python3 -m venv venv
-. venv/bin/activate
-pip install -r requirements.txt
+pip install --user pipenv
+pipenv install --dev
+
+# To activate this project's virtualenv, run pipenv shell.
+# Alternatively, run a command inside the virtualenv with pipenv run.
 
 # Perform analysis (not supported yet)
-python -m ticker analyze --tickers aapl,msft
+pipenv run python src/ticker/cli.py analyze --tickers aapl,msft
+
+# Run Unit Tests
+pipenv run pytest
 ```
 
 More information can be found in our [documentation](https://gyund.github.io/fundamental-analysis/)
