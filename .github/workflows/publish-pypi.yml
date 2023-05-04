@@ -10,9 +10,9 @@ on:
 concurrency:
     group: ${{ github.ref }}
     cancel-in-progress: true
-    
+
 jobs:
-  deploy:
+  pypi:
     runs-on: ubuntu-latest
     environment: ${{ inputs.ENVIRONMENT }}
         # url: https://test-pypi.org/p/<your-pypi-project-name>
