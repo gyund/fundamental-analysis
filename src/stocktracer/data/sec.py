@@ -142,10 +142,7 @@ class Filter:
 
         Companies file quarterly reports. The annual report replaces the quarterly
         report depending on when that is reported. Typically Q4 is replaced with FY
-        for the annual reports. For example:
-
-        >>> getFocusPeriod()
-        ['FY']
+        for the annual reports.
 
         Returns:
             list[str]: list of focus periods to use for the filter

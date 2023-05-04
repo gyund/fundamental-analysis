@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 def trendline(data: pd.Series, order: int = 1) -> float:
     """Calculate the trend of a series
 
-    >>> trendline((1,2,3))
-    1
+    >>> trendline(pd.Series((1,2,3)))
+    1.0000000000000004
 
     Args:
         data (pd.Series): _description_
