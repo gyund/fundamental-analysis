@@ -6,6 +6,7 @@
 version: 2
 updates:
   - package-ecosystem: "pip" # See documentation for possible values
+    versioning-strategy: lockfile-only
     open-pull-requests-limit: 5
     directory: "/" # Location of package manifests
     schedule:
