@@ -19,6 +19,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       COVERALLS_PARALLEL: true
+      PYTHONPATH: src
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 1
@@ -66,15 +67,15 @@ jobs:
       #   if: ${{ success() }}
       - name: Lint - Ruff 
         run: |
-          ruff . 
+          ruff src 
         if: ${{ always() }}
       - name: Lint - Black
         run: |
-          black --check ticker/ tests/
+          black --check src
         if: ${{ always() }}
       - name: Lint - isort
         run: |
-          isort --check ticker/ tests/
+          isort --check src
         if: ${{ always() }}
       # - name: Upload pytest test results
       #   uses: actions/upload-artifact@v3
