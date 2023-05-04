@@ -29,7 +29,7 @@ pipenv install --dev
 # Alternatively, run a command inside the virtualenv with pipenv run.
 
 # Perform analysis (not supported yet)
-pipenv run python src/ticker/cli.py analyze --tickers aapl,msft
+pipenv run python src/stocktracer/cli.py analyze --tickers aapl,msft
 
 # Run Unit Tests
 pipenv run pytest

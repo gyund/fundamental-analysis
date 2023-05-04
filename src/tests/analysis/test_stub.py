@@ -19,6 +19,8 @@ class TestCli:
 
     def test_invalid(self):
         try:
-            self.cli.export(tickers="invalid", analysis_plugin="stocktracer.analysis.stub")
+            self.cli.export(
+                tickers="invalid", analysis_plugin="stocktracer.analysis.stub"
+            )
         except ZeroDivisionError as exc:
             pytest.fail(exc, pytrace=True)

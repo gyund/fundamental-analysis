@@ -7,6 +7,7 @@ from stocktracer.cli import Cli, Options, ReportOptions
 
 logger = logging.getLogger(__name__)
 
+
 @pytest.mark.webtest
 class TestCli:
     cli: Cli = Cli()
