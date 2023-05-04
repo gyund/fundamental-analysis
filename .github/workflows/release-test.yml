@@ -12,7 +12,7 @@ name: Test - Upload Python Package
 on:
   push:
     branches:
-      - 16-publish-package
+      - release-*
 
 jobs:
   deploy:

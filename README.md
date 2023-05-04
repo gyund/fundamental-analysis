@@ -6,7 +6,9 @@
     <img alt="PyPI - Status" src="https://img.shields.io/pypi/status/stocktracer?">
 </p>
 
-# Ticker - Stock Analysis Framework
+# StockTracer
+
+**Stock Analysis Framework**
 
 The goal of this project is aggregate a variety of ways to consume information about a particular equity traded on the US stock market and provide a modular mechanism to process it. Core tenants of this project include:
 
@@ -20,6 +22,21 @@ The goal of this project is aggregate a variety of ways to consume information a
 - `python 3.10+`
 
 ## Getting Started
+
+### Users
+
+```sh
+pip install stocktracer
+
+# Perform analysis (not supported yet)
+stocktracer analyze --tickers aapl,msft
+
+# Help
+stocktracer
+
+```
+
+### Developers
 
 Make sure you have `pipenv` installed through a package manager or through pip. You may also use the generated `requirements.txt` but note that these are generated using `pipenv` when we make changes to to dependencies.
 
