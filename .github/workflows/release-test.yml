@@ -18,6 +18,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: publish-pypi.yml
+      - uses: ./.github/workflows/publish-pypi.yml
         with:
             ENVIRONMENT: release-test
