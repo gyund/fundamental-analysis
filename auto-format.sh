@@ -6,7 +6,7 @@ pushd $dir > /dev/null
 pipenv run ruff check --fix .
 pipenv run black src/
 pipenv run isort src/
-pipenv run pydoctest --config pydocktest.json
+PYTHONPATH=src pipenv run pydoctest --config pydocktest.json
 
 # Update requirements
 pipenv requirements > requirements.txt
