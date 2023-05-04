@@ -1,0 +1,35 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+requests-cache = "*"
+pandas = "*"
+tabulate = "*"
+python-dateutil = "*"
+fire = "*"
+
+[dev-packages]
+pytest = "*"
+pydoctest = "*"
+ruff = "*"
+mock = "*"
+coveralls = "*"
+pytest-cov = "*"
+pytest-benchmark = "*"
+black = "*"
+isort = "*"
+mkdocs = "*"
+mkdocs-material = "*"
+mkdocs-material-extensions = "*"
+mkdocstrings-python = "*"
+mkdocs-gen-files = "*"
+mkdocs-literate-nav = "*"
+mkdocs-section-index = "*"
+build = "*"
+coverage = "*"
+
+[requires]
+python_version = "3.10"

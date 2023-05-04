@@ -1,9 +1,9 @@
 import pandas as pd
 import pytest
 
-import ticker.filter as Filter
-from ticker.cli import Cli
-from ticker.data.sec import DataSelector, ReportDate, Sec
+import stocktracer.filter as Filter
+from stocktracer.cli import Cli
+from stocktracer.data.sec import DataSelector, ReportDate, Sec
 
 
 @pytest.fixture

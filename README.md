@@ -21,13 +21,19 @@ The goal of this project is aggregate a variety of ways to consume information a
 
 ## Getting Started
 
+Make sure you have `pipenv` installed through a package manager or through pip. You may also use the generated `requirements.txt` but note that these are generated using `pipenv` when we make changes to to dependencies.
+
 ```sh
-python3 -m venv venv
-. venv/bin/activate
-pip install -r requirements.txt
+pipenv install --dev
 
 # Perform analysis (not supported yet)
-python -m ticker analyze --tickers aapl,msft
+PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft
+
+# Help
+PYTHONPATH=src pipenv run python -m stocktracer
+
+# Run Unit Tests
+pipenv run pytest
 ```
 
 More information can be found in our [documentation](https://gyund.github.io/fundamental-analysis/)

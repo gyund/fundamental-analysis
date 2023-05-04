@@ -4,8 +4,7 @@
 
 ## Install
 
-!!! warning
-    This is the proposed design and approach for how the tool will function. Implementation is currently under development and subject to change.
+Make sure you have `pipenv` installed through a package manager or through pip.
 
 === "git"
 
@@ -14,13 +13,16 @@
     git clone https://github.com/gyund/fundamental-analysis.git
     cd fundamental-analysis.git
 
-    # Setup python virtual environment
-    python3 -m venv venv
-    . venv/bin/activate
-    pip install -r requirements.txt
+    pipenv install --dev
 
-    # Perform analysis / Run tool
-    python -m ticker analyze --tickers aapl,msft
+    # Perform analysis (not supported yet)
+    PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft
+
+    # Help
+    PYTHONPATH=src pipenv run python -m stocktracer
+
+    # Run Unit Tests
+    pipenv run pytest
     ```
 
 ## Generating a Basic Report

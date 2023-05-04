@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 
-from ticker.cli import Options, ReportOptions
+from stocktracer.cli import Options, ReportOptions
 
 logger = logging.getLogger(__name__)
 

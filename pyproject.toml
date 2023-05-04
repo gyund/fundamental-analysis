@@ -1,11 +1,55 @@
+[build-system]
+requires = ["hatchling", "hatch-requirements-txt"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+only-include = ["src/stocktracer"]
+sources = ["src"]
+
+[project]
+name = "stocktracer"
+version = "0.1.3"
+authors = [
+  { name="Gary Yund", email="gary.yund@gmail.com" },
+]
+description = "Tools for aggregating efficient ways to consume and process publically traded equities on the US stock market. Includes caching SEC data dump processing."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+keywords = [ "sec-tools", "fundamental analysis", "stocks" ]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Intended Audience :: Science/Research",
+    "Development Status :: 2 - Pre-Alpha",
+]
+
+dynamic = ["dependencies"]
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
+
+[project.urls]
+"Homepage" = "https://gyund.github.io/fundamental-analysis/"
+"Bug Tracker" = "https://github.com/gyund/fundamental-analysis/issues"
+
+[project.scripts]
+stocktracer = "stocktracer.__main__:main_cli"
+
 [tool.pytest.ini_options]
 # log_cli = true
 log_cli_level = "INFO"
 log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 testpaths = [
-    "tests",
+    "src/",
 ]
+# addopts = [
+#     "--import-mode=importlib",
+# ]
 
 markers =[
     "webtest: mark a test as a webtest. These kinds of tests can trigger downloads or other network interactions.",
@@ -37,7 +81,7 @@ profile = "black"
 
 [tool.coverage.run]
 branch = true
-source = ["ticker/"]
+source = ["src/stocktracer/"]
 
 [tool.coverage.report]
 exclude_lines = [
