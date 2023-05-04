@@ -3,7 +3,7 @@
     <img alt="License" src="https://img.shields.io/badge/python-3.10%2B-blue">
     <a href='https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml'><img alt="Test Status" src="https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml/badge.svg?service=github"></a>
     <a href='https://coveralls.io/github/gyund/fundamental-analysis?branch=main'><img src='https://coveralls.io/repos/github/gyund/fundamental-analysis/badge.svg?branch=main&service=github' alt='Coverage Status' /></a>
-    <img alt="Development Status" src="https://img.shields.io/badge/status-early%20development-red">
+    <img alt="PyPI - Status" src="https://img.shields.io/pypi/status/stocktracer?">
 </p>
 
 # Ticker - Stock Analysis Framework
