@@ -8,7 +8,7 @@ sources = ["src"]
 
 [project]
 name = "stocktracer"
-version = "0.1.2"
+version = "0.1.3"
 authors = [
   { name="Gary Yund", email="gary.yund@gmail.com" },
 ]

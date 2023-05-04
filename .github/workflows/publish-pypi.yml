@@ -30,7 +30,7 @@ jobs:
           pip install build
       - name: Build package
         # run: python -m build
-        run: python3 -m build --sdist .
+        run: python3 -m build
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@a56da0b891b3dc519c7ee3284aff1fad93cc8598
         with:
