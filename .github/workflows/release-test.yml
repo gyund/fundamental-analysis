@@ -7,11 +7,12 @@
 # To get a newer version, you will need to update the SHA.
 # You can also reference a tag or branch, but the action may change without warning.
 
-name: Upload Python Package
+name: Test - Upload Python Package
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - 16-publish-package
 
 jobs:
   deploy:
@@ -19,4 +20,4 @@ jobs:
     steps:
       - uses: publish-pypi.yml
         with:
-            ENVIRONMENT: release
+            ENVIRONMENT: release-test

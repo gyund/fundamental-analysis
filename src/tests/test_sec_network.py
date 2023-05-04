@@ -7,19 +7,19 @@ from pathlib import Path
 import mock
 import pytest
 
-import ticker.filter as Filter
+import stocktracer.filter as Filter
 from tests.fixtures.network.sec import (
     filter_aapl,
     sec_dataselector_2023q1,
     sec_instance,
 )
-from ticker.cli import Cli
-from ticker.data.sec import DataSelector, DataSetReader
-from ticker.data.sec import Filter as SecFilter
-from ticker.data.sec import ReportDate
-from ticker.data.sec import Sec
-from ticker.data.sec import Sec as SecDataSource
-from ticker.data.sec import TickerReader
+from stocktracer.cli import Cli
+from stocktracer.data.sec import DataSelector, DataSetReader
+from stocktracer.data.sec import Filter as SecFilter
+from stocktracer.data.sec import ReportDate
+from stocktracer.data.sec import Sec
+from stocktracer.data.sec import Sec as SecDataSource
+from stocktracer.data.sec import TickerReader
 
 logger = logging.getLogger(__name__)
 

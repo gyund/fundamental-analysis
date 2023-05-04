@@ -1,4 +1,4 @@
-from ticker.data.sec import Filter as SecFilter
+from stocktracer.data.sec import Filter as SecFilter
 
 
 class Selectors:

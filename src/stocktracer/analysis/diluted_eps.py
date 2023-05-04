@@ -3,11 +3,11 @@ import logging
 import numpy as np
 import pandas as pd
 
-from ticker.cli import Options, ReportOptions
-from ticker.data.sec import DataSelector as SecDataSelector
-from ticker.data.sec import Filter as SecFilter
-from ticker.data.sec import ReportDate
-from ticker.data.sec import Sec as SecDataSource
+from stocktracer.cli import Options, ReportOptions
+from stocktracer.data.sec import DataSelector as SecDataSelector
+from stocktracer.data.sec import Filter as SecFilter
+from stocktracer.data.sec import ReportDate
+from stocktracer.data.sec import Sec as SecDataSource
 
 logger = logging.getLogger(__name__)
 
