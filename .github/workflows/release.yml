@@ -15,6 +15,8 @@ on:
 
 jobs:
   deploy:
+    permissions:
+        id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     uses: ./.github/workflows/publish-pypi.yml
     with:
         ENVIRONMENT: release
