@@ -35,8 +35,6 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pipenv
-          pipenv requirements --dev > requirements.txt
           pip install -r requirements.txt
       - name: Cache Network Requests
         uses: actions/cache@v3
