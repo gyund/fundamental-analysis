@@ -1,4 +1,4 @@
-site_name: Ticker - Fundamental Analysis
+site_name: StockTracer
 theme:
   name: material
   palette:
