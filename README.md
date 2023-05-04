@@ -21,7 +21,7 @@ The goal of this project is aggregate a variety of ways to consume information a
 
 ## Getting Started
 
-Make sure you have `pipenv` installed through a package manager or through pip.
+Make sure you have `pipenv` installed through a package manager or through pip. You may also use the generated `requirements.txt` but note that these are generated using `pipenv` when we make changes to to dependencies.
 
 ```sh
 pipenv install --dev
