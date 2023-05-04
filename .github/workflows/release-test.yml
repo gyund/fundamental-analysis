@@ -16,9 +16,6 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/workflows/publish-pypi.yml
-        with:
-            ENVIRONMENT: release-test
+    uses: ./.github/workflows/publish-pypi.yml
+    with:
+        ENVIRONMENT: release-test
