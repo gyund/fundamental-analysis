@@ -21,15 +21,16 @@ The goal of this project is aggregate a variety of ways to consume information a
 
 ## Getting Started
 
+Make sure you have `pipenv` installed through a package manager or through pip.
+
 ```sh
-pip install --user pipenv
 pipenv install --dev
 
-# To activate this project's virtualenv, run pipenv shell.
-# Alternatively, run a command inside the virtualenv with pipenv run.
-
 # Perform analysis (not supported yet)
-pipenv run python src/stocktracer/cli.py analyze --tickers aapl,msft
+PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft
+
+# Help
+PYTHONPATH=src pipenv run python -m stocktracer
 
 # Run Unit Tests
 pipenv run pytest
