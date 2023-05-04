@@ -10,4 +10,5 @@ pipenv run pydoctest --config pydocktest.json
 
 # Update requirements
 pipenv requirements > requirements.txt
+pipenv requirements --dev > requirements-dev.txt
 popd > /dev/null
