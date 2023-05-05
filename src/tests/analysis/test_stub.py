@@ -20,9 +20,7 @@ class TestCli:
         self.cli.export(tickers=["aapl"], analysis_plugin="stocktracer.analysis.stub")
 
     def test_invalid(self):
-        try:
+        with pytest.raises(LookupError, match="No analysis results available!"):
             self.cli.export(
                 tickers="invalid", analysis_plugin="stocktracer.analysis.stub"
             )
-        except ZeroDivisionError as exc:
-            pytest.fail(exc, pytrace=True)

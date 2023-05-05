@@ -16,9 +16,9 @@ class Options:
         self.cache_path = cache_path
 
 
-class ReportOptions(Options):
-    def __init__(self, file: Path = None, json: Path = None, **kwargs):
-        super().__init__(**kwargs)
+class ReportOptions:
+    def __init__(self, results, file: Path = None, json: Path = None, **kwargs):
+        self.results = results
         self.file = file
         self.json = json
 
@@ -52,9 +52,7 @@ class Cli:
             refresh (bool): Whether to refresh the calculation or use the results from a prior one
             analysis_plugin (str): module to load for analysis
         """
-        cache = Cache(directory=cache_path / "results")
-        results_key = Cli._get_results_key(frozenset(tickers), analysis_plugin)
-        results = cache.get(key=results_key, default=None)
+        cache, results_key, results = self._getCachedResults(tickers, cache_path, analysis_plugin)
 
         if (
             refresh
@@ -74,6 +72,12 @@ class Cli:
             print(results.to_markdown())
         else:
             print(results)
+
+    def _getCachedResults(self, tickers, cache_path, analysis_plugin):
+        cache = Cache(directory=cache_path / "results")
+        results_key = Cli._get_results_key(frozenset(tickers), analysis_plugin)
+        results = cache.get(key=results_key, default=None)
+        return cache,results_key,results
 
     def _get_results_key(tickers: frozenset, analysis_module: str) -> str:
         """
@@ -102,9 +106,15 @@ class Cli:
             json (Path): directory to store the reports in individual json files. Defaults to None.
             analysis_plugin (str): module to load for analysis
         """
+        _, _, results = self._getCachedResults(tickers, cache_path, analysis_plugin)
+
+        if results is None:
+            raise LookupError("No analysis results available!")
+        
+
         # Call analysis plugin
         analysis_module = importlib.import_module(analysis_plugin)
         options = ReportOptions(
-            tickers=tickers, cache_path=cache_path, file=file, json=json
+            results=results, file=file, json=json
         )
         analysis_module.report(options)
