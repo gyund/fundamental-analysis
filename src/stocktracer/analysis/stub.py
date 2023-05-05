@@ -7,17 +7,21 @@ from stocktracer.cli import Options, ReportOptions
 logger = logging.getLogger(__name__)
 
 
-def analyze(options: Options) -> None:
+def analyze(options: Options) -> pd.DataFrame:
     """Analyze the report
 
     As a stub, this does nothing
 
     Args:
         options (Options): options to use for processing
+
+    Returns:
+        pd.DataFrame: Containing the results of the report
     """
     print(
         "This is where we would start to process information, but we're not right now"
     )
+    return pd.DataFrame()
 
 
 def report(options: ReportOptions) -> None:

@@ -30,7 +30,7 @@ def trendline(data: pd.Series, order: int = 1) -> float:
     return float(slope)
 
 
-def analyze(options: Options) -> None:
+def analyze(options: Options) -> pd.DataFrame:
     """Perform an analysis on the earnings per share over time
 
     Args:
@@ -62,6 +62,7 @@ def analyze(options: Options) -> None:
             logger.warning(f"{t}: {ex}")
 
     print(f"Trends:\n{results}")
+    return results
 
 
 def report(options: ReportOptions) -> None:

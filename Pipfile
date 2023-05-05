@@ -10,6 +10,7 @@ pandas = "*"
 tabulate = "*"
 python-dateutil = "*"
 fire = "*"
+diskcache = "*"
 
 [dev-packages]
 pytest = "*"

@@ -12,7 +12,9 @@ class TestCli:
     cli: Cli = Cli()
 
     def test_analyze(self):
-        self.cli.analyze(tickers=["aapl"], analysis_plugin="stocktracer.analysis.stub")
+        self.cli.analyze(
+            refresh=True, tickers=["aapl"], analysis_plugin="stocktracer.analysis.stub"
+        )
 
     def test_export(self):
         self.cli.export(tickers=["aapl"], analysis_plugin="stocktracer.analysis.stub")
