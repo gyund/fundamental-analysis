@@ -18,7 +18,7 @@ class ReportDate:
     def __init__(
         self,
         year: int = date.today().year,
-        quarter: int = math.floor((date.today().month - 1) / 3) + 1,
+        quarter: int = ((date.today().month - 1) // 3) + 1,
     ):
         if year > date.today().year:
             raise ValueError(
