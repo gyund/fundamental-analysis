@@ -49,18 +49,18 @@ fake_sub_txt_sample = """adsh	cik	name	sic	countryba	stprba	cityba	zipba	bas1	ba
 """
 
 fake_data_txt_sample = """adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
-0000320193-23-000005	EntityCommonStockSharesOutstanding	dei/2022		20230131	0	shares	6000.0000
-0000320193-23-000004	EntityCommonStockSharesOutstanding	dei/2022		20230131	0	shares	5000.0000
-0000320193-23-000003	EntityCommonStockSharesOutstanding	dei/2022		20230131	0	shares	4000.0000
-0000320193-23-000002	EntityCommonStockSharesOutstanding	dei/2022		20230131	0	shares	3000.0000
-0000320193-23-000001	EntityCommonStockSharesOutstanding	dei/2022		20230131	0	shares	2000.0000
-0000320193-23-000000	EntityCommonStockSharesOutstanding	dei/2022		20230131	0	shares	1000.0000
-0000320193-23-000005	FakeAttributeTag	dei/2022		20230131	0	shares	600.0000
-0000320193-23-000004	FakeAttributeTag	dei/2022		20230131	0	shares	500.0000
-0000320193-23-000003	FakeAttributeTag	dei/2022		20230131	0	shares	400.0000
-0000320193-23-000002	FakeAttributeTag	dei/2022		20230131	0	shares	300.0000
-0000320193-23-000001	FakeAttributeTag	dei/2022		20230131	0	shares	200.0000
-0000320193-23-000000	FakeAttributeTag	dei/2022		20230131	0	shares	100.0000
+0000320193-23-000006	EntityCommonStockSharesOutstanding	dei/2022		20230131	0	shares	6000.0000
+0000320193-23-000005	EntityCommonStockSharesOutstanding	dei/2022		20230131	0	shares	5000.0000
+0000320193-23-000004	EntityCommonStockSharesOutstanding	dei/2022		20230131	0	shares	4000.0000
+0000320193-23-000003	EntityCommonStockSharesOutstanding	dei/2022		20230131	0	shares	3000.0000
+0000320193-23-000002	EntityCommonStockSharesOutstanding	dei/2022		20230131	0	shares	2000.0000
+0000320193-23-000001	EntityCommonStockSharesOutstanding	dei/2022		20230131	0	shares	1000.0000
+0000320193-23-000006	FakeAttributeTag	dei/2022		20230131	0	shares	600.0000
+0000320193-23-000005	FakeAttributeTag	dei/2022		20230131	0	shares	500.0000
+0000320193-23-000004	FakeAttributeTag	dei/2022		20230131	0	shares	400.0000
+0000320193-23-000003	FakeAttributeTag	dei/2022		20230131	0	shares	300.0000
+0000320193-23-000002	FakeAttributeTag	dei/2022		20230131	0	shares	200.0000
+0000320193-23-000001	FakeAttributeTag	dei/2022		20230131	0	shares	100.0000
 
 """
 
@@ -95,7 +95,7 @@ def sec_manufactured_fake_report(filter_aapl: Filter.Selectors) -> DataSelector:
         sub_dataframe=sub_df,
     )
     ticker_reader = mock.MagicMock()
-    assert not num_df.empty
+    assert num_df is not None
     return DataSelector(num_df, ticker_reader)
 
 def test_Sec_init():
