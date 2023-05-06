@@ -57,7 +57,7 @@ class Analysis(AnalysisInterface):
         for t in self.options.tickers:
             ticker_ds = data_selector.select(ticker=t)
             try:
-                eps_diluted = ticker_ds.EarningsPerShareDiluted
+                eps_diluted = ticker_ds.query("tag == 'EarningsPerShareDiluted'")
                 trend = trendline(data=eps_diluted)
                 results.insert(
                     column={
