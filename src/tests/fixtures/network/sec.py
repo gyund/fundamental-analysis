@@ -9,7 +9,7 @@ from stocktracer.data.sec import DataSelector, ReportDate, Sec
 @pytest.fixture
 def sec_instance() -> Sec:
     # test using the real SEC adapter
-    return Sec(Cli.getDefaultCachePath())
+    return Sec(Cli._getDefaultCachePath())
 
 
 @pytest.fixture
