@@ -53,10 +53,15 @@ class TickerReader:
         Args:
             ticker (str): stock ticker. The case does not matter.
 
+        Raises:
+            LookupError: If ticker is not found
+
         Returns:
             int: cik
         """
         result = self._data[self._data.ticker == ticker.upper()]
+        if result.empty:
+            raise LookupError(f"unable to find ticker: {ticker}")
         return result.cik_str.iloc[0]
 
     def getTicker(self, cik: int) -> str:
@@ -70,6 +75,15 @@ class TickerReader:
         """
         result = self._data[self._data.cik_str == cik]
         return result.ticker.iloc[0]
+    
+    def contains(self, ticker_or_sequence):
+        tickers = set(ticker_or_sequence)
+        try:
+            for t in tickers:
+                self.getCik(t)
+        except LookupError:
+            return False
+        return True
 
 
 period_focus_options = Literal["FY", "Q1", "Q2", "Q3", "Q4"]
@@ -496,6 +510,7 @@ class Sec:
         """
         collector = DataSetCollector(self.download_manager)
         ticker_map = self.download_manager.getTickers()
+        ticker_map.contains(tickers)
         filter.populateCikList(tickers=tickers, ticker_reader=ticker_map)
         filtered_data = collector.getData(filter)
         return DataSelector(data=filtered_data, ticker_reader=ticker_map)

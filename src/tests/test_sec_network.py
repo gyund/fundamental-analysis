@@ -23,6 +23,12 @@ from tests.fixtures.network.sec import (
 
 logger = logging.getLogger(__name__)
 
+@pytest.mark.webtest
+class TestTickerReader:
+    def test_contains(self, sec_instance: Sec):
+        tickers = sec_instance.download_manager.getTickers()
+        assert tickers.contains(("aapl","msft"))
+        assert False == tickers.contains(("aapl","msft","invalid"))
 
 @pytest.mark.webtest
 class TestDownloadManager:
