@@ -33,7 +33,7 @@ class ReportDate:
 
     def __str__(self) -> str:
         return f"{self.year}-q{self.quarter}"
-    
+
     def __repr__(self) -> str:
         return f"ReportDate({self.year},{self.quarter})"
 

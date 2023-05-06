@@ -49,25 +49,12 @@ class Analysis(AnalysisInterface):
         sec = SecDataSource(storage_path=self.options.cache_path)
         data_selector = sec.getData(tickers=self.options.tickers, filter=sec_filter)
 
-        # Show a quick dump of the data
-        logger.info(f"\n{data_selector.data}")
+        # # Show a quick dump of the data
+        # logger.info(f"\n{data_selector.data}")
 
-        # results = list[tuple[str, int]]
-        results = pd.DataFrame(columns=["ticker", "eps_diluted_trend", "units"])
-        for t in self.options.tickers:
-            ticker_ds = data_selector.select(ticker=t)
-            try:
-                eps_diluted = ticker_ds.query("tag == 'EarningsPerShareDiluted'")
-                trend = trendline(data=eps_diluted)
-                results.insert(
-                    column={
-                        "ticker": [t],
-                        "eps_diluted_trend": [trend],
-                        "units": "eps/qtr",
-                    }
-                )
-            except AttributeError as ex:
-                logger.warning(f"{t}: {ex}")
-        results.sort_values(by=["units"])
-        print(f"Trends:\n{results}")
-        return results
+        # # Get only the EPSD Data
+        eps_diluted = data_selector.data.query("tag == 'EarningsPerShareDiluted'")
+        # TODO: Figure this out
+        # return eps_diluted.groupby(["cik"]).apply(lambda x: pd.Series(trendline(x.value),
+        #                                                               index=["trend"]))
+        return eps_diluted.groupby(["cik"]).all()

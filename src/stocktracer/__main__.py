@@ -18,5 +18,6 @@ def main_cli() -> any:
     except Exception as e:
         return e
 
+
 if __name__ == "__main__":
     exit(main_cli())

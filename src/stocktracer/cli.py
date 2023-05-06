@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 from diskcache import Cache
+from pandas.core.groupby.generic import DataFrameGroupBy
 
 from stocktracer.interface import Analysis as AnalysisInterface
 from stocktracer.interface import Options as CliOptions
