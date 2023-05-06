@@ -34,9 +34,9 @@ class Cli:
 
     """Tools for gathering resources, analyzing data, and publishing the results."""
 
-    default_analysis_module = "stocktracer.analysis.stub"
+    _default_analysis_module = "stocktracer.analysis.stub"
 
-    def getDefaultCachePath() -> Path:
+    def _getDefaultCachePath() -> Path:
         """Get the default path for caching data
 
         Returns:
@@ -47,9 +47,9 @@ class Cli:
     def analyze(
         self,
         tickers: list[str],
-        cache_path: Path = getDefaultCachePath(),
+        cache_path: Path = _getDefaultCachePath(),
         refresh: bool = False,
-        analysis_plugin: str = default_analysis_module,
+        analysis_plugin: str = _default_analysis_module,
     ) -> None:
         """Perform stock analysis
 
