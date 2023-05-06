@@ -12,9 +12,12 @@ class TestCli:
     cli: Cli = Cli()
 
     def test_analyze(self):
-        self.cli.analyze(
-            refresh=True, tickers=["aapl"], analysis_plugin="stocktracer.analysis.stub"
-        )
+        with pytest.raises(LookupError, match="No analysis results available!"):
+            self.cli.analyze(
+                refresh=True,
+                tickers=["aapl"],
+                analysis_plugin="stocktracer.analysis.stub",
+            )
 
     def test_invalid(self):
         with pytest.raises(LookupError, match="No analysis results available!"):
