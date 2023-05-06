@@ -34,7 +34,7 @@ class Cli:
 
     """Tools for gathering resources, analyzing data, and publishing the results."""
 
-    default_analysis_module = "ticker.analysis.stub"
+    default_analysis_module = "stocktracer.analysis.stub"
 
     def getDefaultCachePath() -> Path:
         """Get the default path for caching data

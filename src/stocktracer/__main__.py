@@ -13,8 +13,10 @@ def main_cli() -> any:
         any: normal return values from main
     """
     cli = Cli()
-    return fire.Fire(component=cli, name="stocktracer")
-
+    try:
+        return fire.Fire(component=cli, name="stocktracer")
+    except Exception as e:
+        return e
 
 if __name__ == "__main__":
-    main_cli()
+    exit(main_cli())
