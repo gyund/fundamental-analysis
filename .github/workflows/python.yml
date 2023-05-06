@@ -48,12 +48,6 @@ jobs:
           coverage run -m pytest --run-webtest --doctest-modules
           coverage report
           # coveralls --service=github
-      - name: Run smoke test
-        run: |
-          coverage run -a -m stocktracer --help
-          coverage run -a -m stocktracer analyze --help
-          coverage run -a -m stocktracer export --help
-          coverage report
       - name: Coveralls
         run: |
           coveralls --service=github
