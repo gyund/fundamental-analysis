@@ -6,7 +6,7 @@ import fire
 from stocktracer.cli import Cli
 
 
-def main_cli() -> any:
+def main_cli(command=None) -> any:
     """Entrypoint
 
     Returns:
@@ -14,7 +14,7 @@ def main_cli() -> any:
     """
     cli = Cli()
     try:
-        return fire.Fire(component=cli, name="stocktracer")
+        return fire.Fire(component=cli, name="stocktracer", command=command)
     except Exception as e:
         # return e # No stack dump
         raise e  # stack dump
