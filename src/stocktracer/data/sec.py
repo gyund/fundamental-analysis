@@ -280,8 +280,8 @@ class DataSetReader:
         logger.debug("processing sub.txt")
         focus_periods = filter.getFocusPeriod()
         cik_list = filter.getCikList()
-        
-        oldest_fy = filter.last_report.year - filter.years 
+
+        oldest_fy = filter.last_report.year - filter.years
         query_str = f"cik in @cik_list and fp in @focus_periods and fy >= {oldest_fy}"
         logger.debug(f"Query string: {query_str}")
         reader = pd.read_csv(

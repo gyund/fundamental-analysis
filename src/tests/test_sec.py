@@ -35,8 +35,8 @@ data_txt_sample = """adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
 0000723125-23-000022	EntityCommonStockSharesOutstanding	dei/2022		20230331	0	shares	1094394354.0000
 """
 
-# This data we manufacture so that we get the match between sub_txt and data_txt, 
-# but the quarterly date, numbers, etc is different so we can verify the rows 
+# This data we manufacture so that we get the match between sub_txt and data_txt,
+# but the quarterly date, numbers, etc is different so we can verify the rows
 # and column processing
 fake_sub_txt_sample = """adsh	cik	name	sic	countryba	stprba	cityba	zipba	bas1	bas2	baph	countryma	stprma	cityma	zipma	mas1	mas2	countryinc	stprinc	ein	former	changed	afs	wksi	fye	form	period	fy	fp	filed	accepted	prevrpt	detail	instance	nciks	aciks
 0000320193-23-000006	320193	APPLE INC	3571	US	CA	CUPERTINO	95014	ONE APPLE PARK WAY		(408) 996-1010	US	CA	CUPERTINO	95014	ONE APPLE PARK WAY		US	CA	942404110	APPLE INC	20070109	1-LAF	0	0930	10-Q	20221231	2023	Q1	20230203	2023-02-02 18:02:00.0	0	1	aapl-20221231_htm.xml	1
@@ -81,13 +81,15 @@ def sec_fake_report(filter_aapl: Filter.Selectors) -> DataSelector:
     assert not num_df.empty
     return DataSelector(num_df, ticker_reader)
 
+
 @pytest.fixture
 def sec_manufactured_fake_report(filter_aapl: Filter.Selectors) -> DataSelector:
     filter_aapl.sec_filter._cik_list = set()
     filter_aapl.sec_filter._cik_list.add(320193)
-    filter_aapl.sec_filter.tags.append('FakeAttributeTag')
+    filter_aapl.sec_filter.tags.append("FakeAttributeTag")
     sub_df = DataSetReader._processSubText(
-        filepath_or_buffer=io.StringIO(fake_sub_txt_sample), filter=filter_aapl.sec_filter
+        filepath_or_buffer=io.StringIO(fake_sub_txt_sample),
+        filter=filter_aapl.sec_filter,
     )
     num_df = DataSetReader._processNumText(
         filepath_or_buffer=io.StringIO(fake_data_txt_sample),
@@ -97,6 +99,7 @@ def sec_manufactured_fake_report(filter_aapl: Filter.Selectors) -> DataSelector:
     ticker_reader = mock.MagicMock()
     assert num_df is not None
     return DataSelector(num_df, ticker_reader)
+
 
 def test_Sec_init():
     with pytest.raises(ValueError, match="storage_path is required"):
@@ -180,16 +183,21 @@ class TestDataSelector:
         assert df is not None
 
     def test_select_and_pivot(self, sec_manufactured_fake_report: DataSelector):
-        """ Test to figure out how best to orient the table for summarizing data
-        """
+        """Test to figure out how best to orient the table for summarizing data"""
         sec_manufactured_fake_report._getCik = mock.Mock(return_value=320193)
         df = sec_manufactured_fake_report.select(ticker="AAPL")
         df = df[["value"]]
-        tag_group = df.groupby(["cik","tag"])
+        tag_group = df.groupby(["cik", "tag"])
         average = tag_group.mean()
         logger.debug(average)
         # Should only contain the first entry because the filter specifies 0
-        assert False == average.query("cik==320193 and tag=='EntityCommonStockSharesOutstanding' and value==6000").empty
+        assert (
+            False
+            == average.query(
+                "cik==320193 and tag=='EntityCommonStockSharesOutstanding' and value==6000"
+            ).empty
+        )
+
 
 def test_reportDate():
     rd = ReportDate(2023, 1)
