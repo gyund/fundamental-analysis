@@ -31,6 +31,12 @@ class ReportDate:
         self.year = year
         self.quarter = quarter
 
+    def __str__(self) -> str:
+        return f"{self.year}-q{self.quarter}"
+    
+    def __repr__(self) -> str:
+        return f"ReportDate({self.year},{self.quarter})"
+
     def __eq__(self, other: "ReportDate") -> bool:
         """
 
@@ -114,6 +120,19 @@ class Filter:
         self.last_report = last_report
         self.only_annual = only_annual
         self._cik_list: set[int] = None
+
+    def __str__(self) -> str:
+        """
+        >>> print(Filter(["Income","Debt"],5,ReportDate(2023,1)))
+        Filter on 2023-q1 and the previous 5 years
+        Annual Only: True
+        CIK(s): None
+        Tags: Income,Debt
+        """
+        return f"""Filter on {self.last_report} and the previous {self.years} years
+Annual Only: {self.only_annual}
+CIK(s): {','.join([str(i) for i in self._cik_list]) if self._cik_list else 'None'}
+Tags: {','.join(self.tags) if self.tags else 'None'}"""
 
     def getCikList(self) -> set[int]:
         """Retrieves a list of CIK values corresponding to the tickers being looked up
@@ -458,6 +477,7 @@ class DataSetCollector:
         Returns:
             pd.DataFrame: filtered results
         """
+        assert isinstance(filter, Filter)
         df = None
         report_dates = filter.getRequiredReports()
         logger.info(f"Creating Unified Data record for these reports: {report_dates}")
@@ -474,7 +494,8 @@ class DataSetCollector:
             except ImportError as e:
                 # Note, when searching for annual reports, this will generally occur 1/4 times
                 # if we're only searching for one stock's tags
-                logger.warning(f"{r} did not have any matches for the provided filter")
+                logger.debug(f"{r} did not have any matches for the provided filter")
+                logger.debug(f"{filter}")
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
         logger.debug(f"keys: {df.keys()}")
         logger.debug(f"Rows: {len(df)}")

@@ -59,6 +59,11 @@ class Cli:
             refresh (bool): Whether to refresh the calculation or use the results from a prior one
             analysis_plugin (str): module to load for analysis
         """
+        if isinstance(tickers, str):
+            tickers = frozenset([tickers])
+        else:
+            tickers = frozenset(tickers)
+
         analysis_module: AnalysisInterface = get_analysis_instance(analysis_plugin)
         analysis_module.options = CliOptions(tickers=tickers, cache_path=cache_path)
 
@@ -90,8 +95,9 @@ class Cli:
             print(results)
 
     def _getCachedResults(self, tickers, cache_path, analysis_plugin):
+        assert isinstance(tickers, frozenset)
         cache = Cache(directory=cache_path / "results")
-        results_key = Cli._get_results_key(frozenset(tickers), analysis_plugin)
+        results_key = Cli._get_results_key(tickers, analysis_plugin)
         results = cache.get(key=results_key, default=None)
         return cache, results_key, results
 
