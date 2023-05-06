@@ -23,4 +23,3 @@ class TestCli:
             self.cli.analyze(
                 tickers="invalid", analysis_plugin="stocktracer.analysis.diluted_eps"
             )
-

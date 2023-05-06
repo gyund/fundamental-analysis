@@ -104,4 +104,3 @@ class Cli:
         sorted_tickers.sort()
         results_key = "-".join(sorted_tickers)
         return "-".join((analysis_module, results_key))
-

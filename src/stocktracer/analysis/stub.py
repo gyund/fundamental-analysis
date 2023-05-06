@@ -23,5 +23,3 @@ class Analysis(AnalysisInterface):
             "This is where we would start to process information, but we're not right now"
         )
         return pd.DataFrame()
-
-

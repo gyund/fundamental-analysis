@@ -75,7 +75,7 @@ class TickerReader:
         """
         result = self._data[self._data.cik_str == cik]
         return result.ticker.iloc[0]
-    
+
     def contains(self, ticker_or_sequence):
         tickers = set(ticker_or_sequence)
         try:
