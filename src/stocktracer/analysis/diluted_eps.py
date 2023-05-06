@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -31,7 +32,7 @@ def trendline(data: pd.Series, order: int = 1) -> float:
 
 
 class Analysis(AnalysisInterface):
-    def analyze(self) -> pd.DataFrame:
+    def analyze(self) -> Optional[pd.DataFrame]:
         """Perform an analysis on the earnings per share over time
 
         Args:

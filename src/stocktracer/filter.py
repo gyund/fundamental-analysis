@@ -1,6 +1,9 @@
+from beartype import beartype
+
 from stocktracer.data.sec import Filter as SecFilter
 
 
+@beartype
 class Selectors:
     def __init__(
         self, ticker_filter: set[str] | list[str], sec_filter: SecFilter

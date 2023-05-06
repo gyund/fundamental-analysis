@@ -11,6 +11,7 @@ tabulate = "*"
 python-dateutil = "*"
 fire = "*"
 diskcache = "*"
+beartype = "*"
 
 [dev-packages]
 pytest = "*"

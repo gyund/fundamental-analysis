@@ -1,12 +1,13 @@
 import logging
-import math
 from datetime import date, timedelta
 from io import BytesIO
 from pathlib import Path
-from typing import Literal, get_args
+from typing import Literal, Optional, get_args
 from zipfile import ZipFile
 
+import numpy as np
 import pandas as pd
+from beartype import beartype
 from requests_cache import CachedSession, FileCache, SQLiteCache
 
 logger = logging.getLogger(__name__)
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 default_chunk_size = 1000000
 
 
+@beartype
 class ReportDate:
     def __init__(
         self,
@@ -49,11 +51,12 @@ class ReportDate:
         return self.quarter == other.quarter and self.year == other.year
 
 
+@beartype
 class TickerReader:
-    def __init__(self, data: bytes):
+    def __init__(self, data: str):
         self._data = pd.read_json(data, orient="index")
 
-    def getCik(self, ticker: str) -> int:
+    def getCik(self, ticker: str) -> np.int64:
         """Get the Cik from the stock ticker
 
         Args:
@@ -82,8 +85,15 @@ class TickerReader:
         result = self._data[self._data.cik_str == cik]
         return result.ticker.iloc[0]
 
-    def contains(self, ticker_or_sequence):
-        tickers = set(ticker_or_sequence)
+    def contains(self, tickers: frozenset) -> bool:
+        """Check that the tickers provided exist
+
+        Args:
+            tickers (frozenset): tickers to check
+
+        Returns:
+            bool: if all the tickers are found
+        """
         try:
             for t in tickers:
                 self.getCik(t)
@@ -95,6 +105,7 @@ class TickerReader:
 period_focus_options = Literal["FY", "Q1", "Q2", "Q3", "Q4"]
 
 
+@beartype
 class Filter:
     def __init__(
         self,
@@ -154,7 +165,9 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             )
         return self._cik_list
 
-    def populateCikList(self, tickers: list[str], ticker_reader: TickerReader) -> None:
+    def populateCikList(
+        self, tickers: frozenset[str], ticker_reader: TickerReader
+    ) -> None:
         """Populates the filter's CIK list to be used for filtering.
 
         The Filter doesn't need the ticker symbols. If we expand to other data sources,
@@ -162,7 +175,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
         report is the CIK values to find the corresponding stocks.
 
         Args:
-            tickers (list[str]): ticker symbols to search for
+            tickers (frozenset[str]): ticker symbols to search for
             ticker_reader (TickerReader): reader to convert ticker symbols to CIK values
         """
         self._cik_list = set()
@@ -217,6 +230,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
         return dl_list
 
 
+@beartype
 class DataSetReader:
     """Reads the data from a zip file retrieved from the SEC website"""
 
@@ -288,7 +302,7 @@ class DataSetReader:
             logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
         return filtered_data
 
-    def _processSubText(filepath_or_buffer, filter: Filter) -> pd.DataFrame:
+    def _processSubText(filepath_or_buffer, filter: Filter) -> Optional[pd.DataFrame]:
         """Contains the submissions
 
         adsh	cik	name	sic	countryba	stprba	cityba	zipba	bas1	bas2	baph	countryma
@@ -327,6 +341,7 @@ class DataSetReader:
         return filtered_data
 
 
+@beartype
 class DownloadManager:
     # Format of zip example: 2023q1.zip
     _base_url = "https://www.sec.gov/files/dera/data/financial-statement-data-sets"
@@ -392,6 +407,7 @@ class DownloadManager:
             return DataSetReader(pd.DataFrame())
 
 
+@beartype
 class DataSelector:
     """A DataSelector contains all the data we know about.
 
@@ -462,6 +478,7 @@ class DataSelector:
         return df
 
 
+@beartype
 class DataSetCollector:
     def __init__(self, download_manager: DownloadManager):
         self.download_manager = download_manager
@@ -503,6 +520,7 @@ class DataSetCollector:
         return df
 
 
+@beartype
 class Sec:
     def __init__(self, storage_path: Path):
         if not isinstance(storage_path, Path):
@@ -523,11 +541,11 @@ class Sec:
         )
         self.download_manager = DownloadManager(ticker_session, data_session)
 
-    def getData(self, tickers: list[str], filter: Filter) -> DataSelector:
+    def getData(self, tickers: frozenset[str], filter: Filter) -> DataSelector:
         """Initiate the retrieval of ticker information based on the provided filters.
 
         Args:
-            tickers (list[str]): ticker symbols you want information about
+            tickers (frozenset[str]): ticker symbols you want information about
             filter (Filter): SEC specific data to scrape from the reports
 
         Returns:

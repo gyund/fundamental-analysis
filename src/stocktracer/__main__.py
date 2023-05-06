@@ -16,7 +16,8 @@ def main_cli() -> any:
     try:
         return fire.Fire(component=cli, name="stocktracer")
     except Exception as e:
-        return e
+        # return e # No stack dump
+        raise e  # stack dump
 
 
 if __name__ == "__main__":

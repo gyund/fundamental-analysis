@@ -1,10 +1,12 @@
-import hashlib
 import importlib
 import logging
 import os
 from pathlib import Path
+from typing import Optional, Union
 
 import pandas as pd
+from beartype import beartype
+from beartype.typing import Sequence
 from diskcache import Cache
 from pandas.core.groupby.generic import DataFrameGroupBy
 
@@ -15,6 +17,7 @@ from stocktracer.interface import ReportOptions as CliReportOptions
 logger = logging.getLogger(__name__)
 
 
+@beartype
 def get_analysis_instance(module_name: str) -> AnalysisInterface:
     """Dynamically import and load the Analysis class from a module
 
@@ -31,6 +34,7 @@ def get_analysis_instance(module_name: str) -> AnalysisInterface:
     return instance
 
 
+@beartype
 class Cli:
 
     """Tools for gathering resources, analyzing data, and publishing the results."""
@@ -47,7 +51,7 @@ class Cli:
 
     def analyze(
         self,
-        tickers: list[str],
+        tickers: Union[Sequence[str], str],
         cache_path: Path = _getDefaultCachePath(),
         refresh: bool = False,
         analysis_plugin: str = _default_analysis_module,
@@ -104,7 +108,7 @@ class Cli:
 
     def _get_results_key(tickers: frozenset, analysis_module: str) -> str:
         """
-        >>> Cli._get_results_key({"aapl","msft"},"my.analysis")
+        >>> Cli._get_results_key(frozenset({"aapl","msft"}),"my.analysis")
         'my.analysis-aapl-msft'
         """
         sorted_tickers = list(tickers)

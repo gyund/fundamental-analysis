@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 
 import pandas as pd
 
@@ -8,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class Analysis(AnalysisInterface):
-    def analyze(self) -> pd.DataFrame:
+    def analyze(self) -> Optional[pd.DataFrame]:
         """Analyze the report
 
         As a stub, this does nothing
