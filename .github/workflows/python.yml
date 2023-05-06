@@ -45,12 +45,17 @@ jobs:
           key: sqlite-${{ hashFiles('**/tests/fixtures/network/**') }}
           path: |
             **/.ticker-cache/*.sqlite
-      - name: Test with pytest
+      - name: Run unit-tests
         run: |
           coverage run -m pytest --doctest-modules
           # coverage run -m pytest --run-webtest --doctest-modules
           coverage report
           # coveralls --service=github
+      # Just to cut down on network testing while initially iterating
+      - name: run network-tests
+        run: |
+          coverage run -m pytest -m webtest
+        if: ${{ github.event.pull_request.draft == 'false' }}
       - name: Coveralls
         run: |
           coveralls --service=github
