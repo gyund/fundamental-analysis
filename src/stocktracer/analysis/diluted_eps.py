@@ -52,15 +52,16 @@ class Analysis(AnalysisInterface):
         # Show a quick dump of the data
         logger.info(f"\n{data_selector.data}")
 
-        results = list[tuple[str, int]]
+        # results = list[tuple[str, int]]
+        results = pd.DataFrame(columns=["ticker","eps_diluted_trend", "units"])
         for t in self.options.tickers:
             ticker_ds = data_selector.select(ticker=t)
             try:
                 eps_diluted = ticker_ds.EarningsPerShareDiluted
                 trend = trendline(data=eps_diluted)
-                results.append((t, trend))
+                results.insert(column={"ticker":[t],"eps_diluted_trend":[trend], "units":"eps/qtr"})
             except AttributeError as ex:
                 logger.warning(f"{t}: {ex}")
-
+        results.sort_values(by=['units'])
         print(f"Trends:\n{results}")
         return results
