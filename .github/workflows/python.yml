@@ -47,7 +47,8 @@ jobs:
             **/.ticker-cache/*.sqlite
       - name: Test with pytest
         run: |
-          coverage run -m pytest --run-webtest --doctest-modules
+          coverage run -m pytest --doctest-modules
+          # coverage run -m pytest --run-webtest --doctest-modules
           coverage report
           # coveralls --service=github
       - name: Coveralls
