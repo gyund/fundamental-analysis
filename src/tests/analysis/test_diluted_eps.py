@@ -19,7 +19,7 @@ class TestCli:
         )
 
     def test_invalid(self):
-        with pytest.raises(LookupError, match="No analysis results available!"):
+        with pytest.raises(LookupError, match="unable to find ticker: invalid"):
             self.cli.analyze(
                 tickers="invalid", analysis_plugin="stocktracer.analysis.diluted_eps"
             )

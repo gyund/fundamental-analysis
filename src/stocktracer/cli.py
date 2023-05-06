@@ -6,7 +6,7 @@ from typing import Optional, Union
 
 import pandas as pd
 from beartype import beartype
-from beartype.typing import Sequence
+from beartype.typing import Sequence, Tuple
 from diskcache import Cache
 from pandas.core.groupby.generic import DataFrameGroupBy
 
@@ -80,7 +80,7 @@ class Cli:
             refresh
             or results is None
             or not isinstance(results, pd.DataFrame)
-            or results.empty()
+            or results.empty
         ):
             # Call analysis plugin
             results = analysis_module.analyze()
@@ -99,7 +99,9 @@ class Cli:
         else:
             print(results)
 
-    def _getCachedResults(self, tickers, cache_path, analysis_plugin):
+    def _getCachedResults(
+        self, tickers, cache_path, analysis_plugin
+    ) -> Tuple[Cache, str, Optional[pd.DataFrame]]:
         assert isinstance(tickers, frozenset)
         cache = Cache(directory=cache_path / "results")
         results_key = Cli._get_results_key(tickers, analysis_plugin)

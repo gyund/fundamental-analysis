@@ -77,7 +77,7 @@ def sec_fake_report(filter_aapl: Filter.Selectors) -> DataSelector:
         filter=filter_aapl.sec_filter,
         sub_dataframe=sub_df,
     )
-    ticker_reader = mock.MagicMock()
+    ticker_reader = mock.MagicMock(TickerReader)
     assert not num_df.empty
     return DataSelector(num_df, ticker_reader)
 
@@ -96,14 +96,14 @@ def sec_manufactured_fake_report(filter_aapl: Filter.Selectors) -> DataSelector:
         filter=filter_aapl.sec_filter,
         sub_dataframe=sub_df,
     )
-    ticker_reader = mock.MagicMock()
+    ticker_reader = mock.MagicMock(TickerReader)
     assert num_df is not None
     return DataSelector(num_df, ticker_reader)
 
 
 def test_Sec_init():
-    with pytest.raises(ValueError, match="storage_path is required"):
-        Sec("")
+    with pytest.raises((TypeError, AssertionError)):
+        Sec()
 
 
 def test_benchmark_DataSetReader_processSubText(

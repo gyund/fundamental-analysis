@@ -523,8 +523,6 @@ class DataSetCollector:
 @beartype
 class Sec:
     def __init__(self, storage_path: Path):
-        if not isinstance(storage_path, Path):
-            raise ValueError("storage_path is required")
         storage_path.mkdir(parents=True, exist_ok=True)
         data_session = CachedSession(
             "data",

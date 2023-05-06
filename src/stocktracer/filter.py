@@ -16,5 +16,5 @@ class Selectors:
         """
         assert True == isinstance(sec_filter, SecFilter)
 
-        self.ticker_filter = set(ticker_filter)
+        self.ticker_filter = frozenset(ticker_filter)
         self.sec_filter = sec_filter

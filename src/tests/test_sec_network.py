@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 class TestTickerReader:
     def test_contains(self, sec_instance: Sec):
         tickers = sec_instance.download_manager.getTickers()
-        assert tickers.contains(("aapl", "msft"))
-        assert False == tickers.contains(("aapl", "msft", "invalid"))
+        assert tickers.contains(frozenset(("aapl", "msft")))
+        assert False == tickers.contains(frozenset(("aapl", "msft", "invalid")))
 
 
 @pytest.mark.webtest
@@ -59,7 +59,7 @@ def test_update(sec_instance: Sec, filter_aapl: Filter.Selectors):
     # pytest.skip(
     #     "skip until we can resolve performance issues with large data sets")
     data_selector = sec_instance.getData(
-        tickers=["aapl"], filter=filter_aapl.sec_filter
+        tickers=frozenset(["aapl"]), filter=filter_aapl.sec_filter
     )
     assert data_selector.data.empty == False
     logger.debug(f"There are {len(data_selector.data)} records about apple")
@@ -86,7 +86,7 @@ def test_multi_stock_request_over_1year(sec_instance: SecDataSource):
         last_report=ReportDate(year=2023, quarter=1),
         only_annual=True,  # We only want the 10-K
     )
-    tickers = ["aapl", "msft", "goog", "tmo"]
+    tickers = frozenset(["aapl", "msft", "goog", "tmo"])
     data_selector = sec_instance.getData(tickers=tickers, filter=sec_filter)
     logger.debug(data_selector)
     # Get series for data and make sure they're all yearly-focus(YF)/annual reports
