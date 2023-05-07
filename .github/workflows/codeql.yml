@@ -23,7 +23,7 @@ on:
 #     - cron: '42 16 * * 0'
 
 concurrency:
-  group: ${{ github.ref }}
+  group: codeql-${{ github.ref }}
   cancel-in-progress: true
   
 jobs:
