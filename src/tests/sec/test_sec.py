@@ -1,9 +1,10 @@
-import io
 import logging
+import os
 from datetime import date
 from pathlib import Path
 
 import mock
+import pandas as pd
 import pytest
 
 import stocktracer.filter as Filter
@@ -11,6 +12,7 @@ from stocktracer.cli import Cli
 from stocktracer.data.sec import (
     DataSelector,
     DataSetReader,
+    DownloadManager,
     ReportDate,
     Sec,
     TickerReader,
@@ -28,9 +30,40 @@ from tests.fixtures.unit import (
 logger = logging.getLogger(__name__)
 
 
-def test_Sec_init():
-    with pytest.raises((TypeError, AssertionError)):
-        Sec()
+@pytest.fixture
+def sec_harness() -> tuple[Sec, mock.MagicMock]:
+    sec = Sec(Path(os.getcwd()) / ".test-cache")
+
+    # Mock all objects that interact with network elements.
+    # You will need to re-mock them in the test to get code completion
+    # for setting checks if the mock gets called.
+    sec.download_manager = mock.MagicMock(DownloadManager)
+    return sec, sec.download_manager
+
+
+class TestSec:
+    def test_init(self):
+        with pytest.raises((TypeError, AssertionError)):
+            Sec()
+
+    def test_getData(self, sec_harness: tuple[Sec, mock.MagicMock]):
+        (sec, download_manager) = sec_harness
+        data_reader = mock.MagicMock(DataSetReader)
+        data_reader.processZip = mock.MagicMock(return_value=pd.DataFrame())
+
+        ticker_reader = mock.MagicMock(TickerReader)
+        download_manager.getTickers = mock.MagicMock(return_value=ticker_reader)
+        download_manager.getData = mock.MagicMock(return_value=data_reader)
+
+        with pytest.raises(
+            LookupError, match="No data matching the filter was retrieved"
+        ):
+            sec.getData(
+                tickers=frozenset(("aapl", "msft")),
+                filter=Filter.SecFilter(tags=["test"]),
+            )
+        ticker_reader.contains.assert_called()
+        data_reader.processZip.assert_called()
 
 
 def test_reportDate():

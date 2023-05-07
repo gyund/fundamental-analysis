@@ -237,7 +237,7 @@ class DataSetReader:
     def __init__(self, zip_data: bytes) -> None:
         self.zip_data = BytesIO(zip_data)
 
-    def processZip(self, filter: Filter) -> pd.DataFrame:
+    def processZip(self, filter: Filter) -> Optional[pd.DataFrame]:
         """Process a zip archive with the provided filter
 
         Args:
@@ -247,7 +247,7 @@ class DataSetReader:
             ImportError: the filter doesn't match anything
 
         Returns:
-            pd.DataFrame: filtered data
+            Optional[pd.DataFrame]: filtered data
         """
         with ZipFile(self.zip_data) as myzip:
             # Process the mapping first
@@ -264,7 +264,7 @@ class DataSetReader:
 
     def _processNumText(
         filepath_or_buffer, filter: Filter, sub_dataframe: pd.DataFrame
-    ) -> pd.DataFrame:
+    ) -> Optional[pd.DataFrame]:
         """Contains the numerical data
 
         adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
@@ -491,6 +491,9 @@ class DataSetCollector:
         Args:
             filter (Filter): SEC specific filter of how to filter the results
 
+        Raises:
+            LookupError: when there are no results matching the filter
+
         Returns:
             pd.DataFrame: filtered results
         """
@@ -502,7 +505,9 @@ class DataSetCollector:
             reader = self.download_manager.getData(r)
             try:
                 data = reader.processZip(filter)
-                if df is None:
+                if data is None or data.empty:
+                    logger.debug(f"no results captured in report {r}")
+                elif df is None:
                     logger.debug(f"keys: {data.keys()}")
                     df = data
                 else:
@@ -514,9 +519,12 @@ class DataSetCollector:
                 logger.debug(f"{r} did not have any matches for the provided filter")
                 logger.debug(f"{filter}")
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
-        logger.debug(f"keys: {df.keys()}")
-        logger.debug(f"Rows: {len(df)}")
-        logger.debug(df.head())
+        if df is not None:
+            logger.debug(f"keys: {df.keys()}")
+            logger.debug(f"Rows: {len(df)}")
+            logger.debug(df.head())
+        else:
+            raise LookupError("No data matching the filter was retrieved")
         return df
 
 
