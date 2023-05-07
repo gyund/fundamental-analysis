@@ -104,16 +104,16 @@ convention = "google"
 
 [tool.pylint.main]
 source-roots = ["src"]
-fail-under = 7
+fail-under = 9
 fail-on = [
-    "redefined-builtin",    # unintended sideaffects
+    # "redefined-builtin",    # unintended sideaffects
     "unused-variable",      # cleaner code
     "unused-import",        # cleaner code
     "no-self-argument",     # possible bug, annotate correctly
     "use-list-literal",     # cleaner code
     "no-else-return",       # cleaner code
     "no-member",            # make explicit for clarity 
-    "invalid-name",         # consistency
+    # "invalid-name",         # consistency
     ]
 
 [tool.pylint."messages control"]

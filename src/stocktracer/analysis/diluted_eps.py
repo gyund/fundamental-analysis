@@ -4,7 +4,6 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from stocktracer.data.sec import DataSelector as SecDataSelector
 from stocktracer.data.sec import Filter as SecFilter
 from stocktracer.data.sec import ReportDate
 from stocktracer.data.sec import Sec as SecDataSource

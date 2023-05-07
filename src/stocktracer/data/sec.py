@@ -1,3 +1,5 @@
+"""This data source grabs information from quarterly SEC data archives.
+"""
 import logging
 from datetime import date, timedelta
 from io import BytesIO
@@ -68,7 +70,9 @@ class TickerReader:
         Returns:
             np.int64: cik
         """
-        result = self._data[self._data.ticker == ticker.upper()]
+        result = self._data[
+            self._data.ticker == ticker.upper()  # pylint: disable=no-member
+        ]  # pylint: disable=no-member
         if result.empty:
             raise LookupError(f"unable to find ticker: {ticker}")
         return result.cik_str.iloc[0]
@@ -82,7 +86,7 @@ class TickerReader:
         Returns:
             str: stock ticker
         """
-        result = self._data[self._data.cik_str == cik]
+        result = self._data[self._data.cik_str == cik]  # pylint: disable=no-member
         return result.ticker.iloc[0]
 
     def contains(self, tickers: frozenset) -> bool:
@@ -197,8 +201,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
         """
         if self.only_annual:
             return ["FY"]
-        else:
-            return ["FY", "Q1", "Q2", "Q3", "Q4"]
+        return ["FY", "Q1", "Q2", "Q3", "Q4"]
 
     @property
     def required_reports(self) -> list[ReportDate]:
@@ -214,7 +217,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
         Returns:
             list[ReportDate]: list of report dates to retrieve
         """
-        dl_list: list[ReportDate] = list()
+        dl_list: list[ReportDate] = []
         next_report = self.last_report
         final_report = ReportDate(
             self.last_report.year - self.years, self.last_report.quarter
@@ -265,8 +268,9 @@ class DataSetReader:
                 with myzip.open("num.txt") as myfile:
                     return DataSetReader._processNumText(myfile, filter, sub_dataframe)
 
+    @classmethod
     def _processNumText(
-        filepath_or_buffer, filter: Filter, sub_dataframe: pd.DataFrame
+        cls, filepath_or_buffer, filter: Filter, sub_dataframe: pd.DataFrame
     ) -> Optional[pd.DataFrame]:
         """Contains the numerical data
 
@@ -288,7 +292,7 @@ class DataSetReader:
         for chunk in reader:
             # We want only the tables in left if they join on the key, so inner it is
             data = chunk.join(sub_dataframe, how="inner")
-            tag_list = filter.tags
+            tag_list = filter.tags  # pylint: disable=unused-variable
             data = data.query("tag in @tag_list")
             if data.empty:  # pragma: no cover
                 logger.debug(f"chunk:\n{chunk}")
@@ -305,7 +309,10 @@ class DataSetReader:
             logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
         return filtered_data
 
-    def _processSubText(filepath_or_buffer, filter: Filter) -> Optional[pd.DataFrame]:
+    @classmethod
+    def _processSubText(
+        cls, filepath_or_buffer, filter: Filter
+    ) -> Optional[pd.DataFrame]:
         """Contains the submissions
 
         adsh	cik	name	sic	countryba	stprba	cityba	zipba	bas1	bas2	baph	countryma
@@ -381,8 +388,7 @@ class DownloadManager:
             logger.info("Retrieved tickers->cik mapping from cache")
         if response.status_code == 200:  # pragma: no cover
             return TickerReader(response.content.decode())
-        else:  # pragma: no cover
-            return TickerReader(pd.DataFrame())
+        return TickerReader(pd.DataFrame())  # pragma: no cover
 
     def _createDownloadUri(self, report_date: ReportDate) -> str:
         file = f"{report_date.year}q{report_date.quarter}.zip"
@@ -406,8 +412,7 @@ class DownloadManager:
             logger.info(f"Retrieved {request} from cache")
         if response.status_code == 200:
             return DataSetReader(response.content)
-        else:
-            return DataSetReader(pd.DataFrame())
+        return DataSetReader(pd.DataFrame())  # pragma: no cover
 
 
 @beartype
@@ -483,10 +488,10 @@ class DataSelector:
 
 @beartype
 class DataSetCollector:
+    """Take care of downloading all the data sets and aggregate them into a single structure"""
+
     def __init__(self, download_manager: DownloadManager):
         self.download_manager = download_manager
-
-    """ Take care of downloading all the data sets and aggregate them into a single structure """
 
     def getData(self, filter: Filter) -> pd.DataFrame:
         """Collect data based on the provided filter

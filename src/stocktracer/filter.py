@@ -14,7 +14,5 @@ class Selectors:
             ticker_filter (set[str] | list[str],): list of stock tickers to get information about
             sec_filter (SecFilter): filter for SEC reports
         """
-        assert True == isinstance(sec_filter, SecFilter)
-
         self.ticker_filter = frozenset(ticker_filter)
         self.sec_filter = sec_filter

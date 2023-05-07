@@ -1,3 +1,4 @@
+"""This stub serves an example for module developers."""
 import logging
 from typing import Optional
 
