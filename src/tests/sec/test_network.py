@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.webtest
 class TestTickerReader:
     def test_contains(self, sec_instance: Sec):
-        tickers = sec_instance.download_manager.getTickers()
+        tickers = sec_instance.download_manager.get_tickers()
         assert tickers.contains(frozenset(("aapl", "msft")))
         assert False == tickers.contains(frozenset(("aapl", "msft", "invalid")))
 
@@ -31,18 +31,18 @@ class TestTickerReader:
 @pytest.mark.webtest
 class TestDownloadManager:
     def test_getTickers(self, sec_instance: Sec):
-        tickers = sec_instance.download_manager.getTickers()
+        tickers = sec_instance.download_manager.get_tickers()
         assert tickers.getCik("AAPL") == 320193
         assert tickers.getCik("aapl") == 320193
         assert tickers.getTicker(320193) == "AAPL"
 
     def test_benchmark_getTickers(self, sec_instance: Sec, benchmark):
-        benchmark(sec_instance.download_manager.getTickers)
+        benchmark(sec_instance.download_manager.get_tickers)
 
     def test_getData(self, sec_dataselector_2023q1: Sec):
         report: DataSelector = sec_dataselector_2023q1
 
-        tags = report.getTags()
+        tags = report.get_tags()
         logger.debug(f"tags({len(tags)}): {tags}")
         assert len(tags) > 0
         # TODO: Verify access semantics so we can create a query API on the extracted data

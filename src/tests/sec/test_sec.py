@@ -52,8 +52,8 @@ class TestSec:
         data_reader.processZip = mock.MagicMock(return_value=pd.DataFrame())
 
         ticker_reader = mock.MagicMock(TickerReader)
-        download_manager.getTickers = mock.MagicMock(return_value=ticker_reader)
-        download_manager.getData = mock.MagicMock(return_value=data_reader)
+        download_manager.get_tickers = mock.MagicMock(return_value=ticker_reader)
+        download_manager.get_data = mock.MagicMock(return_value=data_reader)
 
         with pytest.raises(
             LookupError, match="No data matching the filter was retrieved"

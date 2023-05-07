@@ -36,26 +36,26 @@ class TestDataSelector:
         assert "cik" in sec_fake_report.data.index.names
 
     def test_getTags(self, sec_fake_report: DataSelector):
-        tags = sec_fake_report.getTags()
+        tags = sec_fake_report.get_tags()
         assert len(tags) == 1
         assert "EntityCommonStockSharesOutstanding" in tags
 
     def test_filterByTicker(self, sec_fake_report: DataSelector):
         # Create a sample set of typical queries one might make with the DataSelector
-        sec_fake_report._getCik = mock.Mock(return_value=320193)
+        sec_fake_report._get_cik = mock.Mock(return_value=320193)
         df = sec_fake_report.filterByTicker(ticker="AAPL", data=sec_fake_report.data)
         assert df is not None
         assert 1 == len(df)
 
     def test_select(self, sec_fake_report: DataSelector):
         # Create a sample set of typical queries one might make with the DataSelector
-        sec_fake_report._getCik = mock.Mock(return_value=320193)
+        sec_fake_report._get_cik = mock.Mock(return_value=320193)
         df = sec_fake_report.select(ticker="AAPL")
         assert df is not None
 
     def test_select_and_pivot(self, sec_manufactured_fake_report: DataSelector):
         """Test to figure out how best to orient the table for summarizing data"""
-        sec_manufactured_fake_report._getCik = mock.Mock(return_value=320193)
+        sec_manufactured_fake_report._get_cik = mock.Mock(return_value=320193)
         df = sec_manufactured_fake_report.select(ticker="AAPL")
         df = df[["value"]]
         tag_group = df.groupby(["cik", "tag"])

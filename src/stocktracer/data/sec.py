@@ -2,13 +2,13 @@ import logging
 from datetime import date, timedelta
 from io import BytesIO
 from pathlib import Path
-from typing import Literal, Optional, get_args
+from typing import Literal, Optional
 from zipfile import ZipFile
 
 import numpy as np
 import pandas as pd
 from beartype import beartype
-from requests_cache import CachedSession, FileCache, SQLiteCache
+from requests_cache import CachedSession, SQLiteCache
 
 logger = logging.getLogger(__name__)
 
@@ -311,7 +311,7 @@ class DataSetReader:
         """
         logger.debug("processing sub.txt")
         focus_periods = filter.getFocusPeriod()
-        cik_list = filter.getCikList()
+        cik_list = filter.getCikList()  # pylint: disable=unused-variable
 
         oldest_fy = filter.last_report.year - filter.years
         query_str = f"cik in @cik_list and fp in @focus_periods and fy >= {oldest_fy}"
@@ -353,7 +353,7 @@ class DownloadManager:
         self._ticker_session = ticker_session
         self._data_session = data_session
 
-    def getTickers(self) -> TickerReader:
+    def get_tickers(self) -> TickerReader:
         """Get the CIK ticker mappings. This must be done before processing reports
 
         The SEC stores the mappings of the CIK values to tickers in a JSON file.
@@ -384,7 +384,7 @@ class DownloadManager:
         file = f"{report_date.year}q{report_date.quarter}.zip"
         return "/".join([self._base_url, file])
 
-    def getData(self, report_date: ReportDate) -> DataSetReader:
+    def get_data(self, report_date: ReportDate) -> DataSetReader:
         """Retrieves from a cache or makes a request to retrieve archived quarterly data.
 
         This allows us to download data independent of actually processing it, allowing
@@ -429,7 +429,7 @@ class DataSelector:
         self.data: pd.DataFrame = data
         self._ticker_reader: TickerReader = ticker_reader
 
-    def getTags(self) -> pd.Index:
+    def get_tags(self) -> pd.Index:
         """Get a list of the tag values filtered from the results
 
         Returns:
@@ -437,7 +437,7 @@ class DataSelector:
         """
         return self.data.index.get_level_values("tag").unique()
 
-    def _getCik(self, ticker: str):
+    def _get_cik(self, ticker: str):
         return self._ticker_reader.getCik(ticker)
 
     def filterByTicker(self, ticker: str, data: pd.DataFrame = None) -> pd.DataFrame:
@@ -452,7 +452,7 @@ class DataSelector:
         """
         assert isinstance(ticker, str)
         assert data is None or isinstance(data, pd.DataFrame)
-        cik = self._getCik(ticker)
+        cik = self._get_cik(ticker)
 
         # Supply the object default if not provided in the method
         if data is None or data.empty:
@@ -472,8 +472,8 @@ class DataSelector:
             pd.DataFrame: filtered DataFrame
         """
         # Filter out the Stock
-        df = self.filterByTicker(ticker=ticker)
-        return df
+        data_frame = self.filterByTicker(ticker=ticker)
+        return data_frame
 
 
 @beartype
@@ -496,34 +496,34 @@ class DataSetCollector:
             pd.DataFrame: filtered results
         """
         assert isinstance(filter, Filter)
-        df = None
+        data_frame = None
         report_dates = filter.getRequiredReports()
         logger.info(f"Creating Unified Data record for these reports: {report_dates}")
         for r in report_dates:
-            reader = self.download_manager.getData(r)
+            reader = self.download_manager.get_data(r)
             try:
                 data = reader.processZip(filter)
                 if data is None or data.empty:
                     logger.debug(f"no results captured in report {r}")
-                elif df is None:
+                elif data_frame is None:
                     logger.debug(f"keys: {data.keys()}")
-                    df = data
+                    data_frame = data
                 else:
                     # df = pd.concat(df, data)
-                    df.merge(right=data)
-            except ImportError as e:
+                    data_frame.merge(right=data)
+            except ImportError:
                 # Note, when searching for annual reports, this will generally occur 1/4 times
                 # if we're only searching for one stock's tags
                 logger.debug(f"{r} did not have any matches for the provided filter")
                 logger.debug(f"{filter}")
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
-        if df is not None:
-            logger.debug(f"keys: {df.keys()}")
-            logger.debug(f"Rows: {len(df)}")
-            logger.debug(df.head())
+        if data_frame is not None:
+            logger.debug(f"keys: {data_frame.keys()}")
+            logger.debug(f"Rows: {len(data_frame)}")
+            logger.debug(data_frame.head())
         else:
             raise LookupError("No data matching the filter was retrieved")
-        return df
+        return data_frame
 
 
 @beartype
@@ -556,7 +556,7 @@ class Sec:
             DataSelector: Helper for processing the filtered results
         """
         collector = DataSetCollector(self.download_manager)
-        ticker_map = self.download_manager.getTickers()
+        ticker_map = self.download_manager.get_tickers()
         ticker_map.contains(tickers)
         filter.populateCikList(tickers=tickers, ticker_reader=ticker_map)
         filtered_data = collector.getData(filter)
