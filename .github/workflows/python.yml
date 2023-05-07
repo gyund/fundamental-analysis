@@ -12,7 +12,7 @@ on:
       - ready_for_review
 
 concurrency:
-  group: ${{ github.ref }}
+  group: python-${{ github.ref }}
   cancel-in-progress: true
   
 jobs:
