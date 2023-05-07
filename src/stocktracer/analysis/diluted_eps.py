@@ -35,11 +35,6 @@ class Analysis(AnalysisInterface):
     """Perform an analysis on the earnings per share over time."""
 
     def analyze(self) -> Optional[pd.DataFrame]:
-        """Perform analysis
-
-        Returns:
-            Optional[pd.DataFrame]: analysis results
-        """
         # Create the filter we'll use to scrape the results
         sec_filter = SecFilter(
             tags=["EarningsPerShareDiluted"],
@@ -61,3 +56,6 @@ class Analysis(AnalysisInterface):
         # return eps_diluted.groupby(["cik"]).apply(lambda x: pd.Series(trendline(x.value),
         #                                                               index=["trend"]))
         return eps_diluted.groupby(["cik"]).all()
+
+    # Reuse documentation from parent
+    analyze.__doc__ = AnalysisInterface.analyze.__doc__

@@ -10,7 +10,7 @@ from tests.fixtures.unit import filter_aapl
 @pytest.fixture
 def sec_instance() -> Sec:
     # test using the real SEC adapter
-    return Sec(Cli._getDefaultCachePath())
+    return Sec(Cli.get_default_cache_path())
 
 
 @pytest.fixture

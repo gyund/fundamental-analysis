@@ -112,6 +112,7 @@ fail-on = [
     "use-list-literal",     # cleaner code
     "no-else-return",       # cleaner code
     "no-member",            # make explicit for clarity 
+    "invalid-name",         # consistency
     ]
 
 [tool.pylint."messages control"]

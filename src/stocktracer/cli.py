@@ -1,3 +1,4 @@
+"""This is the CLI class for stocktracer."""
 import importlib
 import logging
 import os
@@ -8,7 +9,6 @@ import pandas as pd
 from beartype import beartype
 from beartype.typing import Sequence, Tuple
 from diskcache import Cache
-from pandas.core.groupby.generic import DataFrameGroupBy
 
 from stocktracer.interface import Analysis as AnalysisInterface
 from stocktracer.interface import Options as CliOptions
@@ -34,24 +34,26 @@ def get_analysis_instance(module_name: str) -> AnalysisInterface:
 
 
 @beartype
+def get_default_cache_path() -> Path:
+    """Get the default path for caching data
+
+    Returns:
+        Path: path to cache data
+    """
+    return Path(os.getcwd()) / ".ticker-cache"
+
+
+@beartype
 class Cli:
 
     """Tools for gathering resources, analyzing data, and publishing the results."""
 
     _default_analysis_module = "stocktracer.analysis.stub"
 
-    def _getDefaultCachePath() -> Path:
-        """Get the default path for caching data
-
-        Returns:
-            Path: path to cache data
-        """
-        return Path(os.getcwd()) / ".ticker-cache"
-
     def analyze(
         self,
         tickers: Union[Sequence[str], str],
-        cache_path: Path = _getDefaultCachePath(),
+        cache_path: Path = get_default_cache_path(),
         refresh: bool = False,
         analysis_plugin: str = _default_analysis_module,
     ) -> Optional[pd.DataFrame]:
@@ -77,7 +79,7 @@ class Cli:
         analysis_module: AnalysisInterface = get_analysis_instance(analysis_plugin)
         analysis_module.options = CliOptions(tickers=tickers, cache_path=cache_path)
 
-        cache, results_key, results = self._getCachedResults(
+        cache, results_key, results = self._get_cached_results(
             tickers, cache_path, analysis_plugin
         )
 
@@ -89,7 +91,7 @@ class Cli:
         ):
             # Call analysis plugin
             results = analysis_module.analyze()
-            if results.empty:
+            if results is None or results.empty:
                 raise LookupError("No analysis results available!")
 
             tickers = frozenset(tickers)
@@ -99,21 +101,30 @@ class Cli:
 
         print(results.to_markdown())
 
-    def _getCachedResults(
+    def _get_cached_results(
         self, tickers, cache_path, analysis_plugin
     ) -> Tuple[Cache, str, Optional[pd.DataFrame]]:
         assert isinstance(tickers, frozenset)
         cache = Cache(directory=cache_path / "results")
-        results_key = Cli._get_results_key(tickers, analysis_plugin)
+        results_key = get_cached_results_key(tickers, analysis_plugin)
         results = cache.get(key=results_key, default=None)
         return cache, results_key, results
 
-    def _get_results_key(tickers: frozenset, analysis_module: str) -> str:
-        """
-        >>> Cli._get_results_key(frozenset({"aapl","msft"}),"my.analysis")
-        'my.analysis-aapl-msft'
-        """
-        sorted_tickers = list(tickers)
-        sorted_tickers.sort()
-        results_key = "-".join(sorted_tickers)
-        return "-".join((analysis_module, results_key))
+
+@beartype
+def get_cached_results_key(tickers: frozenset[str], analysis_module: str) -> str:
+    """
+    >>> get_cached_results_key(frozenset({"aapl","msft"}),"my.analysis")
+    'my.analysis-aapl-msft'
+
+    Args:
+        tickers (frozenset[str]): tickers to check
+        analysis_module (str): name of analysis module
+
+    Returns:
+        str: string with the cached key
+    """
+    sorted_tickers = list(tickers)
+    sorted_tickers.sort()
+    results_key = "-".join(sorted_tickers)
+    return "-".join((analysis_module, results_key))

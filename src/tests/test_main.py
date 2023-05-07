@@ -10,5 +10,6 @@ def test_help():
 
 
 def test_stub():
-    with pytest.raises(LookupError, match="No analysis results available!"):
-        main_cli("analyze aapl,msft")
+    result = main_cli("analyze aapl,msft")
+    assert isinstance(result, LookupError)
+    assert result.args[0] == "No analysis results available!"

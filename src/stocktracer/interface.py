@@ -24,6 +24,15 @@ class Options:
 
 @beartype
 class Analysis(metaclass=abc.ABCMeta):
+    """Base class for all analysis techniques.
+
+    Args:
+        metaclass (_type_, optional): _description_. Defaults to abc.ABCMeta.
+
+    Returns:
+        _type_: _description_
+    """
+
     @abc.abstractmethod
     def analyze(self) -> Optional[DataFrame]:
         """Perform financial analysis.
@@ -31,7 +40,6 @@ class Analysis(metaclass=abc.ABCMeta):
         Returns:
             Optional[DataFrame]: results of analysis
         """
-        pass
 
     @property
     def options(self) -> Optional[Options]:
@@ -40,7 +48,6 @@ class Analysis(metaclass=abc.ABCMeta):
         Returns:
             Optional[Options]: configured options or None.
         """
-        return self._options
 
     @options.setter
     def options(self, options: Options):

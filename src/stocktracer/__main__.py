@@ -3,6 +3,7 @@
 
 import sys
 
+import beartype
 import fire
 
 from stocktracer.cli import Cli
@@ -20,9 +21,15 @@ def main_cli(command: str = None) -> any:
     cli = Cli()
     try:
         return fire.Fire(component=cli, name="stocktracer", command=command)
-    except Exception as e:
-        # return e # No stack dump
-        raise e  # stack dump
+    except Exception as app_exception:  # pylint: disable=broad-exception-caught
+        try:
+            if beartype.beartype(app_exception) is app_exception:
+                # Beartype exceptions should be thrown, all others should just be printed
+                raise app_exception
+        except Exception:  # pylint: disable=broad-exception-caught
+            # Not a beartype
+            pass
+        return app_exception
 
 
 if __name__ == "__main__":
