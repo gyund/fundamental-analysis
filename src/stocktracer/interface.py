@@ -26,7 +26,11 @@ class Options:
 class Analysis(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def analyze(self) -> Optional[DataFrame]:
-        """Perform financial analysis."""
+        """Perform financial analysis.
+
+        Returns:
+            Optional[DataFrame]: results of analysis
+        """
         pass
 
     @property

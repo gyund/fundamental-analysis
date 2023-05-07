@@ -54,14 +54,20 @@ class Cli:
         cache_path: Path = _getDefaultCachePath(),
         refresh: bool = False,
         analysis_plugin: str = _default_analysis_module,
-    ) -> None:
+    ) -> Optional[pd.DataFrame]:
         """Perform stock analysis
 
         Args:
-            tickers (list[str]): tickers to include in the analysis
+            tickers (Union[Sequence[str], str]): tickers to include in the analysis
             cache_path (Path): path where to cache data
             refresh (bool): Whether to refresh the calculation or use the results from a prior one
             analysis_plugin (str): module to load for analysis
+
+        Raises:
+            LookupError: no analysis results found
+
+        Returns:
+            Optional[DataFrame]: results of analysis
         """
         if isinstance(tickers, str):
             tickers = frozenset([tickers])
@@ -83,8 +89,6 @@ class Cli:
         ):
             # Call analysis plugin
             results = analysis_module.analyze()
-            if not isinstance(results, pd.DataFrame):
-                raise ValueError("analysis modules must return a pandas.DataFrame")
             if results.empty:
                 raise LookupError("No analysis results available!")
 
@@ -93,10 +97,7 @@ class Cli:
             # Save one week expiry
             cache.set(key=results_key, value=results, expire=3600 * 24 * 7)
 
-        if isinstance(results, pd.DataFrame):
-            print(results.to_markdown())
-        else:
-            print(results)
+        print(results.to_markdown())
 
     def _getCachedResults(
         self, tickers, cache_path, analysis_plugin

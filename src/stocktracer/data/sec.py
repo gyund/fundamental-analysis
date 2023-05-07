@@ -66,7 +66,7 @@ class TickerReader:
             LookupError: If ticker is not found
 
         Returns:
-            int: cik
+            np.int64: cik
         """
         result = self._data[self._data.ticker == ticker.upper()]
         if result.empty:

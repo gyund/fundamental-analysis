@@ -15,9 +15,9 @@ class Analysis(AnalysisInterface):
         As a stub, this does nothing
 
         Returns:
-            pd.DataFrame: Containing the results of the report
+            Optional[pd.DataFrame]: Always None, since the stub doesn't analyze anything.
         """
         print(
             "This is where we would start to process information, but we're not right now"
         )
-        return pd.DataFrame()
+        return None

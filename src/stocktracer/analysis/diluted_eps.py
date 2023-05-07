@@ -35,6 +35,11 @@ class Analysis(AnalysisInterface):
     """Perform an analysis on the earnings per share over time."""
 
     def analyze(self) -> Optional[pd.DataFrame]:
+        """Perform analysis
+
+        Returns:
+            Optional[pd.DataFrame]: analysis results
+        """
         # Create the filter we'll use to scrape the results
         sec_filter = SecFilter(
             tags=["EarningsPerShareDiluted"],
