@@ -16,11 +16,7 @@ from stocktracer.data.sec import (
     Sec,
     TickerReader,
 )
-from tests.fixtures.network.sec import (
-    filter_aapl,
-    sec_dataselector_2023q1,
-    sec_instance,
-)
+from tests.fixtures.unit import filter_aapl
 
 logger = logging.getLogger(__name__)
 

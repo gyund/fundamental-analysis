@@ -15,7 +15,7 @@ from stocktracer.data.sec import ReportDate
 from stocktracer.data.sec import Sec
 from stocktracer.data.sec import Sec as SecDataSource
 from stocktracer.data.sec import TickerReader
-from tests.fixtures.network.sec import (
+from tests.fixtures.network import (
     filter_aapl,
     sec_dataselector_2023q1,
     sec_instance,
