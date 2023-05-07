@@ -19,4 +19,5 @@ echo "Running pylint..."
 pipenv run pylint src/stocktracer
 echo "Running pydocstyle..."
 pipenv run pydocstyle
+echo "success!
 popd > /dev/null
