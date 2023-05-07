@@ -80,6 +80,10 @@ jobs:
         run: |
           isort --check src
         if: ${{ always() }}
+      - name: Lint - pydoctest
+        run: |
+          PYTHONPATH=src pipenv run pydoctest --config pydocktest.json
+        if: ${{ always() }}
       # - name: Upload pytest test results
       #   uses: actions/upload-artifact@v3
       #   with:
