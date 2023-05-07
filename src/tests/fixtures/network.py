@@ -12,6 +12,7 @@ def sec_instance() -> Sec:
     # test using the real SEC adapter
     return Sec(Cli._getDefaultCachePath())
 
+
 @pytest.fixture
 def sec_dataselector_2023q1(
     sec_instance: Sec, filter_aapl: Filter.Selectors
