@@ -33,6 +33,7 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    if: ${{ !github.event.pull_request.draft }}
     permissions:
       actions: read
       contents: read
