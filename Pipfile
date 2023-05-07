@@ -15,7 +15,6 @@ beartype = "*"
 
 [dev-packages]
 pytest = "*"
-pydoctest = "*"
 ruff = "*"
 mock = "*"
 coveralls = "*"
@@ -32,6 +31,9 @@ mkdocs-literate-nav = "*"
 mkdocs-section-index = "*"
 build = "*"
 coverage = "*"
+pydocstyle = {extras = ["toml"], version = "*"}
+pylint = "*"
+pydoctest = "*"
 
 [requires]
 python_version = "3.10"

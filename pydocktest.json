@@ -3,5 +3,6 @@
     "fail_on_missing_docstring": true,
     "include_paths": [ "src/stocktracer/**/*.py"],
     "exclude_methods": ["__*", "_*"],
-    "exclude_functions": ["__*", "_*"]
+    "exclude_functions": ["__*", "_*"],
+    "verbosity": 1
 }

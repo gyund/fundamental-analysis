@@ -1,3 +1,4 @@
+""" Interfaces for the StockTracer Module."""
 import abc
 from pathlib import Path
 from typing import Optional
@@ -8,31 +9,40 @@ from pandas import DataFrame
 
 @beartype
 class Options:
+    """Command Line Options"""
+
     def __init__(self, tickers: frozenset[str], cache_path: Path):
+        """Options
+
+        Args:
+            tickers (frozenset[str]): tickers to scrape from data sets
+            cache_path (Path): path to cache processed or downloaded information
+        """
         self.tickers = tickers
         self.cache_path = cache_path
-
-
-@beartype
-class ReportOptions:
-    def __init__(self, results, file: Path = None, json: Path = None, **kwargs):
-        self.results = results
-        self.file = file
-        self.json = json
 
 
 @beartype
 class Analysis(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def analyze(self) -> Optional[DataFrame]:
+        """Perform financial analysis."""
         pass
 
     @property
-    def options(self) -> Options:
-        if self._options is None:
-            return Options()
+    def options(self) -> Optional[Options]:
+        """Get current analysis options.
+
+        Returns:
+            Optional[Options]: configured options or None.
+        """
         return self._options
 
     @options.setter
     def options(self, options: Options):
+        """Set analysis options.
+
+        Args:
+            options (Options): options
+        """
         self._options = options

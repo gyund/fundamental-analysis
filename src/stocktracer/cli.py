@@ -12,7 +12,6 @@ from pandas.core.groupby.generic import DataFrameGroupBy
 
 from stocktracer.interface import Analysis as AnalysisInterface
 from stocktracer.interface import Options as CliOptions
-from stocktracer.interface import ReportOptions as CliReportOptions
 
 logger = logging.getLogger(__name__)
 

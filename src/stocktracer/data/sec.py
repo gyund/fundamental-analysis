@@ -309,7 +309,6 @@ class DataSetReader:
         stprma	cityma	zipma	mas1	mas2	countryinc	stprinc	ein	former	changed	afs	wksi
         fye	form	period	fy	fp	filed	accepted	prevrpt	detail	instance	nciks	aciks
         """
-        assert True == isinstance(filter, Filter)
         logger.debug("processing sub.txt")
         focus_periods = filter.getFocusPeriod()
         cik_list = filter.getCikList()
@@ -472,7 +471,6 @@ class DataSelector:
         Returns:
             pd.DataFrame: filtered DataFrame
         """
-        assert True == isinstance(ticker, str)
         # Filter out the Stock
         df = self.filterByTicker(ticker=ticker)
         return df

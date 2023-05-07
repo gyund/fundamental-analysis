@@ -1,16 +1,21 @@
 #!/usr/bin/env python
+"""This is the main entrypoint for the CLI."""
 
+import sys
 
 import fire
 
 from stocktracer.cli import Cli
 
 
-def main_cli(command=None) -> any:
-    """Entrypoint
+def main_cli(command: str = None) -> any:
+    """Entry point for the packaging script.
+
+    Args:
+        command (str): alternative input for CLI arguments. Defaults to None.
 
     Returns:
-        any: normal return values from main
+        any: _description_
     """
     cli = Cli()
     try:
@@ -21,4 +26,4 @@ def main_cli(command=None) -> any:
 
 
 if __name__ == "__main__":
-    exit(main_cli())
+    sys.exit(main_cli())

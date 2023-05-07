@@ -80,6 +80,14 @@ jobs:
         run: |
           isort --check src
         if: ${{ always() }}
+      - name: Lint - pylint (src/stocktracer)
+        run: |
+          pylint src/stocktracer
+        if: ${{ always() }}
+      - name: Lint - pydocstyle
+        run: |
+          pydocstyle
+        if: ${{ always() }}
       - name: Lint - pydoctest
         run: |
           PYTHONPATH=src pipenv run pydoctest --config pydocktest.json

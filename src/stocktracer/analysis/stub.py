@@ -14,9 +14,6 @@ class Analysis(AnalysisInterface):
 
         As a stub, this does nothing
 
-        Args:
-            options (Options): options to use for processing
-
         Returns:
             pd.DataFrame: Containing the results of the report
         """

@@ -95,3 +95,34 @@ exclude_lines = [
     "if 0:",
     "if __name__ == .__main__.:"
     ]
+
+[tool.pydocstyle]
+inherit = false
+match = '(?!(test_|conftest)).*\.py'
+match_dir = '^(?!(venv|tests|poc)).*'
+convention = "google"
+
+[tool.pylint.main]
+source-roots = ["src"]
+fail-under = 7
+fail-on = [
+    "redefined-builtin",    # unintended sideaffects
+    "unused-variable",      # cleaner code
+    "no-self-argument",     # possible bug, annotate correctly
+    "use-list-literal",     # cleaner code
+    "no-else-return",       # cleaner code
+    "no-member",            # make explicit for clarity 
+    ]
+
+[tool.pylint."messages control"]
+
+logging-format-style = "new"
+disable = ["line-too-long", "logging-fstring-interpolation", "too-few-public-methods"]
+# disable=["W1203"]
+# disable=["all"]
+
+[tool.pylint.format]
+max-line-length = "88"
+
+[tool.pylint.reports]
+output-format = ["colorized"]
