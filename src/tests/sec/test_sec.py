@@ -49,21 +49,24 @@ class TestSec:
     def test_getData(self, sec_harness: tuple[Sec, mock.MagicMock]):
         (sec, download_manager) = sec_harness
         data_reader = mock.MagicMock(DataSetReader)
-        data_reader.processZip = mock.MagicMock(return_value=pd.DataFrame())
+        data_reader.process_zip = mock.MagicMock(return_value=pd.DataFrame())
 
         ticker_reader = mock.MagicMock(TickerReader)
-        download_manager.get_tickers = mock.MagicMock(return_value=ticker_reader)
-        download_manager.get_data = mock.MagicMock(return_value=data_reader)
+        type(download_manager).ticker_reader = mock.PropertyMock(
+            return_value=ticker_reader
+        )
+        download_manager.get_quarterly_report = mock.MagicMock(return_value=data_reader)
 
         with pytest.raises(
             LookupError, match="No data matching the filter was retrieved"
         ):
-            sec.getData(
+            sec.select_data(
                 tickers=frozenset(("aapl", "msft")),
                 filter=Filter.SecFilter(tags=["test"]),
             )
         ticker_reader.contains.assert_called()
-        data_reader.processZip.assert_called()
+        download_manager.get_quarterly_report.assert_called()
+        data_reader.process_zip.assert_called()
 
 
 def test_reportDate():
@@ -98,7 +101,7 @@ class TestFilter:
             last_report=ReportDate(year=2022, quarter=4),
         )
 
-        required_reports = filter.getRequiredReports()
+        required_reports = filter.required_reports
 
         # You might thing 5, but since companies file annual reports in different quarters,
         # we have to look at all the quarters.
@@ -116,7 +119,7 @@ class TestFilter:
             last_report=ReportDate(year=2022, quarter=4),
             only_annual=False,
         )
-        required_reports = filter.getRequiredReports()
+        required_reports = filter.required_reports
 
         assert len(required_reports) == 5
         assert required_reports[0] == ReportDate(year=2022, quarter=4)

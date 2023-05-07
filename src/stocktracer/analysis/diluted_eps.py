@@ -44,8 +44,10 @@ class Analysis(AnalysisInterface):
         )
 
         # Create an SEC Data Source
+        assert self.options is not None
+        assert self.options.cache_path is not None
         sec = SecDataSource(storage_path=self.options.cache_path)
-        data_selector = sec.getData(tickers=self.options.tickers, filter=sec_filter)
+        data_selector = sec.select_data(tickers=self.options.tickers, filter=sec_filter)
 
         # # Show a quick dump of the data
         # logger.info(f"\n{data_selector.data}")

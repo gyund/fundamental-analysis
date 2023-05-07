@@ -23,26 +23,23 @@ logger = logging.getLogger(__name__)
 @pytest.mark.webtest
 class TestTickerReader:
     def test_contains(self, sec_instance: Sec):
-        tickers = sec_instance.download_manager.get_tickers()
-        assert tickers.contains(frozenset(("aapl", "msft")))
-        assert False == tickers.contains(frozenset(("aapl", "msft", "invalid")))
+        ticker_reader = sec_instance.download_manager.ticker_reader
+        assert ticker_reader.contains(frozenset(("aapl", "msft")))
+        assert False == ticker_reader.contains(frozenset(("aapl", "msft", "invalid")))
 
 
 @pytest.mark.webtest
 class TestDownloadManager:
     def test_getTickers(self, sec_instance: Sec):
-        tickers = sec_instance.download_manager.get_tickers()
-        assert tickers.getCik("AAPL") == 320193
-        assert tickers.getCik("aapl") == 320193
-        assert tickers.getTicker(320193) == "AAPL"
-
-    def test_benchmark_getTickers(self, sec_instance: Sec, benchmark):
-        benchmark(sec_instance.download_manager.get_tickers)
+        ticker_reader = sec_instance.download_manager.ticker_reader
+        assert ticker_reader.convert_to_cik("AAPL") == 320193
+        assert ticker_reader.convert_to_cik("aapl") == 320193
+        assert ticker_reader.convert_to_ticker(320193) == "AAPL"
 
     def test_getData(self, sec_dataselector_2023q1: Sec):
         report: DataSelector = sec_dataselector_2023q1
 
-        tags = report.get_tags()
+        tags = report.tags
         logger.debug(f"tags({len(tags)}): {tags}")
         assert len(tags) > 0
         # TODO: Verify access semantics so we can create a query API on the extracted data
@@ -54,7 +51,7 @@ class TestDownloadManager:
 def test_update(sec_instance: Sec, filter_aapl: Filter.Selectors):
     # pytest.skip(
     #     "skip until we can resolve performance issues with large data sets")
-    data_selector = sec_instance.getData(
+    data_selector = sec_instance.select_data(
         tickers=frozenset(["aapl"]), filter=filter_aapl.sec_filter
     )
     assert data_selector.data.empty == False
@@ -83,7 +80,7 @@ def test_multi_stock_request_over_1year(sec_instance: SecDataSource):
         only_annual=True,  # We only want the 10-K
     )
     tickers = frozenset(["aapl", "msft", "goog", "tmo"])
-    data_selector = sec_instance.getData(tickers=tickers, filter=sec_filter)
+    data_selector = sec_instance.select_data(tickers=tickers, filter=sec_filter)
     logger.debug(data_selector)
     # Get series for data and make sure they're all yearly-focus(YF)/annual reports
     yearly_focus_periods = "FY"

@@ -33,6 +33,9 @@ class Analysis(metaclass=abc.ABCMeta):
         _type_: _description_
     """
 
+    def __init__(self) -> None:
+        self.options: Optional[Options] = None
+
     @abc.abstractmethod
     def analyze(self) -> Optional[DataFrame]:
         """Perform financial analysis.
@@ -40,20 +43,3 @@ class Analysis(metaclass=abc.ABCMeta):
         Returns:
             Optional[DataFrame]: results of analysis
         """
-
-    @property
-    def options(self) -> Optional[Options]:
-        """Get current analysis options.
-
-        Returns:
-            Optional[Options]: configured options or None.
-        """
-
-    @options.setter
-    def options(self, options: Options):
-        """Set analysis options.
-
-        Args:
-            options (Options): options
-        """
-        self._options = options

@@ -36,7 +36,7 @@ class TestDataSelector:
         assert "cik" in sec_fake_report.data.index.names
 
     def test_getTags(self, sec_fake_report: DataSelector):
-        tags = sec_fake_report.get_tags()
+        tags = sec_fake_report.tags
         assert len(tags) == 1
         assert "EntityCommonStockSharesOutstanding" in tags
 
