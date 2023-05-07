@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 @beartype
 def get_analysis_instance(module_name: str) -> AnalysisInterface:
-    """Dynamically import and load the Analysis class from a module
+    """Dynamically import and load the Analysis class from a module.
 
     Args:
         module_name (str): full name of the module. For example, "my.module"
@@ -35,7 +35,7 @@ def get_analysis_instance(module_name: str) -> AnalysisInterface:
 
 @beartype
 def get_default_cache_path() -> Path:
-    """Get the default path for caching data
+    """Get the default path for caching data.
 
     Returns:
         Path: path to cache data
@@ -45,7 +45,6 @@ def get_default_cache_path() -> Path:
 
 @beartype
 class Cli:
-
     """Tools for gathering resources, analyzing data, and publishing the results."""
 
     _default_analysis_module = "stocktracer.analysis.stub"
@@ -57,7 +56,7 @@ class Cli:
         refresh: bool = False,
         analysis_plugin: str = _default_analysis_module,
     ) -> Optional[pd.DataFrame]:
-        """Perform stock analysis
+        """Perform stock analysis.
 
         Args:
             tickers (Union[Sequence[str], str]): tickers to include in the analysis
@@ -113,7 +112,8 @@ class Cli:
 
 @beartype
 def get_cached_results_key(tickers: frozenset[str], analysis_module: str) -> str:
-    """
+    """Get the key used for caching results from analyzed data.
+
     >>> get_cached_results_key(frozenset({"aapl","msft"}),"my.analysis")
     'my.analysis-aapl-msft'
 

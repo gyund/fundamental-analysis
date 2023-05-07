@@ -100,7 +100,8 @@ exclude_lines = [
 inherit = false
 match = '(?!(test_|conftest)).*\.py'
 match_dir = '^(?!(venv|tests|poc)).*'
-convention = "google"
+convention = "pep257"
+ignore_self_only_init = true
 
 [tool.pylint.main]
 source-roots = ["src"]

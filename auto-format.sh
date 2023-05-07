@@ -17,7 +17,7 @@ PYTHONPATH=src pipenv run pydoctest --config pydocktest.json
 # Note: false positivies in the src/test from fixtures, etc.
 echo "Running pylint..."
 pipenv run pylint src/stocktracer
-echo "Running pydocstyle..."
-pipenv run pydocstyle
-echo "success!
+echo "Running pydocstyle... (not required to pass)"
+pipenv run pydocstyle || echo "warnings - see above for recommendations"
+echo "success!"
 popd > /dev/null

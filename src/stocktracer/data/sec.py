@@ -1,5 +1,4 @@
-"""This data source grabs information from quarterly SEC data archives.
-"""
+"""This data source grabs information from quarterly SEC data archives."""
 import logging
 from datetime import date, timedelta
 from io import BytesIO
@@ -24,6 +23,15 @@ class ReportDate:
         year: int = date.today().year,
         quarter: int = ((date.today().month - 1) // 3) + 1,
     ):
+        """ReportDate is used to select and identify archives created by the SEC.
+
+        Args:
+            year (int, optional): Year of the archive. Defaults to date.today().year.
+            quarter (int, optional): Quarter the archive was created. Defaults to ((date.today().month - 1) // 3)+1.
+
+        Raises:
+            ValueError: If the value for quarter or year is invalid
+        """
         if year > date.today().year:
             raise ValueError(
                 "you cannot request reports in the future...that would be illegal :)"
@@ -42,14 +50,6 @@ class ReportDate:
         return f"ReportDate({self.year},{self.quarter})"
 
     def __eq__(self, other: "ReportDate") -> bool:
-        """
-
-        Args:
-            other ('ReportDate'): _description_
-
-        Returns:
-            bool: true if equal
-        """
         return self.quarter == other.quarter and self.year == other.year
 
 
@@ -59,7 +59,7 @@ class TickerReader:
         self._data = pd.read_json(data, orient="index")
 
     def convert_to_cik(self, ticker: str) -> np.int64:
-        """Get the Cik from the stock ticker
+        """Get the Cik from the stock ticker.
 
         Args:
             ticker (str): stock ticker. The case does not matter.
@@ -78,7 +78,7 @@ class TickerReader:
         return result.cik_str.iloc[0]
 
     def convert_to_ticker(self, cik: int) -> str:
-        """Get the stock ticker from the Cik number
+        """Get the stock ticker from the Cik number.
 
         Args:
             cik (int): Cik number for the stock
@@ -90,7 +90,7 @@ class TickerReader:
         return result.ticker.iloc[0]
 
     def contains(self, tickers: frozenset) -> bool:
-        """Check that the tickers provided exist
+        """Check that the tickers provided exist.
 
         Args:
             tickers (frozenset): tickers to check
@@ -151,7 +151,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
 
     @property
     def ciks(self) -> set[int]:
-        """Retrieves a list of CIK values corresponding to the tickers being looked up
+        """Retrieves a list of CIK values corresponding to the tickers being looked up.
 
         The SEC object will call populateCikList to generate this information. This helps
         with dependency injection by avoiding the Filter having to maintain references to
@@ -190,7 +190,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
 
     @property
     def focus_period(self) -> list[str]:
-        """Get the focus period for the report
+        """Get the focus period for the report.
 
         Companies file quarterly reports. The annual report replaces the quarterly
         report depending on when that is reported. Typically Q4 is replaced with FY
@@ -238,13 +238,13 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
 
 @beartype
 class DataSetReader:
-    """Reads the data from a zip file retrieved from the SEC website"""
+    """Reads the data from a zip file retrieved from the SEC website."""
 
     def __init__(self, zip_data: bytes) -> None:
         self.zip_data = BytesIO(zip_data)
 
     def process_zip(self, filter: Filter) -> Optional[pd.DataFrame]:
-        """Process a zip archive with the provided filter
+        """Process a zip archive with the provided filter.
 
         Args:
             filter (Filter): results to filter out of the zip archive
@@ -272,7 +272,7 @@ class DataSetReader:
     def _processNumText(
         cls, filepath_or_buffer, filter: Filter, sub_dataframe: pd.DataFrame
     ) -> Optional[pd.DataFrame]:
-        """Contains the numerical data
+        """Contains the numerical data.
 
         adsh	tag	version	coreg	ddate	qtrs	uom	value	footnote
 
@@ -313,7 +313,7 @@ class DataSetReader:
     def _processSubText(
         cls, filepath_or_buffer, filter: Filter
     ) -> Optional[pd.DataFrame]:
-        """Contains the submissions
+        """Contains the submissions.
 
         adsh	cik	name	sic	countryba	stprba	cityba	zipba	bas1	bas2	baph	countryma
         stprma	cityma	zipma	mas1	mas2	countryinc	stprinc	ein	former	changed	afs	wksi
@@ -365,7 +365,7 @@ class DownloadManager:
 
     @property
     def ticker_reader(self) -> TickerReader:
-        """Get the CIK ticker mappings. This must be done before processing reports
+        """Get the CIK ticker mappings. This must be done before processing reports.
 
         The SEC stores the mappings of the CIK values to tickers in a JSON file.
         We can download and cache this information essentially for a year. We're
@@ -395,7 +395,7 @@ class DownloadManager:
         return "/".join([self._base_url, file])
 
     def get_quarterly_report(self, report_date: ReportDate) -> DataSetReader:
-        """Retrieves from a cache or makes a request to retrieve archived quarterly data.
+        """Retrieve from a cache or make a request archived quarterly data.
 
         This allows us to download data independent of actually processing it, allowing
         us to prefetch information we need if we like.
@@ -427,7 +427,7 @@ class DataSelector:
     _period_focus = Literal["FY", "Q1", "Q2", "Q3", "Q4"]
 
     def __init__(self, data: pd.DataFrame, ticker_reader: TickerReader) -> None:
-        """Class for helping select data
+        """Class for helping select data.
 
         This helps the user to some extent avoid some specifics about the pandas table structure.
 
@@ -440,7 +440,7 @@ class DataSelector:
 
     @property
     def tags(self) -> pd.Index:
-        """Get a list of the tag values filtered from the results
+        """Get a list of the tag values filtered from the results.
 
         Returns:
             pd.Index: tag values
@@ -473,7 +473,7 @@ class DataSelector:
         self,
         ticker: str,
     ) -> pd.DataFrame:
-        """Select only a subset of the data matching the specified criteria
+        """Select only a subset of the data matching the specified criteria.
 
         Args:
             ticker (str): ticker symbol for the company
@@ -488,13 +488,13 @@ class DataSelector:
 
 @beartype
 class DataSetCollector:
-    """Take care of downloading all the data sets and aggregate them into a single structure"""
+    """Take care of downloading all the data sets and aggregate them into a single structure."""
 
     def __init__(self, download_manager: DownloadManager):
         self.download_manager = download_manager
 
     def getData(self, filter: Filter) -> pd.DataFrame:
-        """Collect data based on the provided filter
+        """Collect data based on the provided filter.
 
         Args:
             filter (Filter): SEC specific filter of how to filter the results
@@ -539,6 +539,11 @@ class DataSetCollector:
 @beartype
 class Sec:
     def __init__(self, storage_path: Path):
+        """Object for handling requests for information relating to SEC data dumps.
+
+        Args:
+            storage_path (Path): Where to store the results.
+        """
         storage_path.mkdir(parents=True, exist_ok=True)
         data_session = CachedSession(
             "data",

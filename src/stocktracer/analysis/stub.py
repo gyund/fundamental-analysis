@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class Analysis(AnalysisInterface):
     def analyze(self) -> Optional[pd.DataFrame]:
-        """Analyze the report
+        """Analyze the report.
 
         As a stub, this does nothing
 

@@ -1,4 +1,4 @@
-""" Interfaces for the StockTracer Module."""
+"""Interfaces for the StockTracer Module."""
 import abc
 from pathlib import Path
 from typing import Optional
@@ -9,10 +9,10 @@ from pandas import DataFrame
 
 @beartype
 class Options:
-    """Command Line Options"""
+    """Command Line Options."""
 
     def __init__(self, tickers: frozenset[str], cache_path: Path):
-        """Options
+        """Options.
 
         Args:
             tickers (frozenset[str]): tickers to scrape from data sets
