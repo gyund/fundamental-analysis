@@ -73,6 +73,30 @@ jobs:
       #     parallel: true
       #     format: python
       #   if: ${{ success() }}
+      
+      # - name: Upload pytest test results
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: pytest-results-${{ matrix.python-version }}
+      #     path: junit/test-results-${{ matrix.python-version }}.xml
+      #   # Use always() to always run this step to publish test results when there are test failures
+      #   if: ${{ always() }}
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+          pipenv requirements --dev > requirements.txt
+          pip install -r requirements.txt
       - name: Lint - Ruff 
         run: |
           ruff src 
@@ -97,13 +121,6 @@ jobs:
         run: |
           PYTHONPATH=src pipenv run pydoctest --config pydocktest.json
         if: ${{ always() }}
-      # - name: Upload pytest test results
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: pytest-results-${{ matrix.python-version }}
-      #     path: junit/test-results-${{ matrix.python-version }}.xml
-      #   # Use always() to always run this step to publish test results when there are test failures
-      #   if: ${{ always() }}
 
   finish:
     needs: build
