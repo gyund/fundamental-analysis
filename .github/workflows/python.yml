@@ -60,7 +60,7 @@ jobs:
       # Just to cut down on network testing while initially iterating
       - name: Run - network-tests
         run: |
-          coverage run -m pytest -m webtest
+          coverage run -m pytest -m webtest --run-webtest
         if: ${{ !github.event.pull_request.draft }}
       - name: Coveralls
         run: |
