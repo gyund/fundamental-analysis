@@ -50,7 +50,7 @@ jobs:
           key: sqlite-${{ hashFiles('**/tests/fixtures/network.py') }}
           path: |
             **/.ticker-cache/*.sqlite
-        if: ${{ github.event.pull_request.draft == 'false' }}
+        if: ${{ !github.event.pull_request.draft }}
       - name: Run - unit-tests
         run: |
           coverage run -m pytest --doctest-modules
@@ -61,7 +61,7 @@ jobs:
       - name: Run - network-tests
         run: |
           coverage run -m pytest -m webtest
-        if: ${{ github.event.pull_request.draft == 'false' }}
+        if: ${{ !github.event.pull_request.draft }}
       - name: Coveralls
         run: |
           coveralls --service=github
