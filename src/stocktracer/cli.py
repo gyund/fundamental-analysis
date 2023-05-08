@@ -1,9 +1,11 @@
 """This is the CLI class for stocktracer."""
 import importlib
+import io
 import logging
 import os
+import sys
 from pathlib import Path
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import pandas as pd
 from beartype import beartype
@@ -43,6 +45,9 @@ def get_default_cache_path() -> Path:
     return Path(os.getcwd()) / ".ticker-cache"
 
 
+ReportFormat = Literal["csv", "md", "json"]
+
+
 @beartype
 class Cli:
     """Tools for gathering resources, analyzing data, and publishing the results."""
@@ -52,9 +57,11 @@ class Cli:
     def analyze(
         self,
         tickers: Union[Sequence[str], str],
-        cache_path: Path = get_default_cache_path(),
+        cache_path: str = str(get_default_cache_path()),
         refresh: bool = False,
         analysis_plugin: str = _default_analysis_module,
+        report_format: Optional[ReportFormat] = "md",
+        report_file: Optional[str] = None,
     ) -> Optional[pd.DataFrame]:
         """Perform stock analysis.
 
@@ -63,13 +70,18 @@ class Cli:
             cache_path (Path): path where to cache data
             refresh (bool): Whether to refresh the calculation or use the results from a prior one
             analysis_plugin (str): module to load for analysis
+            report_format (Optional[ReportFormat]): Format of the report. Options include: csv, json, md (markdown)
+            report_file (Optional[Path]): Where to store the report. Required if report_format is specified.
 
         Raises:
             LookupError: no analysis results found
 
         Returns:
-            Optional[DataFrame]: results of analysis
+            Optional[pd.DataFrame]: results of analysis
         """
+        cache_path = Path(cache_path)
+        if report_file:
+            report_file = Path(report_file)
         if isinstance(tickers, str):
             tickers = frozenset([tickers])
         else:
@@ -98,7 +110,26 @@ class Cli:
             # Save one week expiry
             cache.set(key=results_key, value=results, expire=3600 * 24 * 7)
 
-        print(results.to_markdown())
+        self._generate_report(report_format, report_file, results)
+
+    @classmethod
+    def _generate_report(
+        cls,
+        report_format: ReportFormat,
+        report_file: Path | io.StringIO | None,
+        results: pd.DataFrame,
+    ):
+        if report_file is None:
+            report_file = io.StringIO()
+        match report_format.lower():
+            case "csv":
+                results.to_csv(report_file)
+            case "md":
+                results.to_markdown(report_file)
+            case "json":
+                results.to_json(report_file)
+        if isinstance(report_file, io.StringIO):
+            print(report_file.getvalue())
 
     def _get_cached_results(
         self, tickers, cache_path, analysis_plugin

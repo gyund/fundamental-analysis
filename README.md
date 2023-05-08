@@ -47,6 +47,9 @@ pipenv install --dev
 
 # Perform analysis (not supported yet)
 PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft
+PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps
+PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format csv
+PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format json --report-file my_results.json
 
 # Help
 PYTHONPATH=src pipenv run python -m stocktracer
