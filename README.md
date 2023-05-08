@@ -3,6 +3,8 @@
     <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/stocktracer">
     <a href='https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml'><img alt="Test Status" src="https://github.com/gyund/fundamental-analysis/actions/workflows/python.yml/badge.svg?service=github"></a>
     <a href='https://coveralls.io/github/gyund/fundamental-analysis?branch=main'><img src='https://coveralls.io/repos/github/gyund/fundamental-analysis/badge.svg?branch=main&service=github' alt='Coverage Status' /></a>
+    <a href="https://beartype.readthedocs.io"><img src="https://raw.githubusercontent.com/beartype/beartype-assets/main/badge/bear-ified.svg?" alt="bear-ified"></a>
+    <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg?" alt="Code style: black"></a>
     <img alt="PyPI - Status" src="https://img.shields.io/pypi/status/stocktracer?">
 </p>
 
@@ -38,13 +40,16 @@ stocktracer
 
 ### Developers
 
-Make sure you have `pipenv` installed through a package manager or through pip. You may also use the generated `requirements.txt` but note that these are generated using `pipenv` when we make changes to to dependencies.
+Make sure you have `pipenv` installed through a package manager or through pip.
 
 ```sh
 pipenv install --dev
 
 # Perform analysis (not supported yet)
 PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft
+PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps
+PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format csv
+PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format json --report-file my_results.json
 
 # Help
 PYTHONPATH=src pipenv run python -m stocktracer

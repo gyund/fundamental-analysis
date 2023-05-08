@@ -38,15 +38,12 @@ python -m ticker analyze --tickers aapl,msft
 If you wish to use your own analysis plugin, create your own module that implements this interface:
 
 ```python
-from ticker.cli import Options, ReportOptions
 from ticker.data.sec import DataSelector as SecDataSelector
 from ticker.filter import Selectors,SecFilter
 
 def analyze(options: Options) -> None:
     print("This is where we would start to process information, but we're not right now")
 
-def report(options: ReportOptions) -> None: 
-    print("This is where we would report our findings, but we're not right now")
 ```
 
 Then call the tool in the following manner:

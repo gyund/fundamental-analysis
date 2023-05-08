@@ -1,35 +1,23 @@
+"""This stub serves an example for module developers."""
 import logging
+from typing import Optional
 
 import pandas as pd
 
-from stocktracer.cli import Options, ReportOptions
+from stocktracer.interface import Analysis as AnalysisInterface
 
 logger = logging.getLogger(__name__)
 
 
-def analyze(options: Options) -> None:
-    """Analyze the report
+class Analysis(AnalysisInterface):
+    def analyze(self) -> Optional[pd.DataFrame]:
+        """Analyze the report.
 
-    As a stub, this does nothing
+        As a stub, this does nothing
 
-    Args:
-        options (Options): options to use for processing
-    """
-    print(
-        "This is where we would start to process information, but we're not right now"
-    )
-
-
-def report(options: ReportOptions) -> None:
-    """Generate a report
-
-    As a stub, this does nothing, but normally it provides a mechanism
-    to customize the report generated from the analysis phase.
-
-    This allows you to keep processed data in a intermediary format and create reports from
-    already processed data without having to do it again.
-
-    Args:
-        options (ReportOptions): Reporting options to use for processing
-    """
-    print("This is where we would report our findings, but we're not right now")
+        Returns:
+            Optional[pd.DataFrame]: Always None, since the stub doesn't analyze anything.
+        """
+        print(
+            "This is where we would start to process information, but we're not right now"
+        )

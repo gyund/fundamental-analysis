@@ -13,7 +13,7 @@ def test_Selectors_init():
         Filter.Selectors(ticker_filter={"aapl"}, sec_filter=SecFilter())
     selector = Filter.Selectors(
         ticker_filter={"aapl"},
-        sec_filter=SecFilter(tags={"EntityCommonStockSharesOutstanding"}),
+        sec_filter=SecFilter(tags=["EntityCommonStockSharesOutstanding"]),
     )
     assert "aapl" in selector.ticker_filter
     assert "EntityCommonStockSharesOutstanding" in selector.sec_filter.tags
