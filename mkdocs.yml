@@ -1,4 +1,16 @@
 site_name: StockTracer
+nav:
+  - Welcome: index.md
+  - Getting Started: getting-started.md
+  - Design:
+      - design/index.md
+      - Data Retrieval: design/data-retrieval.md
+      # - Analysis: design/analysis.md
+      # - Report: design/report.md
+      - Caching: design/caching.md
+      - Reference: design/reference.md
+  - Code Reference: reference/
+  
 theme:
   name: material
   palette:
@@ -91,14 +103,3 @@ extra:
       make our documentation better. 
 copyright: Copyright &copy; 2023 Gary Yund
 
-nav:
-  - Welcome: index.md
-  - Getting Started: getting-started.md
-  - Design:
-      - design/index.md
-      - Data Retrieval: design/data-retrieval.md
-      # - Analysis: design/analysis.md
-      # - Report: design/report.md
-      - Caching: design/caching.md
-      - Reference: design/reference.md
-  - Code Reference: reference/

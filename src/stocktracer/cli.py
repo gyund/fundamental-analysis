@@ -51,14 +51,12 @@ ReportFormat = Literal["csv", "md", "json"]
 class Cli:
     """Tools for gathering resources, analyzing data, and publishing the results."""
 
-    _default_analysis_module = "stocktracer.analysis.stub"
-
     def analyze(
         self,
         tickers: Union[Sequence[str], str],
         cache_path: str = str(get_default_cache_path()),
         refresh: bool = False,
-        analysis_plugin: str = _default_analysis_module,
+        analysis_plugin: str = "stocktracer.analysis.stub",
         report_format: Optional[ReportFormat] = "md",
         report_file: Optional[str] = None,
     ) -> Optional[pd.DataFrame]:
