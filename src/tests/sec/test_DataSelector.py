@@ -1,6 +1,8 @@
 import logging
 
 import mock
+import numpy as np
+import pandas as pd
 
 from stocktracer.data.sec import DataSelector
 from tests.fixtures.unit import (
@@ -8,8 +10,10 @@ from tests.fixtures.unit import (
     fake_data_txt_sample,
     fake_sub_txt_sample,
     filter_aapl,
+    filter_aapl_years,
     sec_fake_report,
     sec_manufactured_fake_report,
+    sec_manufactured_fake_report_impl,
     sub_txt_sample,
 )
 
@@ -35,10 +39,11 @@ class TestDataSelector:
         assert "tag" in sec_fake_report.data.index.names
         assert "cik" in sec_fake_report.data.index.names
 
-    def test_getTags(self, sec_fake_report: DataSelector):
-        tags = sec_fake_report.tags
-        assert len(tags) == 1
+    def test_getTags(self, sec_manufactured_fake_report: DataSelector):
+        tags = sec_manufactured_fake_report.tags
+        assert len(tags) == 2
         assert "EntityCommonStockSharesOutstanding" in tags
+        assert "FakeAttributeTag" in tags
 
     def test_filterByTicker(self, sec_fake_report: DataSelector):
         # Create a sample set of typical queries one might make with the DataSelector
@@ -53,7 +58,7 @@ class TestDataSelector:
         df = sec_fake_report.select(ticker="AAPL")
         assert df is not None
 
-    def test_select_and_pivot(self, sec_manufactured_fake_report: DataSelector):
+    def test_select(self, sec_manufactured_fake_report: DataSelector):
         """Test to figure out how best to orient the table for summarizing data"""
         sec_manufactured_fake_report._get_cik = mock.Mock(return_value=320193)
         df = sec_manufactured_fake_report.select(ticker="AAPL")
@@ -68,3 +73,32 @@ class TestDataSelector:
                 "cik==320193 and tag=='EntityCommonStockSharesOutstanding' and value==6000"
             ).empty
         )
+
+    def test_select_and_pivot(
+        self, fake_sub_txt_sample: str, fake_data_txt_sample: str
+    ):
+        """
+                                                                            ddate  ...  fp
+        adsh                 tag                                cik                ...
+        0000320193-23-000002 EntityCommonStockSharesOutstanding 320193 2023-01-31  ...  Q1
+                             FakeAttributeTag                   320193 2023-01-31  ...  Q1
+        0000320193-23-000003 EntityCommonStockSharesOutstanding 320193 2023-01-31  ...  Q2
+                             FakeAttributeTag                   320193 2023-01-31  ...  Q2
+        0000320193-23-000004 EntityCommonStockSharesOutstanding 320193 2023-01-31  ...  Q3
+                             FakeAttributeTag                   320193 2023-01-31  ...  Q3
+        0000320193-23-000005 EntityCommonStockSharesOutstanding 320193 2023-01-31  ...  Q4
+                             FakeAttributeTag                   320193 2023-01-31  ...  Q4
+        0000320193-23-000006 EntityCommonStockSharesOutstanding 320193 2023-01-31  ...  Q1
+                             FakeAttributeTag                   320193 2023-01-31  ...  Q1
+        """
+        aapl_filter = filter_aapl_years(1)
+        data_selector = sec_manufactured_fake_report_impl(
+            aapl_filter, fake_sub_txt_sample, fake_data_txt_sample
+        )
+        logger.debug(f"\n{data_selector.data}")
+        table = pd.pivot_table(
+            data_selector.data, values="value", index=["cik", "tag"], aggfunc=np.average
+        )
+        logger.debug(f"processed:\n{table}")
+        assert table.loc[320193].loc["EntityCommonStockSharesOutstanding"][0] == 4000
+        assert table.loc[320193].loc["FakeAttributeTag"][0] == 400

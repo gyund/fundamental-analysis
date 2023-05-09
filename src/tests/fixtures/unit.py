@@ -8,12 +8,16 @@ from stocktracer.data.sec import DataSelector, DataSetReader, ReportDate, Ticker
 
 
 @pytest.fixture
-def filter_aapl() -> Filter.Selectors:
+def filter_aapl():
+    return filter_aapl_years()
+
+
+def filter_aapl_years(history_in_years: int = 0) -> Filter.Selectors:
     return Filter.Selectors(
         ticker_filter={"aapl"},
         sec_filter=Filter.SecFilter(
             tags=["EntityCommonStockSharesOutstanding"],
-            years=0,  # Just want the current
+            years=history_in_years,  # Just want the current
             last_report=ReportDate(year=2023, quarter=1),
             only_annual=False,
         ),  # We want the 10-Q
@@ -95,16 +99,24 @@ def sec_fake_report(
 def sec_manufactured_fake_report(
     filter_aapl: Filter.Selectors, fake_sub_txt_sample, fake_data_txt_sample
 ) -> DataSelector:
-    filter_aapl.sec_filter._cik_list = set()
-    filter_aapl.sec_filter._cik_list.add(320193)
-    filter_aapl.sec_filter.tags.append("FakeAttributeTag")
+    return sec_manufactured_fake_report_impl(
+        filter_aapl, fake_sub_txt_sample, fake_data_txt_sample
+    )
+
+
+def sec_manufactured_fake_report_impl(
+    selector: Filter.Selectors, sub_txt: str, data_txt: str
+) -> DataSelector:
+    selector.sec_filter._cik_list = set()
+    selector.sec_filter._cik_list.add(320193)
+    selector.sec_filter.tags.append("FakeAttributeTag")
     sub_df = DataSetReader._processSubText(
-        filepath_or_buffer=io.StringIO(fake_sub_txt_sample),
-        filter=filter_aapl.sec_filter,
+        filepath_or_buffer=io.StringIO(sub_txt),
+        filter=selector.sec_filter,
     )
     num_df = DataSetReader._processNumText(
-        filepath_or_buffer=io.StringIO(fake_data_txt_sample),
-        filter=filter_aapl.sec_filter,
+        filepath_or_buffer=io.StringIO(data_txt),
+        filter=selector.sec_filter,
         sub_dataframe=sub_df,
     )
     ticker_reader = mock.MagicMock(TickerReader)
