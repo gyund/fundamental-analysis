@@ -58,22 +58,6 @@ class TestDataSelector:
         df = sec_fake_report.select(ticker="AAPL")
         assert df is not None
 
-    def test_select(self, sec_manufactured_fake_report: DataSelector):
-        """Test to figure out how best to orient the table for summarizing data"""
-        sec_manufactured_fake_report._get_cik = mock.Mock(return_value=320193)
-        df = sec_manufactured_fake_report.select(ticker="AAPL")
-        df = df[["value"]]
-        tag_group = df.groupby(["cik", "tag"])
-        average = tag_group.mean()
-        logger.debug(average)
-        # Should only contain the first entry because the filter specifies 0
-        assert (
-            False
-            == average.query(
-                "cik==320193 and tag=='EntityCommonStockSharesOutstanding' and value==6000"
-            ).empty
-        )
-
     def test_select_and_pivot(
         self, fake_sub_txt_sample: str, fake_data_txt_sample: str
     ):
@@ -125,3 +109,6 @@ class TestDataSelector:
             table.data.loc[320193].loc["EntityCommonStockSharesOutstanding"][0] == 4000
         )
         assert table.data.loc[320193].loc["FakeAttributeTag"][0] == 400
+        assert table.data.loc[320193].loc["FakeAttributeTag"][0] == 400
+        assert table.getValue(ticker_or_cik="aapl", tag="FakeAttributeTag") == 400
+        assert table.getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 400

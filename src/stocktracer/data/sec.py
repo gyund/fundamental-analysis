@@ -3,7 +3,7 @@ import logging
 from datetime import date, timedelta
 from io import BytesIO
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal, Optional, SupportsInt
 from zipfile import ZipFile
 
 import numpy as np
@@ -485,8 +485,17 @@ class DataSelector:
 
         """
 
-        def __init__(self, table: pd.DataFrame) -> None:
+        def __init__(self, table: pd.DataFrame, ticker_reader: TickerReader) -> None:
             self.data = table
+            self._ticker_reader = ticker_reader
+
+        def getValue(self, ticker_or_cik: str | int, tag: str) -> SupportsInt:
+            if isinstance(ticker_or_cik, int):
+                return self.data.loc[ticker_or_cik].loc[tag][0]
+            # Lookup convert ticker to cik
+            return self.data.loc[self._ticker_reader.convert_to_cik(ticker_or_cik)].loc[
+                tag
+            ][0]
 
     def select(
         self,
@@ -517,7 +526,7 @@ class DataSelector:
             if ciks:
                 table = table.query("cik in @ciks")
 
-        return DataSelector.Table(table)
+        return DataSelector.Table(table, self._ticker_reader)
 
 
 @beartype
