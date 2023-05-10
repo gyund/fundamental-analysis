@@ -4,7 +4,7 @@ import mock
 import numpy as np
 import pandas as pd
 
-from stocktracer.data.sec import DataSelector
+from stocktracer.data.sec import DataSelector, TickerReader
 from tests.fixtures.unit import (
     data_txt_sample,
     fake_data_txt_sample,
@@ -102,3 +102,26 @@ class TestDataSelector:
         logger.debug(f"processed:\n{table}")
         assert table.loc[320193].loc["EntityCommonStockSharesOutstanding"][0] == 4000
         assert table.loc[320193].loc["FakeAttributeTag"][0] == 400
+
+        table = data_selector.select(aggregate_func=np.average)
+        assert (
+            table.data.loc[320193].loc["EntityCommonStockSharesOutstanding"][0] == 4000
+        )
+        assert table.data.loc[320193].loc["FakeAttributeTag"][0] == 400
+
+        data_selector._ticker_reader = mock.MagicMock(TickerReader)
+        data_selector._ticker_reader.convert_to_cik = mock.Mock(return_value=12345)
+        table = data_selector.select(aggregate_func=np.average, tickers=["bad"])
+        # normally bad tickers throw exceptions, but we'll just have it filter on
+        # an index we don't have so we get an empty value
+        assert table.data.empty == True
+
+        # Filter on aapl and get only thses results
+        # data_selector._ticker_reader = mock.MagicMock(TickerReader)
+        data_selector._ticker_reader.convert_to_cik = mock.Mock(return_value=320193)
+        table = data_selector.select(aggregate_func=np.average, tickers=["aapl"])
+        logger.debug(f"processed-ticker:\n{table.data}")
+        assert (
+            table.data.loc[320193].loc["EntityCommonStockSharesOutstanding"][0] == 4000
+        )
+        assert table.data.loc[320193].loc["FakeAttributeTag"][0] == 400

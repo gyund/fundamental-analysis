@@ -9,6 +9,7 @@ from zipfile import ZipFile
 import numpy as np
 import pandas as pd
 from beartype import beartype
+from beartype.typing import Callable, Sequence
 from requests_cache import CachedSession, SQLiteCache
 
 logger = logging.getLogger(__name__)
@@ -435,6 +436,7 @@ class DataSelector:
             data (pd.DataFrame): Filtered data from processing
             ticker_reader (TickerReader): Reader that helps convert tickers to CIKs
         """
+
         self.data: pd.DataFrame = data
         self._ticker_reader: TickerReader = ticker_reader
 
@@ -469,21 +471,53 @@ class DataSelector:
             data = self.data
         return data.query(f"cik == {cik}")
 
+    class Table:
+        """This is a table that is the output from a `DataSelector.select()` call.
+
+        When data is converted, it creates a pivot table that looks like the following:
+
+                                                        value
+            cik    tag
+            320193 EntityCommonStockSharesOutstanding   4000.0
+                   FakeAttributeTag                     400.0
+            ...
+
+
+        """
+
+        def __init__(self, table: pd.DataFrame) -> None:
+            self.data = table
+
     def select(
         self,
-        ticker: str,
-    ) -> pd.DataFrame:
+        aggregate_func: Callable | Literal["mean", "average", "sum"],
+        tickers: Optional[Sequence[str]] = None,
+    ) -> Table:
         """Select only a subset of the data matching the specified criteria.
 
+
         Args:
-            ticker (str): ticker symbol for the company
+            aggfunc (Callable): Numpy function to use for aggregating the results. This should be a function like `numpy.average` or `numpy.sum`.
+            tickers (Optional[Sequence[str]]): ticker symbol for the company
 
         Returns:
             pd.DataFrame: filtered DataFrame
         """
-        # Filter out the Stock
-        data_frame = self.filterByTicker(ticker=ticker)
-        return data_frame
+        table: pd.DataFrame = pd.pivot_table(
+            self.data, values="value", index=["cik", "tag"], aggfunc=aggregate_func
+        )
+
+        ciks = set()
+        if tickers:
+            for t in tickers:
+                ciks.add(self._get_cik(t))
+
+            logger.debug(f"filtering on ciks: {ciks}")
+
+            if ciks:
+                table = table.query("cik in @ciks")
+
+        return DataSelector.Table(table)
 
 
 @beartype
