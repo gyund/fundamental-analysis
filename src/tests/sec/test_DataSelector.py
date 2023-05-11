@@ -114,9 +114,39 @@ class TestDataSelector:
         assert table.getValue(ticker_or_cik="aapl", tag="FakeAttributeTag") == 400
         assert table.getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 400
 
-        assert data_selector.select(aggregate_func="max", tickers=["aapl"]).getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 600
-        assert data_selector.select(aggregate_func="min", tickers=["aapl"]).getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 200
-        assert data_selector.select(aggregate_func="mean", tickers=["aapl"]).getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 400
-        assert data_selector.select(aggregate_func="std", tickers=["aapl"]).getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 158.11388300841898
-        assert data_selector.select(aggregate_func="sum", tickers=["aapl"]).getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 2000
-        assert data_selector.select(aggregate_func="var", tickers=["aapl"]).getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 25000
+        assert (
+            data_selector.select(aggregate_func="max", tickers=["aapl"]).getValue(
+                ticker_or_cik=320193, tag="FakeAttributeTag"
+            )
+            == 600
+        )
+        assert (
+            data_selector.select(aggregate_func="min", tickers=["aapl"]).getValue(
+                ticker_or_cik=320193, tag="FakeAttributeTag"
+            )
+            == 200
+        )
+        assert (
+            data_selector.select(aggregate_func="mean", tickers=["aapl"]).getValue(
+                ticker_or_cik=320193, tag="FakeAttributeTag"
+            )
+            == 400
+        )
+        assert (
+            data_selector.select(aggregate_func="std", tickers=["aapl"]).getValue(
+                ticker_or_cik=320193, tag="FakeAttributeTag"
+            )
+            == 158.11388300841898
+        )
+        assert (
+            data_selector.select(aggregate_func="sum", tickers=["aapl"]).getValue(
+                ticker_or_cik=320193, tag="FakeAttributeTag"
+            )
+            == 2000
+        )
+        assert (
+            data_selector.select(aggregate_func="var", tickers=["aapl"]).getValue(
+                ticker_or_cik=320193, tag="FakeAttributeTag"
+            )
+            == 25000
+        )

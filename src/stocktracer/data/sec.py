@@ -502,7 +502,9 @@ class DataSelector:
 
     def select(
         self,
-        aggregate_func: Optional[Callable | Literal["mean", "std", "var", "sum", "min","max"]] = "mean",
+        aggregate_func: Optional[
+            Callable | Literal["mean", "std", "var", "sum", "min", "max"]
+        ] = "mean",
         tickers: Optional[Sequence[str]] = None,
     ) -> Table:
         """Select only a subset of the data matching the specified criteria.
