@@ -137,6 +137,13 @@ class Filter:
         self.only_annual = only_annual
         self._cik_list: set[int] = None
 
+        # Filtered data looks like this:
+        # ticker,tag,cik,ddate,uom,value,period,fy,fp,title
+        # TMO,EarningsPerShareDiluted,97745,2022-12-31,USD,17.63,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
+        # TMO,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
+        # TMO,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
+        self.filtered_data : pd.DataFrame = None
+
     def __str__(self) -> str:
         """
         >>> print(Filter(["Income","Debt"],5,ReportDate(2023,1)))
@@ -540,7 +547,7 @@ class DataSetCollector:
     def __init__(self, download_manager: DownloadManager):
         self.download_manager = download_manager
 
-    def getData(self, filter: Filter) -> pd.DataFrame:
+    def getData(self, filter: Filter) -> None:
         """Collect data based on the provided filter.
 
         Args:
@@ -549,10 +556,7 @@ class DataSetCollector:
         Raises:
             LookupError: when there are no results matching the filter
 
-        Returns:
-            pd.DataFrame: filtered results
         """
-        assert isinstance(filter, Filter)
         data_frame = None
         report_dates = filter.required_reports
         logger.info(f"Creating Unified Data record for these reports: {report_dates}")
@@ -580,8 +584,21 @@ class DataSetCollector:
             logger.debug(data_frame.head())
         else:
             raise LookupError("No data matching the filter was retrieved")
-        return data_frame
-
+        
+        # Now add an index for ticker values to pair with the cik
+        logger.debug(f"filtered_df_before_merge:\n{data_frame.to_csv()}")
+        data_frame = data_frame.reset_index().merge(right=self.download_manager.ticker_reader._data, how='inner', left_on='cik', right_on=['cik_str'])
+        
+        # Columns at this point look like this
+        #  ,adsh,tag,cik,ddate,uom,value,period,fy,fp,cik_str,ticker,title
+        # 0,0000097745-23-000008,EarningsPerShareDiluted,97745,2022-12-31,USD,17.63,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC.
+        # 1,0000097745-23-000008,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC.
+        # 2,0000097745-23-000008,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC..
+        
+        data_frame = data_frame.drop(columns=["cik_str","adsh"]).set_index(['ticker','tag','cik'])
+        
+        logger.debug(f"filtered_df:\n{data_frame.to_csv()}")
+        filter.filtered_data = data_frame
 
 @beartype
 class Sec:
@@ -607,22 +624,20 @@ class Sec:
         )
         self.download_manager = DownloadManager(ticker_session, data_session)
 
-    def select_data(self, tickers: frozenset[str], filter: Filter) -> DataSelector:
+    def select_data(self, tickers: frozenset[str], filter: Filter) -> None:
         """Initiate the retrieval of ticker information based on the provided filters.
+
+        Filtered data is stored with the filter
 
         Args:
             tickers (frozenset[str]): ticker symbols you want information about
             filter (Filter): SEC specific data to scrape from the reports
-
-        Returns:
-            DataSelector: Helper for processing the filtered results
         """
         collector = DataSetCollector(self.download_manager)
         ticker_reader = self.download_manager.ticker_reader
         ticker_reader.contains(tickers)
         filter.populate_ciks(tickers=tickers, ticker_reader=ticker_reader)
-        filtered_data = collector.getData(filter)
-        return DataSelector(data=filtered_data, ticker_reader=ticker_reader)
+        collector.getData(filter)
 
     # def update(self, tickers: list, years: int = 5, last_report: ReportDate = ReportDate()) -> DataSelector:
     #     """ Update the database with information about the following stocks.

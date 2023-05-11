@@ -49,13 +49,13 @@ class Analysis(AnalysisInterface):
         assert self.options is not None
         assert self.options.cache_path is not None
         sec = SecDataSource(storage_path=self.options.cache_path)
-        data_selector = sec.select_data(tickers=self.options.tickers, filter=sec_filter)
+        sec.select_data(tickers=self.options.tickers, filter=sec_filter)
 
         # # Show a quick dump of the data
         # logger.info(f"\n{data_selector.data}")
 
         # # Get only the EPSD Data
-        eps_diluted = data_selector.data.query("tag == 'EarningsPerShareDiluted'")
+        eps_diluted = sec_filter.filtered_data.query("tag == 'EarningsPerShareDiluted'")
         # TODO: Figure this out
         # return eps_diluted.groupby(["cik"]).apply(lambda x: pd.Series(trendline(x.value),
         #                                                               index=["trend"]))
