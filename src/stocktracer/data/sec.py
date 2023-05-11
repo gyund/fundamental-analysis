@@ -510,7 +510,7 @@ class DataSelector:
         """Select only a subset of the data matching the specified criteria.
 
         Args:
-            aggregate_func (Optional[Callable | Literal["mean", "std", "var", "sum", "min","max"]]): Numpy function to use for aggregating the results. This should be a function like `numpy.average` or `numpy.sum`.
+            aggregate_func (Optional[Callable | Literal['mean', 'std', 'var', 'sum', 'min','max']]): Numpy function to use for aggregating the results. This should be a function like `numpy.average` or `numpy.sum`.
             tickers (Optional[Sequence[str]]): ticker symbol for the company
 
         Returns:
