@@ -55,8 +55,9 @@ class TestDataSelector:
     def test_select(self, sec_fake_report: DataSelector):
         # Create a sample set of typical queries one might make with the DataSelector
         sec_fake_report._get_cik = mock.Mock(return_value=320193)
-        df = sec_fake_report.select(ticker="AAPL")
+        df = sec_fake_report.select(tickers=["AAPL"])
         assert df is not None
+        logger.debug(df)
 
     def test_select_and_pivot(
         self, fake_sub_txt_sample: str, fake_data_txt_sample: str
@@ -112,3 +113,10 @@ class TestDataSelector:
         assert table.data.loc[320193].loc["FakeAttributeTag"][0] == 400
         assert table.getValue(ticker_or_cik="aapl", tag="FakeAttributeTag") == 400
         assert table.getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 400
+
+        assert data_selector.select(aggregate_func="max", tickers=["aapl"]).getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 600
+        assert data_selector.select(aggregate_func="min", tickers=["aapl"]).getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 200
+        assert data_selector.select(aggregate_func="mean", tickers=["aapl"]).getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 400
+        assert data_selector.select(aggregate_func="std", tickers=["aapl"]).getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 158.11388300841898
+        assert data_selector.select(aggregate_func="sum", tickers=["aapl"]).getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 2000
+        assert data_selector.select(aggregate_func="var", tickers=["aapl"]).getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 25000

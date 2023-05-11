@@ -489,6 +489,9 @@ class DataSelector:
             self.data = table
             self._ticker_reader = ticker_reader
 
+        def __str__(self) -> str:
+            return str(self.data)
+
         def getValue(self, ticker_or_cik: str | int, tag: str) -> SupportsInt:
             if isinstance(ticker_or_cik, int):
                 return self.data.loc[ticker_or_cik].loc[tag][0]
@@ -499,14 +502,13 @@ class DataSelector:
 
     def select(
         self,
-        aggregate_func: Callable | Literal["mean", "average", "sum"],
+        aggregate_func: Optional[Callable | Literal["mean", "std", "var", "sum", "min","max"]] = "mean",
         tickers: Optional[Sequence[str]] = None,
     ) -> Table:
         """Select only a subset of the data matching the specified criteria.
 
-
         Args:
-            aggfunc (Callable): Numpy function to use for aggregating the results. This should be a function like `numpy.average` or `numpy.sum`.
+            aggfunc (Optional[Callable | Literal["mean", "std", "var", "sum", "min","max"]]): Numpy function to use for aggregating the results. This should be a function like `numpy.average` or `numpy.sum`.
             tickers (Optional[Sequence[str]]): ticker symbol for the company
 
         Returns:
