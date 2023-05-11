@@ -8,14 +8,19 @@ from stocktracer.cli import Cli
 logger = logging.getLogger(__name__)
 
 
-class TestCli:
+class TestCliDilutedEps:
     cli: Cli = Cli()
 
     @pytest.mark.webtest
     def test_analyze(self):
-        self.cli.analyze(
+        result = self.cli.analyze(
             tickers=["aapl", "tmo", "msft"],
             analysis_plugin="stocktracer.analysis.diluted_eps",
+            refresh=True,
+        )
+        assert result is not None
+        logger.debug(
+            f"diluted_eps_result:\n{result.sort_values(ascending=True, by=['ddate'])}"
         )
 
     def test_invalid(self):

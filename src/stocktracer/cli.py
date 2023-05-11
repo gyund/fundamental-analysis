@@ -108,6 +108,7 @@ class Cli:
             cache.set(key=results_key, value=results, expire=3600 * 24 * 7)
 
         self._generate_report(report_format, report_file, results)
+        return results
 
     @classmethod
     def _generate_report(

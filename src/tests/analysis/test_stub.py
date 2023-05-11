@@ -1,6 +1,5 @@
 import logging
 
-import mock
 import pytest
 
 from stocktracer.cli import Cli
@@ -8,7 +7,7 @@ from stocktracer.cli import Cli
 logger = logging.getLogger(__name__)
 
 
-class TestCli:
+class TestCliStub:
     cli: Cli = Cli()
 
     def test_analyze(self):

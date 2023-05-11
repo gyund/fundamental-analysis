@@ -3,6 +3,7 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
+from beartype import beartype
 
 from stocktracer.data.sec import Filter as SecFilter
 from stocktracer.data.sec import ReportDate
@@ -12,6 +13,7 @@ from stocktracer.interface import Analysis as AnalysisInterface
 logger = logging.getLogger(__name__)
 
 
+@beartype
 def trendline(data: pd.Series, order: int = 1) -> float:
     """Calculate the trend of a series.
 
@@ -30,6 +32,7 @@ def trendline(data: pd.Series, order: int = 1) -> float:
     return float(slope)
 
 
+@beartype
 class Analysis(AnalysisInterface):
     """Perform an analysis on the earnings per share over time."""
 
@@ -56,7 +59,7 @@ class Analysis(AnalysisInterface):
         # TODO: Figure this out
         # return eps_diluted.groupby(["cik"]).apply(lambda x: pd.Series(trendline(x.value),
         #                                                               index=["trend"]))
-        return eps_diluted.groupby(["cik"]).all()
+        return eps_diluted
 
     # Reuse documentation from parent
     analyze.__doc__ = AnalysisInterface.analyze.__doc__
