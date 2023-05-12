@@ -36,6 +36,8 @@ def trendline(data: pd.Series, order: int = 1) -> float:
 class Analysis(AnalysisInterface):
     """Perform an analysis on the earnings per share over time."""
 
+    under_development = True
+
     def analyze(self) -> Optional[pd.DataFrame]:
         # Create the filter we'll use to scrape the results
         sec_filter = SecFilter(

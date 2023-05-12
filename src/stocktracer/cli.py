@@ -3,6 +3,7 @@ import importlib
 import io
 import logging
 import os
+import warnings
 from pathlib import Path
 from typing import Literal, Optional, Union
 
@@ -50,6 +51,8 @@ ReportFormat = Literal["csv", "md", "json"]
 @beartype
 class Cli:
     """Tools for gathering resources, analyzing data, and publishing the results."""
+
+    return_results: bool = True
 
     def analyze(
         self,
@@ -108,7 +111,13 @@ class Cli:
             cache.set(key=results_key, value=results, expire=3600 * 24 * 7)
 
         self._generate_report(report_format, report_file, results)
-        return results
+        if analysis_module.under_development:
+            warnings.warn(
+                "This analysis module is under development and may be incorrect, incomplete, or may change."
+            )
+        if self.return_results:
+            return results
+        return None
 
     @classmethod
     def _generate_report(

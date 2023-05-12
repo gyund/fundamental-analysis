@@ -43,3 +43,5 @@ class Analysis(metaclass=abc.ABCMeta):
         Returns:
             Optional[DataFrame]: results of analysis
         """
+
+    under_development: bool = False

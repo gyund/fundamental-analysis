@@ -137,3 +137,4 @@ dmypy.json
 *.sqlite
 .ticker-cache
 .ticker-report
+.results/
