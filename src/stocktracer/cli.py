@@ -60,6 +60,8 @@ class Cli:
         cache_path: str = str(get_default_cache_path()),
         refresh: bool = False,
         analysis_plugin: str = "stocktracer.analysis.stub",
+        final_year: Optional[int] = None,
+        final_quarter: Optional[int] = None,
         report_format: Optional[ReportFormat] = "md",
         report_file: Optional[str] = None,
     ) -> Optional[pd.DataFrame]:
@@ -70,6 +72,8 @@ class Cli:
             cache_path (str): path where to cache data
             refresh (bool): Whether to refresh the calculation or use the results from a prior one
             analysis_plugin (str): module to load for analysis
+            final_year (Optional[int]): last year to consider for report collection
+            final_quarter (Optional[int]): last quarter to consider for report collection
             report_format (Optional[ReportFormat]): Format of the report. Options include: csv, json, md (markdown)
             report_file (Optional[str]): Where to store the report. Required if report_format is specified.
 
@@ -88,7 +92,7 @@ class Cli:
             tickers = frozenset(tickers)
 
         analysis_module: AnalysisInterface = get_analysis_instance(analysis_plugin)
-        analysis_module.options = CliOptions(tickers=tickers, cache_path=cache_path)
+        analysis_module.options = CliOptions(tickers=tickers, cache_path=cache_path, final_year = final_year, final_quarter = final_quarter)
 
         cache, results_key, results = self._get_cached_results(
             tickers, cache_path, analysis_plugin

@@ -37,13 +37,14 @@ class Analysis(AnalysisInterface):
     """Perform an analysis on the earnings per share over time."""
 
     under_development = True
+    years_of_analysis = 5
 
     def analyze(self) -> Optional[pd.DataFrame]:
         # Create the filter we'll use to scrape the results
         sec_filter = SecFilter(
             tags=["EarningsPerShareDiluted"],
-            years=1,  # Over the past 5 years
-            last_report=ReportDate(year=2023, quarter=1),
+            years=self.years_of_analysis,
+            last_report=self.options.last_report,
             only_annual=True,  # We only want the 10-K
         )
 

@@ -22,8 +22,8 @@ pd.set_option('mode.chained_assignment','raise')
 class ReportDate:
     def __init__(
         self,
-        year: int = date.today().year,
-        quarter: int = ((date.today().month - 1) // 3) + 1,
+        year: int | None = None,
+        quarter: int | None = None,
     ):
         """ReportDate is used to select and identify archives created by the SEC.
 
@@ -34,16 +34,17 @@ class ReportDate:
         Raises:
             ValueError: If the value for quarter or year is invalid
         """
-        if year > date.today().year:
+        self.year = date.today().year if year is None else year
+        self.quarter = ((date.today().month - 1) // 3) + 1 if quarter is None else quarter 
+
+        if self.year > date.today().year:
             raise ValueError(
                 "you cannot request reports in the future...that would be illegal :)"
             )
-        if not quarter in range(1, 5):
+        if self.quarter not in range(1, 5):
             raise ValueError(
                 f"the quarter must be a value between 1 and 4 - given: {quarter}"
             )
-        self.year = year
-        self.quarter = quarter
 
     def __str__(self) -> str:
         return f"{self.year}-q{self.quarter}"
