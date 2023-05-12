@@ -12,8 +12,8 @@ Likewise it's impossible to predict the future of the stock market by any reason
         commit id:"Setup Documentation Generation"
         commit id:"Create Basic Code Outline"
         commit id:"Add Download & Basic Data Aggregation"
-        commit type: HIGHLIGHT id:"Review & Optimize for Large Data Sets"
-        commit id:"Add Statistic Modules"
+        commit id:"Review & Optimize for Large Data Sets"
+        commit type: HIGHLIGHT id:"Add Statistic Modules"
         commit id:"Implement Basic Analytics Module"
         commit id:"Alpha Testing"
 ```
