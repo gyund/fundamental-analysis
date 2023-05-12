@@ -142,7 +142,7 @@ class Filter:
         # TMO,EarningsPerShareDiluted,97745,2022-12-31,USD,17.63,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
         # TMO,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
         # TMO,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
-        self.filtered_data : pd.DataFrame = None
+        self.filtered_data: pd.DataFrame = None
 
     def __str__(self) -> str:
         """
@@ -584,21 +584,29 @@ class DataSetCollector:
             logger.debug(data_frame.head())
         else:
             raise LookupError("No data matching the filter was retrieved")
-        
+
         # Now add an index for ticker values to pair with the cik
         logger.debug(f"filtered_df_before_merge:\n{data_frame.to_csv()}")
-        data_frame = data_frame.reset_index().merge(right=self.download_manager.ticker_reader._data, how='inner', left_on='cik', right_on=['cik_str'])
-        
+        data_frame = data_frame.reset_index().merge(
+            right=self.download_manager.ticker_reader._data,
+            how="inner",
+            left_on="cik",
+            right_on=["cik_str"],
+        )
+
         # Columns at this point look like this
         #  ,adsh,tag,cik,ddate,uom,value,period,fy,fp,cik_str,ticker,title
         # 0,0000097745-23-000008,EarningsPerShareDiluted,97745,2022-12-31,USD,17.63,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC.
         # 1,0000097745-23-000008,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC.
         # 2,0000097745-23-000008,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC..
-        
-        data_frame = data_frame.drop(columns=["cik_str","adsh"]).set_index(['ticker','tag','cik'])
-        
+
+        data_frame = data_frame.drop(columns=["cik_str", "adsh"]).set_index(
+            ["ticker", "tag", "cik"]
+        )
+
         logger.debug(f"filtered_df:\n{data_frame.to_csv()}")
         filter.filtered_data = data_frame
+
 
 @beartype
 class Sec:
