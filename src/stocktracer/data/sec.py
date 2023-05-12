@@ -136,13 +136,27 @@ class Filter:
         self.last_report = last_report
         self.only_annual = only_annual
         self._cik_list: set[int] = None
+        self._filtered_data: pd.DataFrame = None
 
-        # Filtered data looks like this:
-        # ticker,tag,cik,ddate,uom,value,period,fy,fp,title
-        # TMO,EarningsPerShareDiluted,97745,2022-12-31,USD,17.63,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
-        # TMO,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
-        # TMO,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
-        self.filtered_data: pd.DataFrame = None
+    @property
+    def filtered_data(self) -> pd.DataFrame:
+        """Filtered data looks like this(in csv format):
+
+        .. code-block:: text
+
+            ticker,tag,cik,ddate,uom,value,period,fy,fp,title
+            TMO,EarningsPerShareDiluted,97745,2022-12-31,USD,17.63,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
+            TMO,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
+            TMO,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
+
+        Returns:
+            pd.DataFrame: _description_
+        """
+        return self._filtered_data
+
+    @filtered_data.setter
+    def filtered_data(self, filtered_data: pd.DataFrame):
+        self._filtered_data = filtered_data
 
     def __str__(self) -> str:
         """
