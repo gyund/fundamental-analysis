@@ -15,6 +15,7 @@ from requests_cache import CachedSession, SQLiteCache
 logger = logging.getLogger(__name__)
 
 default_chunk_size = 1000000
+pd.set_option('mode.chained_assignment','raise')
 
 
 @beartype
