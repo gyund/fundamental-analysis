@@ -1,7 +1,7 @@
 import pytest
 
 import stocktracer.filter as Filter
-from stocktracer.data.sec import Filter as SecFilter
+from stocktracer.data.sec import Filter as SecFilter, ReportDate
 
 
 def test_Selectors_init():
@@ -26,3 +26,4 @@ def test_Selectors_init():
     )
     assert "aapl" in selector.ticker_filter
     assert "EntityCommonStockSharesOutstanding" in selector.sec_filter.tags
+
