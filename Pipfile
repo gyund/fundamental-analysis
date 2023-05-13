@@ -12,6 +12,7 @@ python-dateutil = "*"
 fire = "*"
 diskcache = "*"
 beartype = "*"
+alive-progress = "*"
 
 [dev-packages]
 pytest = "*"
