@@ -3,8 +3,8 @@ nav:
   - Welcome: index.md
   - Getting Started: getting-started.md
   - Design:
-      - design/index.md
-      - Data Retrieval: design/data-retrieval.md
+      # - design/index.md
+      # - Data Retrieval: design/data-retrieval.md
       # - Analysis: design/analysis.md
       # - Report: design/report.md
       - Caching: design/caching.md
@@ -47,6 +47,8 @@ plugins:
   - literate-nav:
       nav_file: SUMMARY.md
   - section-index
+  - git-revision-date-localized:
+      enable_creation_date: false
 markdown_extensions:
   - tables
   - admonition

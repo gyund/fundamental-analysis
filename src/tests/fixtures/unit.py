@@ -2,18 +2,23 @@ import io
 
 import mock
 import pytest
+from pandas import DataFrame
 
 import stocktracer.filter as Filter
-from stocktracer.data.sec import DataSelector, DataSetReader, ReportDate, TickerReader
+from stocktracer.data.sec import DataSetReader, ReportDate, TickerReader
 
 
 @pytest.fixture
-def filter_aapl() -> Filter.Selectors:
+def filter_aapl():
+    return filter_aapl_years()
+
+
+def filter_aapl_years(history_in_years: int = 0) -> Filter.Selectors:
     return Filter.Selectors(
         ticker_filter={"aapl"},
         sec_filter=Filter.SecFilter(
             tags=["EntityCommonStockSharesOutstanding"],
-            years=0,  # Just want the current
+            years=history_in_years,  # Just want the current
             last_report=ReportDate(year=2023, quarter=1),
             only_annual=False,
         ),  # We want the 10-Q
@@ -75,38 +80,45 @@ def fake_data_txt_sample() -> str:
 @pytest.fixture
 def sec_fake_report(
     filter_aapl: Filter.Selectors, sub_txt_sample, data_txt_sample
-) -> DataSelector:
+) -> Filter.Selectors:
     filter_aapl.sec_filter._cik_list = set()
     filter_aapl.sec_filter._cik_list.add(320193)
-    sub_df = DataSetReader._processSubText(
+    sub_df = DataSetReader._process_sub_text(
         filepath_or_buffer=io.StringIO(sub_txt_sample), filter=filter_aapl.sec_filter
     )
-    num_df = DataSetReader._processNumText(
+    num_df = DataSetReader._process_num_text(
         filepath_or_buffer=io.StringIO(data_txt_sample),
         filter=filter_aapl.sec_filter,
         sub_dataframe=sub_df,
     )
     ticker_reader = mock.MagicMock(TickerReader)
     assert not num_df.empty
-    return DataSelector(num_df, ticker_reader)
+    return filter_aapl
 
 
 @pytest.fixture
 def sec_manufactured_fake_report(
     filter_aapl: Filter.Selectors, fake_sub_txt_sample, fake_data_txt_sample
-) -> DataSelector:
-    filter_aapl.sec_filter._cik_list = set()
-    filter_aapl.sec_filter._cik_list.add(320193)
-    filter_aapl.sec_filter.tags.append("FakeAttributeTag")
-    sub_df = DataSetReader._processSubText(
-        filepath_or_buffer=io.StringIO(fake_sub_txt_sample),
-        filter=filter_aapl.sec_filter,
+) -> Filter.Selectors:
+    return sec_manufactured_fake_report_impl(
+        filter_aapl, fake_sub_txt_sample, fake_data_txt_sample
     )
-    num_df = DataSetReader._processNumText(
-        filepath_or_buffer=io.StringIO(fake_data_txt_sample),
-        filter=filter_aapl.sec_filter,
+
+
+def sec_manufactured_fake_report_impl(
+    selector: Filter.Selectors, sub_txt: str, data_txt: str
+) -> DataFrame:
+    selector.sec_filter._cik_list = set()
+    selector.sec_filter._cik_list.add(320193)
+    selector.sec_filter.tags.append("FakeAttributeTag")
+    sub_df = DataSetReader._process_sub_text(
+        filepath_or_buffer=io.StringIO(sub_txt),
+        filter=selector.sec_filter,
+    )
+    num_df = DataSetReader._process_num_text(
+        filepath_or_buffer=io.StringIO(data_txt),
+        filter=selector.sec_filter,
         sub_dataframe=sub_df,
     )
-    ticker_reader = mock.MagicMock(TickerReader)
     assert num_df is not None
-    return DataSelector(num_df, ticker_reader)
+    return num_df

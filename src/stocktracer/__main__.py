@@ -19,6 +19,9 @@ def main_cli(command: str = None) -> any:
         any: _description_
     """
     cli = Cli()
+
+    # Since we're running with Fire, we need to return None to avoid chaining
+    Cli.return_results = False
     try:
         return fire.Fire(component=cli, name="stocktracer", command=command)
     except Exception as app_exception:  # pylint: disable=broad-exception-caught

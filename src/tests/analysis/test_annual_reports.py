@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 Analysis.years_of_analysis = 1
 
 
-class TestCliDilutedEps:
+class TestCliAnnualReports:
     cli: Cli = Cli()
 
     @pytest.mark.webtest
@@ -20,15 +20,13 @@ class TestCliDilutedEps:
         self.cli.return_results = True
         result = self.cli.analyze(
             tickers=["aapl", "tmo", "msft"],
-            analysis_plugin="stocktracer.analysis.diluted_eps",
+            analysis_plugin="stocktracer.analysis.annual_reports",
             refresh=True,
             final_year=2023,
             final_quarter=1,
         )
         assert result is not None
-        logger.debug(
-            f"diluted_eps_result:\n{result.sort_values(ascending=True, by=['ddate'])}"
-        )
+        logger.debug(f"annual_reports:\n{result}")
 
     def test_invalid(self):
         with pytest.raises(LookupError, match="unable to find ticker: invalid"):

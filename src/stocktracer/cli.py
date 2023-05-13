@@ -3,6 +3,7 @@ import importlib
 import io
 import logging
 import os
+import warnings
 from pathlib import Path
 from typing import Literal, Optional, Union
 
@@ -44,20 +45,24 @@ def get_default_cache_path() -> Path:
     return Path(os.getcwd()) / ".ticker-cache"
 
 
-ReportFormat = Literal["csv", "md", "json"]
+ReportFormat = Literal["csv", "md", "json", "txt"]
 
 
 @beartype
 class Cli:
     """Tools for gathering resources, analyzing data, and publishing the results."""
 
+    return_results: bool = True
+
     def analyze(
         self,
         tickers: Union[Sequence[str], str],
         cache_path: str = str(get_default_cache_path()),
         refresh: bool = False,
-        analysis_plugin: str = "stocktracer.analysis.stub",
-        report_format: Optional[ReportFormat] = "md",
+        analysis_plugin: str = "stocktracer.analysis.annual_reports",
+        final_year: Optional[int] = None,
+        final_quarter: Optional[int] = None,
+        report_format: Optional[ReportFormat] = "txt",
         report_file: Optional[str] = None,
     ) -> Optional[pd.DataFrame]:
         """Perform stock analysis.
@@ -67,6 +72,8 @@ class Cli:
             cache_path (str): path where to cache data
             refresh (bool): Whether to refresh the calculation or use the results from a prior one
             analysis_plugin (str): module to load for analysis
+            final_year (Optional[int]): last year to consider for report collection
+            final_quarter (Optional[int]): last quarter to consider for report collection
             report_format (Optional[ReportFormat]): Format of the report. Options include: csv, json, md (markdown)
             report_file (Optional[str]): Where to store the report. Required if report_format is specified.
 
@@ -85,7 +92,12 @@ class Cli:
             tickers = frozenset(tickers)
 
         analysis_module: AnalysisInterface = get_analysis_instance(analysis_plugin)
-        analysis_module.options = CliOptions(tickers=tickers, cache_path=cache_path)
+        analysis_module.options = CliOptions(
+            tickers=tickers,
+            cache_path=cache_path,
+            final_year=final_year,
+            final_quarter=final_quarter,
+        )
 
         cache, results_key, results = self._get_cached_results(
             tickers, cache_path, analysis_plugin
@@ -108,6 +120,13 @@ class Cli:
             cache.set(key=results_key, value=results, expire=3600 * 24 * 7)
 
         self._generate_report(report_format, report_file, results)
+        if analysis_module.under_development:
+            warnings.warn(
+                "This analysis module is under development and may be incorrect, incomplete, or may change."
+            )
+        if self.return_results:
+            return results
+        return None
 
     @classmethod
     def _generate_report(
@@ -125,6 +144,8 @@ class Cli:
                 results.to_markdown(report_file)
             case "json":
                 results.to_json(report_file)
+            case "txt":
+                results.to_string(report_file)
         if isinstance(report_file, io.StringIO):
             print(report_file.getvalue())
 

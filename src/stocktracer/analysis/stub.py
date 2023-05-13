@@ -3,12 +3,14 @@ import logging
 from typing import Optional
 
 import pandas as pd
+from beartype import beartype
 
 from stocktracer.interface import Analysis as AnalysisInterface
 
 logger = logging.getLogger(__name__)
 
 
+@beartype
 class Analysis(AnalysisInterface):
     def analyze(self) -> Optional[pd.DataFrame]:
         """Analyze the report.
