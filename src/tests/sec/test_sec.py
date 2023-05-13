@@ -134,8 +134,8 @@ class TestSec:
         table = filter.select(aggregate_func=np.average)
         logger.debug(f"select_avg:\n{table}")
 
-        assert table.getValue(320193, "EntityCommonStockSharesOutstanding") == 4000
-        assert table.getValue(320193, "FakeAttributeTag") == 400
+        assert table.get_value(320193, "EntityCommonStockSharesOutstanding") == 4000
+        assert table.get_value(320193, "FakeAttributeTag") == 400
 
         table = filter.select(aggregate_func=np.average, tickers=["bad"])
         # normally bad tickers throw exceptions, but we'll just have it filter on
@@ -146,44 +146,44 @@ class TestSec:
         table = filter.select(aggregate_func=np.average, tickers=["aapl"])
         assert table.data.empty == False
         logger.debug(f"processed-ticker:\n{table.data}")
-        assert table.getValue(320193, "EntityCommonStockSharesOutstanding") == 4000
+        assert table.get_value(320193, "EntityCommonStockSharesOutstanding") == 4000
         # assert table.data.loc[320193].loc["FakeAttributeTag"][0] == 400
         # assert table.data.loc[320193].loc["FakeAttributeTag"][0] == 400
-        assert table.getValue(ticker_or_cik="aapl", tag="FakeAttributeTag") == 400
-        assert table.getValue(ticker_or_cik=320193, tag="FakeAttributeTag") == 400
+        assert table.get_value(ticker_or_cik="aapl", tag="FakeAttributeTag") == 400
+        assert table.get_value(ticker_or_cik=320193, tag="FakeAttributeTag") == 400
 
         assert (
-            filter.select(aggregate_func="max", tickers=["aapl"]).getValue(
+            filter.select(aggregate_func="max", tickers=["aapl"]).get_value(
                 ticker_or_cik=320193, tag="FakeAttributeTag"
             )
             == 600
         )
         assert (
-            filter.select(aggregate_func="min", tickers=["aapl"]).getValue(
+            filter.select(aggregate_func="min", tickers=["aapl"]).get_value(
                 ticker_or_cik=320193, tag="FakeAttributeTag"
             )
             == 200
         )
         assert (
-            filter.select(aggregate_func="mean", tickers=["aapl"]).getValue(
+            filter.select(aggregate_func="mean", tickers=["aapl"]).get_value(
                 ticker_or_cik=320193, tag="FakeAttributeTag"
             )
             == 400
         )
         assert (
-            filter.select(aggregate_func="std", tickers=["aapl"]).getValue(
+            filter.select(aggregate_func="std", tickers=["aapl"]).get_value(
                 ticker_or_cik=320193, tag="FakeAttributeTag"
             )
             == 158.11388300841898
         )
         assert (
-            filter.select(aggregate_func="sum", tickers=["aapl"]).getValue(
+            filter.select(aggregate_func="sum", tickers=["aapl"]).get_value(
                 ticker_or_cik=320193, tag="FakeAttributeTag"
             )
             == 2000
         )
         assert (
-            filter.select(aggregate_func="var", tickers=["aapl"]).getValue(
+            filter.select(aggregate_func="var", tickers=["aapl"]).get_value(
                 ticker_or_cik=320193, tag="FakeAttributeTag"
             )
             == 25000

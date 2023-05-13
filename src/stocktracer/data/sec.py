@@ -14,7 +14,7 @@ from requests_cache import CachedSession, SQLiteCache
 
 logger = logging.getLogger(__name__)
 
-default_chunk_size = 1000000
+DEFAULT_CHUNK_SIZE = 1000000
 pd.set_option("mode.chained_assignment", "raise")
 
 
@@ -138,7 +138,7 @@ class Filter:
         def tags(self):
             return self.data.index.get_level_values("tag").unique()
 
-        def getValue(self, ticker_or_cik: str | int, tag: str) -> SupportsInt:
+        def get_value(self, ticker_or_cik: str | int, tag: str) -> SupportsInt:
             # TODO: access the either the ticker or cik index
             if isinstance(ticker_or_cik, int):
                 return self.data.query(
@@ -354,16 +354,18 @@ class DataSetReader:
             logger.debug("opening sub.txt")
             with myzip.open("sub.txt") as myfile:
                 # Get reports that are 10-K or 10-Q
-                sub_dataframe = DataSetReader._processSubText(myfile, filter)
+                sub_dataframe = DataSetReader._process_sub_text(myfile, filter)
 
                 if sub_dataframe is None or sub_dataframe.empty:
                     raise ImportError("nothing found in sub.txt matching the filter")
 
                 with myzip.open("num.txt") as myfile:
-                    return DataSetReader._processNumText(myfile, filter, sub_dataframe)
+                    return DataSetReader._process_num_text(
+                        myfile, filter, sub_dataframe
+                    )
 
     @classmethod
-    def _processNumText(
+    def _process_num_text(
         cls, filepath_or_buffer, filter: Filter, sub_dataframe: pd.DataFrame
     ) -> Optional[pd.DataFrame]:
         """Contains the numerical data.
@@ -377,7 +379,7 @@ class DataSetReader:
             delimiter="\t",
             usecols=["adsh", "tag", "ddate", "uom", "value"],
             index_col=["adsh", "tag"],
-            chunksize=default_chunk_size,
+            chunksize=DEFAULT_CHUNK_SIZE,
             parse_dates=["ddate"],
         )
 
@@ -408,7 +410,7 @@ class DataSetReader:
         return filtered_data
 
     @classmethod
-    def _processSubText(
+    def _process_sub_text(
         cls, filepath_or_buffer, filter: Filter
     ) -> Optional[pd.DataFrame]:
         """Contains the submissions.
@@ -429,7 +431,7 @@ class DataSetReader:
             delimiter="\t",
             usecols=["adsh", "cik", "period", "fy", "fp"],
             index_col=["adsh", "cik"],
-            chunksize=default_chunk_size,
+            chunksize=DEFAULT_CHUNK_SIZE,
             parse_dates=["period"],
         )
         logger.debug(f"keeping only these focus periods: {focus_periods}")
@@ -488,7 +490,7 @@ class DownloadManager:
             return TickerReader(response.content.decode())
         return TickerReader(pd.DataFrame())  # pragma: no cover
 
-    def _createDownloadUri(self, report_date: ReportDate) -> str:
+    def _create_download_uri(self, report_date: ReportDate) -> str:
         file = f"{report_date.year}q{report_date.quarter}.zip"
         return "/".join([self._base_url, file])
 
@@ -504,7 +506,7 @@ class DownloadManager:
         Returns:
             DataSetReader: this object helps process the data received more granularly
         """
-        request = self._createDownloadUri(report_date)
+        request = self._create_download_uri(report_date)
         response = self._data_session.get(request)
         if response.from_cache:
             logger.info(f"Retrieved {request} from cache")
@@ -520,7 +522,7 @@ class DataSetCollector:
     def __init__(self, download_manager: DownloadManager):
         self.download_manager = download_manager
 
-    def getData(self, filter: Filter) -> None:
+    def get_data(self, filter: Filter) -> None:
         """Collect data based on the provided filter.
 
         Args:
@@ -621,6 +623,6 @@ class Sec:
         ticker_reader = self.download_manager.ticker_reader
         if ticker_reader.contains(tickers):
             filter.populate_ciks(tickers=tickers, ticker_reader=ticker_reader)
-            collector.getData(filter)
+            collector.get_data(filter)
 
         return filter

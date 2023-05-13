@@ -35,14 +35,7 @@ class Options:
 
 @beartype
 class Analysis(metaclass=abc.ABCMeta):
-    """Base class for all analysis techniques.
-
-    Args:
-        metaclass (_type_, optional): _description_. Defaults to abc.ABCMeta.
-
-    Returns:
-        _type_: _description_
-    """
+    """Base class for all analysis techniques."""
 
     def __init__(self) -> None:
         self.options: Optional[Options] = None

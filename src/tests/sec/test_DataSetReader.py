@@ -20,7 +20,7 @@ def test_benchmark_DataSetReader_processSubText(
     filter_aapl.sec_filter._cik_list = set()
     filter_aapl.sec_filter._cik_list.add(320193)
     benchmark.pedantic(
-        DataSetReader._processSubText,
+        DataSetReader._process_sub_text,
         args=(io.StringIO(sub_txt_sample), filter_aapl.sec_filter),
     )
 
@@ -30,11 +30,11 @@ def test_benchmark_DataSetReader_processNumText(
 ):
     filter_aapl.sec_filter._cik_list = set()
     filter_aapl.sec_filter._cik_list.add(320193)
-    sub_df = DataSetReader._processSubText(
+    sub_df = DataSetReader._process_sub_text(
         filepath_or_buffer=io.StringIO(sub_txt_sample), filter=filter_aapl.sec_filter
     )
     benchmark.pedantic(
-        DataSetReader._processNumText,
+        DataSetReader._process_num_text,
         args=(io.StringIO(data_txt_sample), filter_aapl.sec_filter, sub_df),
     )
 
@@ -43,7 +43,7 @@ def test_DataSetReader_processSubText(filter_aapl: Filter.Selectors, sub_txt_sam
     # Put AAPL's CIK in the list so it will be filtered
     filter_aapl.sec_filter._cik_list = set()
     filter_aapl.sec_filter._cik_list.add(320193)
-    sub_df = DataSetReader._processSubText(
+    sub_df = DataSetReader._process_sub_text(
         filepath_or_buffer=io.StringIO(sub_txt_sample), filter=filter_aapl.sec_filter
     )
     logger.debug(f"sub keys: {sub_df.keys()}")
