@@ -13,7 +13,13 @@ from stocktracer.data.sec import ReportDate
 class Options:
     """Command Line Options."""
 
-    def __init__(self, tickers: frozenset[str], cache_path: Path, final_year: int | None, final_quarter: int | None):
+    def __init__(
+        self,
+        tickers: frozenset[str],
+        cache_path: Path,
+        final_year: int | None,
+        final_quarter: int | None,
+    ):
         """Options.
 
         Args:

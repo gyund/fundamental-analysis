@@ -4,7 +4,7 @@ import mock
 import pytest
 
 import stocktracer.filter as Filter
-from stocktracer.data.sec import DataSelector, DataSetReader, ReportDate, TickerReader
+from stocktracer.data.sec import DataSetReader, ReportDate, TickerReader
 
 
 @pytest.fixture
@@ -79,7 +79,7 @@ def fake_data_txt_sample() -> str:
 @pytest.fixture
 def sec_fake_report(
     filter_aapl: Filter.Selectors, sub_txt_sample, data_txt_sample
-) -> DataSelector:
+) -> Filter.Selectors:
     filter_aapl.sec_filter._cik_list = set()
     filter_aapl.sec_filter._cik_list.add(320193)
     sub_df = DataSetReader._processSubText(
@@ -92,13 +92,13 @@ def sec_fake_report(
     )
     ticker_reader = mock.MagicMock(TickerReader)
     assert not num_df.empty
-    return DataSelector(num_df, ticker_reader)
+    return filter_aapl
 
 
 @pytest.fixture
 def sec_manufactured_fake_report(
     filter_aapl: Filter.Selectors, fake_sub_txt_sample, fake_data_txt_sample
-) -> DataSelector:
+) -> Filter.Selectors:
     return sec_manufactured_fake_report_impl(
         filter_aapl, fake_sub_txt_sample, fake_data_txt_sample
     )
@@ -106,7 +106,7 @@ def sec_manufactured_fake_report(
 
 def sec_manufactured_fake_report_impl(
     selector: Filter.Selectors, sub_txt: str, data_txt: str
-) -> DataSelector:
+) -> Filter.Selectors:
     selector.sec_filter._cik_list = set()
     selector.sec_filter._cik_list.add(320193)
     selector.sec_filter.tags.append("FakeAttributeTag")
@@ -121,4 +121,4 @@ def sec_manufactured_fake_report_impl(
     )
     ticker_reader = mock.MagicMock(TickerReader)
     assert num_df is not None
-    return DataSelector(num_df, ticker_reader)
+    return selector

@@ -3,7 +3,7 @@ import pytest
 
 import stocktracer.filter as Filter
 from stocktracer.cli import Cli, get_default_cache_path
-from stocktracer.data.sec import DataSelector, Sec
+from stocktracer.data.sec import Sec
 from tests.fixtures.unit import filter_aapl
 
 
@@ -16,7 +16,8 @@ def sec_instance() -> Sec:
 @pytest.fixture
 def sec_dataselector_2023q1(
     sec_instance: Sec, filter_aapl: Filter.Selectors
-) -> DataSelector:
-    return sec_instance.select_data(
+) -> Filter.Selectors:
+    sec_instance.select_data(
         tickers=filter_aapl.ticker_filter, filter=filter_aapl.sec_filter
     )
+    return filter_aapl

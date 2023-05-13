@@ -9,8 +9,10 @@ def test_Selectors_init():
         Filter.Selectors()
     with pytest.raises(TypeError, match="missing 1 required positional argument"):
         Filter.Selectors(ticker_filter={"aapl"})
-    with pytest.raises(TypeError, match="missing 1 required positional argument"):
-        Filter.Selectors(ticker_filter={"aapl"}, sec_filter=SecFilter())
+
+    default_selector = Filter.Selectors(ticker_filter={"aapl"}, sec_filter=SecFilter())
+    assert default_selector.sec_filter.last_report is not None
+    assert default_selector.sec_filter.only_annual is True
     selector = Filter.Selectors(
         ticker_filter={"aapl"},
         sec_filter=SecFilter(tags=["EntityCommonStockSharesOutstanding"]),

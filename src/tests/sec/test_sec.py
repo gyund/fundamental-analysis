@@ -10,7 +10,6 @@ import pytest
 import stocktracer.filter as Filter
 from stocktracer.cli import Cli
 from stocktracer.data.sec import (
-    DataSelector,
     DataSetReader,
     DownloadManager,
     ReportDate,
@@ -46,7 +45,7 @@ class TestSec:
         with pytest.raises((TypeError, AssertionError)):
             Sec()
 
-    def test_getData(self, sec_harness: tuple[Sec, mock.MagicMock]):
+    def test_select_data(self, sec_harness: tuple[Sec, mock.MagicMock]):
         (sec, download_manager) = sec_harness
         data_reader = mock.MagicMock(DataSetReader)
         data_reader.process_zip = mock.MagicMock(return_value=pd.DataFrame())
@@ -103,9 +102,9 @@ class TestFilter:
 
         required_reports = filter.required_reports
 
-        # You might thing 5, but since companies file annual reports in different quarters,
+        # You might thing 1, but since companies file annual reports in different quarters,
         # we have to look at all the quarters.
-        assert len(required_reports) == 21
+        assert len(required_reports) == 5
         assert required_reports[0] == ReportDate(year=2022, quarter=4)
         assert required_reports[1] == ReportDate(year=2022, quarter=3)
         assert required_reports[2] == ReportDate(year=2022, quarter=2)

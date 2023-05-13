@@ -92,7 +92,12 @@ class Cli:
             tickers = frozenset(tickers)
 
         analysis_module: AnalysisInterface = get_analysis_instance(analysis_plugin)
-        analysis_module.options = CliOptions(tickers=tickers, cache_path=cache_path, final_year = final_year, final_quarter = final_quarter)
+        analysis_module.options = CliOptions(
+            tickers=tickers,
+            cache_path=cache_path,
+            final_year=final_year,
+            final_quarter=final_quarter,
+        )
 
         cache, results_key, results = self._get_cached_results(
             tickers, cache_path, analysis_plugin
