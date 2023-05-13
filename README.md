@@ -31,7 +31,7 @@ The goal of this project is aggregate a variety of ways to consume information a
 ```sh
 pip install stocktracer
 
-# Perform analysis (not supported yet)
+# Perform analysis
 stocktracer analyze --tickers aapl,msft
 
 # Help
@@ -46,7 +46,7 @@ Make sure you have `pipenv` installed through a package manager or through pip.
 ```sh
 pipenv install --dev
 
-# Perform analysis (not supported yet)
+# Perform analysis
 PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft
 PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps
 PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format csv

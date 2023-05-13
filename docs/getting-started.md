@@ -15,7 +15,7 @@ Make sure you have `pipenv` installed through a package manager or through pip.
 
     pipenv install --dev
 
-    # Perform analysis (not supported yet)
+    # Perform analysis
     PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft
 
     # Help
