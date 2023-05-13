@@ -2,6 +2,7 @@ import io
 
 import mock
 import pytest
+from pandas import DataFrame
 
 import stocktracer.filter as Filter
 from stocktracer.data.sec import DataSetReader, ReportDate, TickerReader
@@ -106,7 +107,7 @@ def sec_manufactured_fake_report(
 
 def sec_manufactured_fake_report_impl(
     selector: Filter.Selectors, sub_txt: str, data_txt: str
-) -> Filter.Selectors:
+) -> DataFrame:
     selector.sec_filter._cik_list = set()
     selector.sec_filter._cik_list.add(320193)
     selector.sec_filter.tags.append("FakeAttributeTag")
@@ -119,6 +120,5 @@ def sec_manufactured_fake_report_impl(
         filter=selector.sec_filter,
         sub_dataframe=sub_df,
     )
-    ticker_reader = mock.MagicMock(TickerReader)
     assert num_df is not None
-    return selector
+    return num_df

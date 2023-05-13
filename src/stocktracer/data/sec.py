@@ -103,11 +103,9 @@ class TickerReader:
         Returns:
             bool: if all the tickers are found
         """
-        try:
-            for t in tickers:
-                self.convert_to_cik(t)
-        except LookupError:
-            return False
+        for t in tickers:
+            self.convert_to_cik(t)
+
         return True
 
 
@@ -147,8 +145,9 @@ class Filter:
                     f'cik == {ticker_or_cik} and tag == "{tag}"'
                 ).values[0]
             # Lookup convert ticker to cik
+            ticker_or_cik = ticker_or_cik.upper()
             return self.data.query(
-                f'ticker == {ticker_or_cik} and tag == "{tag}"'
+                f'ticker == "{ticker_or_cik}" and tag == "{tag}"'
             ).values[0]
 
     def __init__(
@@ -226,10 +225,20 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
         Returns:
             Filter.Table: Object that represents a pivot table with the data requested
         """
+        if tickers is not None:
+            tickers = [t.upper() for t in tickers]
+            logger.debug(f"ticker filter: {tickers}")
+
+        data = (
+            self.filtered_data
+            if tickers is None
+            else self.filtered_data.query("ticker in @tickers")
+        )
+        logger.debug(f"pre-pivot:\n{data}")
         table: pd.DataFrame = pd.pivot_table(
-            self.filtered_data,
+            data,
             values="value",
-            index=["cik", "tag"],
+            index=["cik", "tag", "ticker"],
             aggfunc=aggregate_func,
         )
         return Filter.Table(table)
@@ -610,7 +619,8 @@ class Sec:
         """
         collector = DataSetCollector(self.download_manager)
         ticker_reader = self.download_manager.ticker_reader
-        ticker_reader.contains(tickers)
-        filter.populate_ciks(tickers=tickers, ticker_reader=ticker_reader)
-        collector.getData(filter)
+        if ticker_reader.contains(tickers):
+            filter.populate_ciks(tickers=tickers, ticker_reader=ticker_reader)
+            collector.getData(filter)
+
         return filter

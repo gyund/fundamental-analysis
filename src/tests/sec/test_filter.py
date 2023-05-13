@@ -1,9 +1,10 @@
-import stocktracer.filter as Filter
-from stocktracer.data.sec import (
-    ReportDate,
-)
 from datetime import date
+
 import pytest
+
+import stocktracer.filter as Filter
+from stocktracer.data.sec import ReportDate
+
 
 class TestFilter:
     def test_getRequiredReports_default(self):
@@ -40,7 +41,6 @@ class TestFilter:
         assert required_reports[4] == ReportDate(year=2021, quarter=4)
 
 
-
 def test_reportDate():
     rd = ReportDate(2023, 1)
     assert rd.year == date.today().year
@@ -64,5 +64,3 @@ def test_reportDate():
         pytest.fail("should throw and exception")
     except ValueError as ex:
         pass
-
-
