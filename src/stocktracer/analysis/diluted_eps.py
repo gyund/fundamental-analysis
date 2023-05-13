@@ -6,7 +6,6 @@ import pandas as pd
 from beartype import beartype
 
 from stocktracer.data.sec import Filter as SecFilter
-from stocktracer.data.sec import ReportDate
 from stocktracer.data.sec import Sec as SecDataSource
 from stocktracer.interface import Analysis as AnalysisInterface
 

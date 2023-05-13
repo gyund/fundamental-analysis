@@ -15,7 +15,7 @@ class Selectors:
         """Entry for data to search for in various sources.
 
         Args:
-            ticker_filter (set[str] | list[str],): list of stock tickers to get information about
+            ticker_filter (set[str] | list[str]): list of stock tickers to get information about
             sec_filter (SecFilter): filter for SEC reports
         """
         self.ticker_filter = frozenset(ticker_filter)
