@@ -22,7 +22,8 @@ class TestTickerReader:
     def test_contains(self, sec_instance: Sec):
         ticker_reader = sec_instance.download_manager.ticker_reader
         assert ticker_reader.contains(frozenset(("aapl", "msft")))
-        assert False == ticker_reader.contains(frozenset(("aapl", "msft", "invalid")))
+        with pytest.raises(LookupError, match="unable to find ticker: invalid"):
+            ticker_reader.contains(frozenset(("aapl", "msft", "invalid")))
 
 
 @pytest.mark.webtest
