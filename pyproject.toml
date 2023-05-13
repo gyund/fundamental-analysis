@@ -8,11 +8,11 @@ sources = ["src"]
 
 [project]
 name = "stocktracer"
-version = "0.1.5"
+version = "0.2.0"
 authors = [
   { name="Gary Yund", email="gary.yund@gmail.com" },
 ]
-description = "Tools for aggregating efficient ways to consume and process publically traded equities on the US stock market. Includes caching SEC data dump processing."
+description = "Tools for aggregating efficient ways to consume and process publically traded equities on the US stock market. Includes support for SEC quarterly data processing."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
@@ -24,6 +24,7 @@ classifiers = [
     "Topic :: Office/Business :: Financial :: Investment",
     "Intended Audience :: Science/Research",
     "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11"
 ]
