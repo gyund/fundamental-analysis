@@ -494,7 +494,7 @@ class DownloadManager:
         file = f"{report_date.year}q{report_date.quarter}.zip"
         return "/".join([self._base_url, file])
 
-    def get_quarterly_report(self, report_date: ReportDate) -> DataSetReader:
+    def get_quarterly_report(self, report_date: ReportDate) -> Optional[DataSetReader]:
         """Retrieve from a cache or make a request archived quarterly data.
 
         This allows us to download data independent of actually processing it, allowing
@@ -504,7 +504,7 @@ class DownloadManager:
             report_date (ReportDate): information specifying the quarterly dump to retrieve
 
         Returns:
-            DataSetReader: this object helps process the data received more granularly
+            Optional[DataSetReader]: this object helps process the data received more granularly
         """
         request = self._create_download_uri(report_date)
         response = self._data_session.get(request)
@@ -512,7 +512,7 @@ class DownloadManager:
             logger.info(f"Retrieved {request} from cache")
         if response.status_code == 200:
             return DataSetReader(response.content)
-        return DataSetReader(pd.DataFrame())  # pragma: no cover
+        return None  # pragma: no cover
 
 
 @beartype
@@ -537,21 +537,24 @@ class DataSetCollector:
         logger.info(f"Creating Unified Data record for these reports: {report_dates}")
         for r in report_dates:
             reader = self.download_manager.get_quarterly_report(r)
-            try:
-                data = reader.process_zip(filter)
-                if data is None or data.empty:
-                    logger.debug(f"no results captured in report {r}")
-                elif data_frame is None:
-                    logger.debug(f"keys: {data.keys()}")
-                    data_frame = data
-                else:
-                    # df = pd.concat(df, data)
-                    data_frame.merge(right=data)
-            except ImportError:
-                # Note, when searching for annual reports, this will generally occur 1/4 times
-                # if we're only searching for one stock's tags
-                logger.debug(f"{r} did not have any matches for the provided filter")
-                logger.debug(f"{filter}")
+            if isinstance(reader, DataSetReader):
+                try:
+                    data = reader.process_zip(filter)
+                    if data is None or data.empty:
+                        logger.debug(f"no results captured in report {r}")
+                    elif data_frame is None:
+                        logger.debug(f"keys: {data.keys()}")
+                        data_frame = data
+                    else:
+                        # df = pd.concat(df, data)
+                        data_frame.merge(right=data)
+                except ImportError:
+                    # Note, when searching for annual reports, this will generally occur 1/4 times
+                    # if we're only searching for one stock's tags
+                    logger.debug(
+                        f"{r} did not have any matches for the provided filter"
+                    )
+                    logger.debug(f"{filter}")
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
         if data_frame is not None:
             logger.debug(f"keys: {data_frame.keys()}")

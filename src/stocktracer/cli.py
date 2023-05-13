@@ -144,7 +144,7 @@ class Cli:
                 results.to_markdown(report_file)
             case "json":
                 results.to_json(report_file)
-            case "txt":   
+            case "txt":
                 results.to_string(report_file)
         if isinstance(report_file, io.StringIO):
             print(report_file.getvalue())
