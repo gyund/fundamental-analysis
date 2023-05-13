@@ -45,7 +45,7 @@ def get_default_cache_path() -> Path:
     return Path(os.getcwd()) / ".ticker-cache"
 
 
-ReportFormat = Literal["csv", "md", "json"]
+ReportFormat = Literal["csv", "md", "json", "txt"]
 
 
 @beartype
@@ -59,10 +59,10 @@ class Cli:
         tickers: Union[Sequence[str], str],
         cache_path: str = str(get_default_cache_path()),
         refresh: bool = False,
-        analysis_plugin: str = "stocktracer.analysis.stub",
+        analysis_plugin: str = "stocktracer.analysis.annual_reports",
         final_year: Optional[int] = None,
         final_quarter: Optional[int] = None,
-        report_format: Optional[ReportFormat] = "md",
+        report_format: Optional[ReportFormat] = "txt",
         report_file: Optional[str] = None,
     ) -> Optional[pd.DataFrame]:
         """Perform stock analysis.
@@ -144,6 +144,8 @@ class Cli:
                 results.to_markdown(report_file)
             case "json":
                 results.to_json(report_file)
+            case "txt":   
+                results.to_string(report_file)
         if isinstance(report_file, io.StringIO):
             print(report_file.getvalue())
 
