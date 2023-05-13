@@ -38,3 +38,12 @@ mkdocs-git-revision-date-localized-plugin = "*"
 
 [requires]
 python_version = "3.10"
+
+[docs]
+mkdocs-material = "*"
+mkdocstrings-python = "*"
+mkdocs-gen-files = "*"
+mkdocs-literate-nav = "*"
+mkdocs-section-index = "*"
+mkdocs-material-extensions = "*"
+mkdocs-git-revision-date-localized-plugin = "*"
