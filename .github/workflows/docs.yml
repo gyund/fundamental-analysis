@@ -4,14 +4,18 @@ on:
     branches:
       - main
     paths:
+    - 'src/**'
     - 'docs/**'
     - '.github/workflows/docs.yml'
     - 'mkdocs.yml'
+    - 'Pipfile.lock'
   pull_request:
     paths:
+    - 'src/**'
     - 'docs/**'
     - '.github/workflows/docs.yml'
     - 'mkdocs.yml'
+    - 'Pipfile.lock'
 permissions:
   contents: write
 
