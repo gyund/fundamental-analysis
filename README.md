@@ -7,6 +7,7 @@
     <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black"></a>
     <img alt="PyPI - Downloads" src="https://img.shields.io/pypi/dm/stocktracer">
     <img alt="PyPI - Status" src="https://img.shields.io/pypi/status/stocktracer">
+     <a href="https://pypi.org/"><img src="https://img.shields.io/badge/PyPI-Web-brightgreen" alt="PyPI Web"></a>
 </p>
 
 # StockTracer
