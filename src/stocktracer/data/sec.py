@@ -1,5 +1,6 @@
 """This data source grabs information from quarterly SEC data archives."""
 import logging
+import sys
 from datetime import date, timedelta
 from io import BytesIO
 from pathlib import Path
@@ -8,6 +9,7 @@ from zipfile import ZipFile
 
 import numpy as np
 import pandas as pd
+from alive_progress import alive_it
 from beartype import beartype
 from beartype.typing import Callable, Sequence
 from requests_cache import CachedSession, SQLiteCache
@@ -535,7 +537,17 @@ class DataSetCollector:
         data_frame = None
         report_dates = filter.required_reports
         logger.info(f"Creating Unified Data record for these reports: {report_dates}")
-        for r in report_dates:
+        bar = alive_it(
+            report_dates,
+            theme="smooth",
+            # stats=False,
+            title="Filtering",
+            file=sys.stderr,
+            calibrate=5_000,
+            finalize=lambda bar: bar.text("Success!"),
+        )
+        for r in bar:
+            bar.text(r)
             reader = self.download_manager.get_quarterly_report(r)
             if isinstance(reader, DataSetReader):
                 try:
