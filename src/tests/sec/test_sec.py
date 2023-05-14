@@ -1,4 +1,5 @@
 import logging
+import math
 import os
 from pathlib import Path
 
@@ -187,4 +188,10 @@ class TestSec:
                 ticker_or_cik=320193, tag="FakeAttributeTag"
             )
             == 25000
+        )
+        assert math.isclose(
+            filter.select(aggregate_func="slope", tickers=["aapl"]).get_value(
+                ticker_or_cik=320193, tag="FakeAttributeTag"
+            ),
+            1,
         )

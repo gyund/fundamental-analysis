@@ -3,6 +3,7 @@ import logging
 import sys
 from datetime import date, timedelta
 from io import BytesIO
+from numbers import Number
 from pathlib import Path
 from typing import Literal, Optional, SupportsInt
 from zipfile import ZipFile
@@ -115,6 +116,26 @@ period_focus_options = Literal["FY", "Q1", "Q2", "Q3", "Q4"]
 
 
 @beartype
+def trend_line(data: pd.Series, order: int = 1) -> float:
+    """Calculate the trend of a series.
+
+    >>> import math
+    >>> math.isclose(trend_line(pd.Series((1,2,3))), 1)
+    True
+
+    Args:
+        data (pd.Series): _description_
+        order (int): _description_. Defaults to 1.
+
+    Returns:
+        float: slope of the trend line
+    """
+    coeffs = np.polyfit(data.values, list(data), order)
+    slope = coeffs[-2]
+    return float(slope)
+
+
+@beartype
 class Filter:
     class Table:
         """This is a table that is the output from a `Filter.select()` call.
@@ -140,17 +161,17 @@ class Filter:
         def tags(self):
             return self.data.index.get_level_values("tag").unique()
 
-        def get_value(self, ticker_or_cik: str | int, tag: str) -> SupportsInt:
+        def get_value(self, ticker_or_cik: str | int, tag: str) -> Number:
             # TODO: access the either the ticker or cik index
             if isinstance(ticker_or_cik, int):
                 return self.data.query(
                     f'cik == {ticker_or_cik} and tag == "{tag}"'
-                ).values[0]
+                ).squeeze()
             # Lookup convert ticker to cik
             ticker_or_cik = ticker_or_cik.upper()
             return self.data.query(
                 f'ticker == "{ticker_or_cik}" and tag == "{tag}"'
-            ).values[0]
+            ).squeeze()
 
     def __init__(
         self,
@@ -214,14 +235,14 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
     def select(
         self,
         aggregate_func: Optional[
-            Callable | Literal["mean", "std", "var", "sum", "min", "max"]
+            Callable | Literal["mean", "std", "var", "sum", "min", "max", "slope"]
         ] = "mean",
         tickers: Optional[Sequence[str]] = None,
     ) -> Table:
         """Select only a subset of the data matching the specified criteria.
 
         Args:
-            aggregate_func (Optional[Callable | Literal['mean', 'std', 'var', 'sum', 'min','max']]): Numpy function to use for aggregating the results. This should be a function like `numpy.average` or `numpy.sum`.
+            aggregate_func (Optional[Callable | Literal['mean', 'std', 'var', 'sum', 'min','max','slope']]): Numpy function to use for aggregating the results. This should be a function like `numpy.average` or `numpy.sum`.
             tickers (Optional[Sequence[str]]): ticker symbol for the company
 
         Returns:
@@ -237,12 +258,22 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             else self.filtered_data.query("ticker in @tickers")
         )
         logger.debug(f"pre-pivot:\n{data}")
-        table: pd.DataFrame = pd.pivot_table(
-            data,
-            values="value",
-            index=["cik", "tag", "ticker"],
-            aggfunc=aggregate_func,
-        )
+        if aggregate_func == "slope":
+            data = data.sort_values(by=["ddate"])
+            table: pd.DataFrame = pd.pivot_table(
+                data,
+                values="value",
+                index=["cik", "tag", "ticker"],
+                aggfunc=trend_line,
+            )
+            logger.debug(table)
+        else:
+            table: pd.DataFrame = pd.pivot_table(
+                data,
+                values="value",
+                index=["cik", "tag", "ticker"],
+                aggfunc=aggregate_func,
+            )
         return Filter.Table(table)
 
     @property
