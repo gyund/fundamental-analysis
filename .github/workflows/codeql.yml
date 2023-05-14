@@ -26,8 +26,8 @@ on:
       - ready_for_review
     paths:
       - '**/*.py'
-#   schedule:
-#     - cron: '42 16 * * 0'
+  schedule:
+    - cron: '42 16 * * 0'
 
 concurrency:
   group: codeql-${{ github.ref }}
