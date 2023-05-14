@@ -114,8 +114,6 @@ class Cli:
             if results is None or results.empty:
                 raise LookupError("No analysis results available!")
 
-            tickers = frozenset(tickers)
-
             # Save one week expiry
             cache.set(key=results_key, value=results, expire=3600 * 24 * 7)
 
