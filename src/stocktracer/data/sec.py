@@ -9,7 +9,7 @@ from zipfile import ZipFile
 
 import numpy as np
 import pandas as pd
-from alive_progress import alive_bar
+from alive_progress import alive_it
 from beartype import beartype
 from beartype.typing import Callable, Sequence
 from requests_cache import CachedSession, SQLiteCache
@@ -537,36 +537,36 @@ class DataSetCollector:
         data_frame = None
         report_dates = filter.required_reports
         logger.info(f"Creating Unified Data record for these reports: {report_dates}")
-        with alive_bar(
-            len(report_dates),
+        bar = alive_it(
+            report_dates,
             theme="smooth",
-            stats=False,
+            # stats=False,
             title="Filtering",
             file=sys.stderr,
-            calibrate=7,
-        ) as bar:
-            for r in report_dates:
-                bar.text(f"- {r}")
-                reader = self.download_manager.get_quarterly_report(r)
-                if isinstance(reader, DataSetReader):
-                    try:
-                        data = reader.process_zip(filter)
-                        if data is None or data.empty:
-                            logger.debug(f"no results captured in report {r}")
-                        elif data_frame is None:
-                            logger.debug(f"keys: {data.keys()}")
-                            data_frame = data
-                        else:
-                            # df = pd.concat(df, data)
-                            data_frame.merge(right=data)
-                    except ImportError:
-                        # Note, when searching for annual reports, this will generally occur 1/4 times
-                        # if we're only searching for one stock's tags
-                        logger.debug(
-                            f"{r} did not have any matches for the provided filter"
-                        )
-                        logger.debug(f"{filter}")
-                bar()
+            calibrate=5_000,
+            finalize=lambda bar: bar.text("Success!"),
+        )
+        for r in bar:
+            bar.text(r)
+            reader = self.download_manager.get_quarterly_report(r)
+            if isinstance(reader, DataSetReader):
+                try:
+                    data = reader.process_zip(filter)
+                    if data is None or data.empty:
+                        logger.debug(f"no results captured in report {r}")
+                    elif data_frame is None:
+                        logger.debug(f"keys: {data.keys()}")
+                        data_frame = data
+                    else:
+                        # df = pd.concat(df, data)
+                        data_frame.merge(right=data)
+                except ImportError:
+                    # Note, when searching for annual reports, this will generally occur 1/4 times
+                    # if we're only searching for one stock's tags
+                    logger.debug(
+                        f"{r} did not have any matches for the provided filter"
+                    )
+                    logger.debug(f"{filter}")
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
         if data_frame is not None:
             logger.debug(f"keys: {data_frame.keys()}")
