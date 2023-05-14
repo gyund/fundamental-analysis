@@ -123,6 +123,9 @@ def trend_line(data: pd.Series, order: int = 1) -> float:
     >>> math.isclose(trend_line(pd.Series((1,2,3))), 1)
     True
 
+    >>> math.isclose(trend_line(pd.Series((3,2,1))), -1)
+    True
+
     Args:
         data (pd.Series): _description_
         order (int): _description_. Defaults to 1.
@@ -130,9 +133,13 @@ def trend_line(data: pd.Series, order: int = 1) -> float:
     Returns:
         float: slope of the trend line
     """
-    coeffs = np.polyfit(data.values, list(data), order)
-    slope = coeffs[-2]
-    return float(slope)
+    x = range(len(data.keys()))
+    y = data.values
+
+    coeffs = np.polyfit(x, y, order)
+    slope = coeffs[0]
+    # np.isclose()
+    return slope
 
 
 @beartype

@@ -193,5 +193,5 @@ class TestSec:
             filter.select(aggregate_func="slope", tickers=["aapl"]).get_value(
                 ticker_or_cik=320193, tag="FakeAttributeTag"
             ),
-            1,
+            100,
         )
