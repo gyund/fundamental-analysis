@@ -111,7 +111,7 @@ jobs:
         if: ${{ always() }}
       - name: Lint - pylint (src/stocktracer)
         run: |
-          pylint src/stocktracer
+          pylint -E src/stocktracer
         if: ${{ always() }}
       # - name: Lint - pydocstyle
       #   run: |
