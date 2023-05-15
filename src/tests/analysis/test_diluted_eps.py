@@ -1,6 +1,6 @@
 import logging
+import math
 
-import mock
 import pytest
 
 from stocktracer.analysis.diluted_eps import Analysis
@@ -27,6 +27,9 @@ class TestCliDilutedEps:
         )
         assert result is not None
         logger.debug(f"diluted_eps_result:\n{result}")
+        assert math.isclose(
+            result.loc["TMO"]["EarningsPerShareDiluted"], 17.683333, rel_tol=0.001
+        )
 
     def test_invalid(self):
         with pytest.raises(LookupError, match="unable to find ticker: invalid"):
