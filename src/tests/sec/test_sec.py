@@ -138,6 +138,14 @@ class TestSec:
         assert table.get_value("aapl", "EntityCommonStockSharesOutstanding") == 4000
         assert table.get_value("AAPL", "FakeAttributeTag") == 400
 
+        # TODO: See if there's a nice way to leverage pandas mapping to do this simultaneously
+        # table = filter.select(aggregate_func={"EntityCommonStockSharesOutstanding":np.average,
+        #                                       "FakeAttributeTag":np.sum})
+        # logger.debug(f"select_avg_map:\n{table}")
+
+        # assert table.get_value("aapl", "EntityCommonStockSharesOutstanding") == 4000
+        # assert table.get_value("AAPL", "FakeAttributeTag") == 2000
+
         table = filter.select(aggregate_func=np.average, tickers=["bad"])
         # normally bad tickers throw exceptions, but we'll just have it filter on
         # an index we don't have so we get an empty value
