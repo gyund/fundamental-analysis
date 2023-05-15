@@ -54,7 +54,7 @@ class Analysis(AnalysisInterface):
 
         # This is an expensive operation
         sec.select_data(tickers=self.options.tickers, filter=sec_filter)
-        return sec_filter.select().data
+        return sec_filter.select("slope").data
 
     # Reuse documentation from parent
     analyze.__doc__ = AnalysisInterface.analyze.__doc__
