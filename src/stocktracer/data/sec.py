@@ -475,7 +475,7 @@ class DataSetReader:
             if filtered_data is None:
                 filtered_data = data
             else:
-                filtered_data = pd.concat([filtered_data,data])
+                filtered_data = pd.concat([filtered_data, data])
         if filtered_data is not None:
             logger.debug(f"found {len(filtered_data.head())} filtered records")
         return filtered_data
@@ -587,12 +587,13 @@ class DataSetCollector:
                         logger.debug(f"keys: {data.keys()}")
                         data_frame = data
                     else:
-                        
                         logger.debug(f"current data: {len(data_frame)}")
                         logger.debug(f"new data: {len(data)}")
                         data_frame = pd.concat([data_frame, data])
                         # data_frame = data_frame.merge(right=data)
-                        logger.debug(f"There are now {len(data_frame)} filtered data fields")
+                        logger.debug(
+                            f"There are now {len(data_frame)} filtered data fields"
+                        )
                 except ImportError:
                     # Note, when searching for annual reports, this will generally occur 1/4 times
                     # if we're only searching for one stock's tags

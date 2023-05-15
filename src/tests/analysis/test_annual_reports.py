@@ -27,7 +27,7 @@ class TestCliAnnualReports:
         )
         assert result is not None
         logger.debug(f"annual_reports:\n{result}")
-        assert(len(result.index) == 3)
+        assert len(result.index) == 3
 
     def test_invalid(self):
         with pytest.raises(LookupError, match="unable to find ticker: invalid"):
