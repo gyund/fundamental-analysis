@@ -116,14 +116,14 @@ period_focus_options = Literal["FY", "Q1", "Q2", "Q3", "Q4"]
 
 
 @beartype
-def trend_line(data: pd.Series, order: int = 1) -> float:
+def slope(data: pd.Series, order: int = 1) -> float:
     """Calculate the trend of a series.
 
     >>> import math
-    >>> math.isclose(trend_line(pd.Series((1,2,3))), 1)
+    >>> math.isclose(slope(pd.Series((1,2,3))), 1)
     True
 
-    >>> math.isclose(trend_line(pd.Series((3,2,1))), -1)
+    >>> math.isclose(slope(pd.Series((3,2,1))), -1)
     True
 
     Args:
@@ -260,24 +260,19 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             else self.filtered_data.query("ticker in @tickers")
         )
         logger.debug(f"pre-pivot:\n{data}")
-        if aggregate_func == "slope":
-            data = data.sort_values(by=["ddate"])
-            table: pd.DataFrame = pd.pivot_table(
-                data,
-                values="value",
-                columns="tag",
-                index=["ticker"],
-                aggfunc=trend_line,
-            )
-            logger.debug(table)
-        else:
-            table: pd.DataFrame = pd.pivot_table(
-                data,
-                values="value",
-                columns="tag",
-                index=["ticker"],
-                aggfunc=aggregate_func,
-            )
+
+        # Try and see if the function exists
+        if isinstance(aggregate_func, str):
+            if aggregate_func in globals():
+                aggregate_func = globals()[aggregate_func]
+
+        table: pd.DataFrame = pd.pivot_table(
+            data,
+            values="value",
+            columns="tag",
+            index=["ticker"],
+            aggfunc=aggregate_func,
+        )
         return Filter.Table(table)
 
     @property
