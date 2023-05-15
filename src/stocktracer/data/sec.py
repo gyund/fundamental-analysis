@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from io import BytesIO
 from numbers import Number
 from pathlib import Path
-from typing import Literal, Optional, SupportsInt
+from typing import Literal, Optional
 from zipfile import ZipFile
 
 import numpy as np
@@ -168,17 +168,11 @@ class Filter:
         def tags(self):
             return self.data.index.get_level_values("tag").unique()
 
-        def get_value(self, ticker_or_cik: str | int, tag: str) -> Number:
-            # TODO: access the either the ticker or cik index
-            if isinstance(ticker_or_cik, int):
-                return self.data.query(
-                    f'cik == {ticker_or_cik} and tag == "{tag}"'
-                ).squeeze()
+        def get_value(self, ticker: str | int, tag: str) -> Number:
             # Lookup convert ticker to cik
-            ticker_or_cik = ticker_or_cik.upper()
-            return self.data.query(
-                f'ticker == "{ticker_or_cik}" and tag == "{tag}"'
-            ).squeeze()
+            ticker = ticker.upper()
+            logger.debug(f"get_value:\n{self.data}")
+            return self.data.loc[ticker].loc[tag]
 
     def __init__(
         self,
@@ -210,12 +204,13 @@ class Filter:
     def filtered_data(self) -> pd.DataFrame:
         """Filtered data looks like this(in csv format):
 
+        Note that fp has the "Q" removed from the front so it can be stored as a simple number.
+
         .. code-block:: text
 
-            ticker,tag,cik,ddate,uom,value,period,fy,fp,title
-            TMO,EarningsPerShareDiluted,97745,2022-12-31,USD,17.63,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
-            TMO,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
-            TMO,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
+            ticker,tag,fy,fp,ddate,uom,value,period,title
+            AAPL,EntityCommonStockSharesOutstanding,2022,Q1,2023-01-31,shares,2000.0,2022-12-31,Apple Inc.
+            AAPL,FakeAttributeTag,2022,Q1,2023-01-31,shares,200.0,2022-12-31,Apple Inc.
 
         Returns:
             pd.DataFrame: _description_
@@ -270,7 +265,8 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             table: pd.DataFrame = pd.pivot_table(
                 data,
                 values="value",
-                index=["cik", "tag", "ticker"],
+                columns="tag",
+                index=["ticker"],
                 aggfunc=trend_line,
             )
             logger.debug(table)
@@ -278,7 +274,8 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             table: pd.DataFrame = pd.pivot_table(
                 data,
                 values="value",
-                index=["cik", "tag", "ticker"],
+                columns="tag",
+                index=["ticker"],
                 aggfunc=aggregate_func,
             )
         return Filter.Table(table)
@@ -628,9 +625,16 @@ class DataSetCollector:
         # 1,0000097745-23-000008,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC.
         # 2,0000097745-23-000008,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC..
 
-        data_frame = data_frame.drop(columns=["cik_str", "adsh"]).set_index(
-            ["ticker", "tag", "cik"]
+        data_frame = data_frame.drop(columns=["cik_str", "adsh", "cik"]).set_index(
+            ["ticker", "tag", "fy", "fp"]
         )
+
+        # # Convert fp to number so we can sort easily
+        # data_frame['fp'].mask(data_frame['fp'] == "Q1", 1, inplace=True)
+        # data_frame['fp'].mask(data_frame['fp'] == "Q2", 2, inplace=True)
+        # data_frame['fp'].mask(data_frame['fp'] == "Q3", 3, inplace=True)
+        # data_frame['fp'].mask(data_frame['fp'] == "Q4", 4, inplace=True)
+        # data_frame = data_frame.set_index("fp", append=True)
 
         logger.debug(f"filtered_df:\n{data_frame.to_csv()}")
         filter.filtered_data = data_frame
