@@ -26,9 +26,7 @@ class TestCliDilutedEps:
             final_quarter=1,
         )
         assert result is not None
-        logger.debug(
-            f"diluted_eps_result:\n{result.sort_values(ascending=True, by=['ddate'])}"
-        )
+        logger.debug(f"diluted_eps_result:\n{result}")
 
     def test_invalid(self):
         with pytest.raises(LookupError, match="unable to find ticker: invalid"):

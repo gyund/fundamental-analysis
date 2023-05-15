@@ -166,7 +166,7 @@ class Filter:
 
         @property
         def tags(self):
-            return self.data.index.get_level_values("tag").unique()
+            return self.data.columns.values
 
         def get_value(self, ticker: str | int, tag: str) -> Number:
             # Lookup convert ticker to cik
