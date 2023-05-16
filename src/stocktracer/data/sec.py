@@ -67,7 +67,7 @@ class TickerReader:
         self._cik_to_ticker_map = pd.read_json(data, orient="index")
 
     @property
-    def map_of_cik_to_ticker(self):
+    def map_of_cik_to_ticker(self) -> pd.DataFrame:
         return self._cik_to_ticker_map
 
     def convert_to_cik(self, ticker: str) -> np.int64:
@@ -83,9 +83,8 @@ class TickerReader:
             np.int64: cik
         """
         result = self.map_of_cik_to_ticker[
-            self.map_of_cik_to_ticker.ticker
-            == ticker.upper()  # pylint: disable=no-member
-        ]  # pylint: disable=no-member
+            self.map_of_cik_to_ticker["ticker"] == ticker.upper()
+        ]
         if result.empty:
             raise LookupError(f"unable to find ticker: {ticker}")
         return result.cik_str.iloc[0]
@@ -99,9 +98,7 @@ class TickerReader:
         Returns:
             str: stock ticker
         """
-        result = self.map_of_cik_to_ticker[
-            self.map_of_cik_to_ticker.cik_str == cik
-        ]  # pylint: disable=no-member
+        result = self.map_of_cik_to_ticker[self.map_of_cik_to_ticker["cik_str"] == cik]
         return result.ticker.iloc[0]
 
     def contains(self, tickers: frozenset) -> bool:
