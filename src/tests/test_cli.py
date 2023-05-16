@@ -17,13 +17,13 @@ def test_generate(sec_harness: tuple[Sec, mock.MagicMock]):
     data_frame = pd.DataFrame(data=d)
     result = io.StringIO()
     Cli._generate_report("csv", result, data_frame)
-    assert data_frame.to_csv() == result.getvalue()
+    assert data_frame.transpose().to_csv() == result.getvalue()
     result = io.StringIO()
     Cli._generate_report("json", result, data_frame)
-    assert data_frame.to_json() == result.getvalue()
+    assert data_frame.transpose().to_json() == result.getvalue()
     result = io.StringIO()
     Cli._generate_report("md", result, data_frame)
-    assert data_frame.to_markdown() == result.getvalue()
+    assert data_frame.transpose().to_markdown() == result.getvalue()
 
     with pytest.raises(beartype.roar.BeartypeCallHintParamViolation):
         Cli._generate_report("invalid", None, data_frame)

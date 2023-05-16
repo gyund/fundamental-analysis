@@ -110,6 +110,7 @@ class Cli:
             or results.empty
         ):
             # Call analysis plugin
+            results = None
             results = analysis_module.analyze()
             if results is None or results.empty:
                 raise LookupError("No analysis results available!")
@@ -135,6 +136,7 @@ class Cli:
     ):
         if report_file is None:
             report_file = io.StringIO()
+        results = results.transpose()
         match report_format.lower():
             case "csv":
                 results.to_csv(report_file)

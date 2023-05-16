@@ -1,6 +1,6 @@
 import logging
+import math
 
-import mock
 import pytest
 
 from stocktracer.analysis.diluted_eps import Analysis
@@ -26,8 +26,12 @@ class TestCliDilutedEps:
             final_quarter=1,
         )
         assert result is not None
-        logger.debug(
-            f"diluted_eps_result:\n{result.sort_values(ascending=True, by=['ddate'])}"
+        logger.debug(f"diluted_eps_result:\n{result}")
+        assert math.isclose(
+            # result.loc["TMO"]["EarningsPerShareDiluted"], 17.683333, rel_tol=0.001 # EPS last qtr
+            result.loc["TMO"]["EarningsPerShareDiluted"],
+            -0.820571,
+            rel_tol=0.001,  # trend
         )
 
     def test_invalid(self):
