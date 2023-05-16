@@ -59,7 +59,7 @@ def test_update(sec_instance: Sec, filter_aapl: Filter.Selectors):
 
     # There should only be one record based on the filter
     EntityCommonStockSharesOutstanding = filter_aapl.sec_filter.filtered_data.query(
-        "cik == 320193 and tag == 'EntityCommonStockSharesOutstanding'"
+        "ticker == 'AAPL' and tag == 'EntityCommonStockSharesOutstanding'"
     )
     eo_series = EntityCommonStockSharesOutstanding.value
 

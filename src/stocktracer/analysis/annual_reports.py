@@ -33,8 +33,8 @@ class Analysis(AnalysisInterface):
         sec.select_data(tickers=self.options.tickers, filter=sec_filter)
 
         table = sec_filter.select()
-        logger.debug(f"tags:\n{table.tags}")
-
+        # logger.debug(f"tags:\n{table.tags}")
+        # logger.debug(f"data:\n{table.data}")
         return table.data
 
     # Reuse documentation from parent

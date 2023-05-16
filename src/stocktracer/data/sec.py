@@ -3,8 +3,9 @@ import logging
 import sys
 from datetime import date, timedelta
 from io import BytesIO
+from numbers import Number
 from pathlib import Path
-from typing import Literal, Optional, SupportsInt
+from typing import Literal, Optional
 from zipfile import ZipFile
 
 import numpy as np
@@ -63,7 +64,11 @@ class ReportDate:
 @beartype
 class TickerReader:
     def __init__(self, data: str):
-        self._data = pd.read_json(data, orient="index")
+        self._cik_to_ticker_map = pd.read_json(data, orient="index")
+
+    @property
+    def map_of_cik_to_ticker(self) -> pd.DataFrame:
+        return self._cik_to_ticker_map
 
     def convert_to_cik(self, ticker: str) -> np.int64:
         """Get the Cik from the stock ticker.
@@ -77,9 +82,9 @@ class TickerReader:
         Returns:
             np.int64: cik
         """
-        result = self._data[
-            self._data.ticker == ticker.upper()  # pylint: disable=no-member
-        ]  # pylint: disable=no-member
+        result = self.map_of_cik_to_ticker[
+            self.map_of_cik_to_ticker["ticker"] == ticker.upper()
+        ]
         if result.empty:
             raise LookupError(f"unable to find ticker: {ticker}")
         return result.cik_str.iloc[0]
@@ -93,7 +98,7 @@ class TickerReader:
         Returns:
             str: stock ticker
         """
-        result = self._data[self._data.cik_str == cik]  # pylint: disable=no-member
+        result = self.map_of_cik_to_ticker[self.map_of_cik_to_ticker["cik_str"] == cik]
         return result.ticker.iloc[0]
 
     def contains(self, tickers: frozenset) -> bool:
@@ -112,6 +117,33 @@ class TickerReader:
 
 
 period_focus_options = Literal["FY", "Q1", "Q2", "Q3", "Q4"]
+
+
+@beartype
+def slope(data: pd.Series, order: int = 1) -> float:
+    """Calculate the trend of a series.
+
+    >>> import math
+    >>> math.isclose(slope(pd.Series((1,2,3))), 1)
+    True
+
+    >>> math.isclose(slope(pd.Series((3,2,1))), -1)
+    True
+
+    Args:
+        data (pd.Series): _description_
+        order (int): _description_. Defaults to 1.
+
+    Returns:
+        float: slope of the trend line
+    """
+    x = range(len(data.keys()))
+    y = data.values
+
+    coeffs = np.polyfit(x, y, order)
+    slope = coeffs[0]
+    # np.isclose()
+    return slope
 
 
 @beartype
@@ -138,19 +170,13 @@ class Filter:
 
         @property
         def tags(self):
-            return self.data.index.get_level_values("tag").unique()
+            return self.data.columns.values
 
-        def get_value(self, ticker_or_cik: str | int, tag: str) -> SupportsInt:
-            # TODO: access the either the ticker or cik index
-            if isinstance(ticker_or_cik, int):
-                return self.data.query(
-                    f'cik == {ticker_or_cik} and tag == "{tag}"'
-                ).values[0]
+        def get_value(self, ticker: str | int, tag: str) -> Number:
             # Lookup convert ticker to cik
-            ticker_or_cik = ticker_or_cik.upper()
-            return self.data.query(
-                f'ticker == "{ticker_or_cik}" and tag == "{tag}"'
-            ).values[0]
+            ticker = ticker.upper()
+            logger.debug(f"get_value:\n{self.data}")
+            return self.data.loc[ticker].loc[tag]
 
     def __init__(
         self,
@@ -182,12 +208,13 @@ class Filter:
     def filtered_data(self) -> pd.DataFrame:
         """Filtered data looks like this(in csv format):
 
+        Note that fp has the "Q" removed from the front so it can be stored as a simple number.
+
         .. code-block:: text
 
-            ticker,tag,cik,ddate,uom,value,period,fy,fp,title
-            TMO,EarningsPerShareDiluted,97745,2022-12-31,USD,17.63,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
-            TMO,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
-            TMO,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,THERMO FISHER SCIENTIFIC INC.
+            ticker,tag,fy,fp,ddate,uom,value,period,title
+            AAPL,EntityCommonStockSharesOutstanding,2022,Q1,2023-01-31,shares,2000.0,2022-12-31,Apple Inc.
+            AAPL,FakeAttributeTag,2022,Q1,2023-01-31,shares,200.0,2022-12-31,Apple Inc.
 
         Returns:
             pd.DataFrame: _description_
@@ -214,14 +241,14 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
     def select(
         self,
         aggregate_func: Optional[
-            Callable | Literal["mean", "std", "var", "sum", "min", "max"]
+            Callable | Literal["mean", "std", "var", "sum", "min", "max", "slope"]
         ] = "mean",
         tickers: Optional[Sequence[str]] = None,
     ) -> Table:
         """Select only a subset of the data matching the specified criteria.
 
         Args:
-            aggregate_func (Optional[Callable | Literal['mean', 'std', 'var', 'sum', 'min','max']]): Numpy function to use for aggregating the results. This should be a function like `numpy.average` or `numpy.sum`.
+            aggregate_func (Optional[Callable | Literal['mean', 'std', 'var', 'sum', 'min','max','slope']]): Numpy function to use for aggregating the results. This should be a function like `numpy.average` or `numpy.sum`.
             tickers (Optional[Sequence[str]]): ticker symbol for the company
 
         Returns:
@@ -237,10 +264,17 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             else self.filtered_data.query("ticker in @tickers")
         )
         logger.debug(f"pre-pivot:\n{data}")
+
+        # Try and see if the function exists
+        if isinstance(aggregate_func, str):
+            if aggregate_func in globals():
+                aggregate_func = globals()[aggregate_func]
+
         table: pd.DataFrame = pd.pivot_table(
             data,
             values="value",
-            index=["cik", "tag", "ticker"],
+            columns="tag",
+            index=["ticker"],
             aggfunc=aggregate_func,
         )
         return Filter.Table(table)
@@ -401,14 +435,58 @@ class DataSetReader:
                 logger.debug(f"sub_dataframe:\n{sub_dataframe}")
                 continue
 
-            if filtered_data is None:
-                filtered_data = data
-            else:
-                filtered_data.merge(data)
+            filtered_data = cls.append(filtered_data, data)
 
-            filtered_data.merge(data)
         if filtered_data is not None:  # pragma: no cover
             logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
+        return filtered_data
+
+    @classmethod
+    def append(
+        cls, filtered_data: Optional[pd.DataFrame], data: pd.DataFrame
+    ) -> pd.DataFrame:
+        """Append data to the filtered_data and return the updated filtered DataFrame
+
+        >>> df1 = pd.DataFrame({"A": ["A0", "A1", "A2", "A3"]},index=[0,1,2,3])
+        >>> df2 = pd.DataFrame({"B": ["B0", "B1", "B2", "B3"]},index=[4,5,6,7])
+        >>> DataSetReader.append(df1, df2)
+             A    B
+        0   A0  NaN
+        1   A1  NaN
+        2   A2  NaN
+        3   A3  NaN
+        4  NaN   B0
+        5  NaN   B1
+        6  NaN   B2
+        7  NaN   B3
+        >>> DataSetReader.append(None, df1)
+            A
+        0  A0
+        1  A1
+        2  A2
+        3  A3
+        >>> DataSetReader.append(df1, df1)
+            A
+        0  A0
+        1  A1
+        2  A2
+        3  A3
+        0  A0
+        1  A1
+        2  A2
+        3  A3
+
+        Args:
+            filtered_data (Optional[pd.DataFrame]): Existing Data
+            data (pd.DataFrame): New data
+
+        Returns:
+            pd.DataFrame: Filtered Data
+        """
+        if filtered_data is None:
+            filtered_data = data
+        else:
+            filtered_data = pd.concat([filtered_data, data])
         return filtered_data
 
     @classmethod
@@ -443,12 +521,11 @@ class DataSetReader:
             data = chunk.query(query_str)
             if data.empty:
                 continue
-            if filtered_data is None:
-                filtered_data = data
-            else:
-                filtered_data.merge(data)
+
+            filtered_data = cls.append(filtered_data, data)
+
         if filtered_data is not None:
-            logger.debug(f"Filtered Records (head+5):\n{filtered_data.head()}")
+            logger.debug(f"found {len(filtered_data.head())} filtered records")
         return filtered_data
 
 
@@ -552,14 +629,15 @@ class DataSetCollector:
             if isinstance(reader, DataSetReader):
                 try:
                     data = reader.process_zip(filter)
-                    if data is None or data.empty:
-                        logger.debug(f"no results captured in report {r}")
-                    elif data_frame is None:
-                        logger.debug(f"keys: {data.keys()}")
-                        data_frame = data
-                    else:
-                        # df = pd.concat(df, data)
-                        data_frame.merge(right=data)
+                    if data_frame is not None:
+                        logger.debug(f"current data: {len(data_frame)}")
+                    if data is not None:
+                        logger.debug(f"new data: {len(data)}")
+                        data_frame = DataSetReader.append(data_frame, data)
+                        logger.debug(
+                            f"There are now {len(data_frame)} filtered data fields"
+                        )
+
                 except ImportError:
                     # Note, when searching for annual reports, this will generally occur 1/4 times
                     # if we're only searching for one stock's tags
@@ -568,17 +646,13 @@ class DataSetCollector:
                     )
                     logger.debug(f"{filter}")
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
-        if data_frame is not None:
-            logger.debug(f"keys: {data_frame.keys()}")
-            logger.debug(f"Rows: {len(data_frame)}")
-            logger.debug(data_frame.head())
-        else:
+        if data_frame is None:
             raise LookupError("No data matching the filter was retrieved")
 
         # Now add an index for ticker values to pair with the cik
-        logger.debug(f"filtered_df_before_merge:\n{data_frame.to_csv()}")
+        # logger.debug(f"filtered_df_before_merge:\n{data_frame.to_csv()}")
         data_frame = data_frame.reset_index().merge(
-            right=self.download_manager.ticker_reader._data,
+            right=self.download_manager.ticker_reader.map_of_cik_to_ticker,
             how="inner",
             left_on="cik",
             right_on=["cik_str"],
@@ -590,9 +664,16 @@ class DataSetCollector:
         # 1,0000097745-23-000008,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC.
         # 2,0000097745-23-000008,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC..
 
-        data_frame = data_frame.drop(columns=["cik_str", "adsh"]).set_index(
-            ["ticker", "tag", "cik"]
+        data_frame = data_frame.drop(columns=["cik_str", "adsh", "cik"]).set_index(
+            ["ticker", "tag", "fy", "fp"]
         )
+
+        # # Convert fp to number so we can sort easily
+        # data_frame['fp'].mask(data_frame['fp'] == "Q1", 1, inplace=True)
+        # data_frame['fp'].mask(data_frame['fp'] == "Q2", 2, inplace=True)
+        # data_frame['fp'].mask(data_frame['fp'] == "Q3", 3, inplace=True)
+        # data_frame['fp'].mask(data_frame['fp'] == "Q4", 4, inplace=True)
+        # data_frame = data_frame.set_index("fp", append=True)
 
         logger.debug(f"filtered_df:\n{data_frame.to_csv()}")
         filter.filtered_data = data_frame
