@@ -62,10 +62,15 @@ class TestSec:
         type(download_manager).ticker_reader = mock.PropertyMock(
             return_value=ticker_reader
         )
+        ticker_reader.map_of_cik_to_ticker = pd.read_json(
+            """{"0":{"cik_str":320193,"ticker":"AAPL","title":"Apple Inc."},
+         "1":{"cik_str":789019,"ticker":"MSFT","title":"MICROSOFT CORP"}}""",
+            orient="index",
+        )
         download_manager.get_quarterly_report = mock.MagicMock(return_value=data_reader)
 
         with pytest.raises(
-            LookupError, match="No data matching the filter was retrieved"
+            KeyError, match="cik"
         ):
             sec.select_data(
                 tickers=frozenset(("aapl", "msft")),
@@ -103,14 +108,15 @@ class TestSec:
             aapl_filter, fake_sub_txt_sample, fake_data_txt_sample
         )
         data_reader = mock.MagicMock(DataSetReader)
-        data_reader.process_zip = mock.MagicMock(return_value=data)
+        data_reader.process_zip = mock.MagicMock()
+        data_reader.process_zip.side_effect = [data, None, None, None, None]
         download_manager.get_quarterly_report = mock.MagicMock(return_value=data_reader)
 
         ticker_reader = mock.MagicMock(TickerReader)
         type(download_manager).ticker_reader = mock.PropertyMock(
             return_value=ticker_reader
         )
-        ticker_reader._data = pd.read_json(
+        ticker_reader.map_of_cik_to_ticker = pd.read_json(
             """{"0":{"cik_str":320193,"ticker":"AAPL","title":"Apple Inc."},
          "1":{"cik_str":789019,"ticker":"MSFT","title":"MICROSOFT CORP"}}""",
             orient="index",
@@ -121,7 +127,10 @@ class TestSec:
             filter=Filter.SecFilter(last_report=ReportDate(2023, 1)),
         )
 
-        logger.debug(f"\n{data}")
+        logger.debug(f"\n{filter.filtered_data.to_csv()}")
+        # Make sure our bulk processing isn't duplicating data
+        assert len(filter.filtered_data) == len(filter.filtered_data.drop_duplicates())
+
         table = pd.pivot_table(
             filter.filtered_data,
             values="value",

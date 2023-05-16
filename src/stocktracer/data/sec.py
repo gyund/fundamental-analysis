@@ -64,7 +64,11 @@ class ReportDate:
 @beartype
 class TickerReader:
     def __init__(self, data: str):
-        self._data = pd.read_json(data, orient="index")
+        self._cik_to_ticker_map = pd.read_json(data, orient="index")
+
+    @property
+    def map_of_cik_to_ticker(self):
+        return self._cik_to_ticker_map
 
     def convert_to_cik(self, ticker: str) -> np.int64:
         """Get the Cik from the stock ticker.
@@ -78,8 +82,8 @@ class TickerReader:
         Returns:
             np.int64: cik
         """
-        result = self._data[
-            self._data.ticker == ticker.upper()  # pylint: disable=no-member
+        result = self.map_of_cik_to_ticker[
+            self.map_of_cik_to_ticker.ticker == ticker.upper()  # pylint: disable=no-member
         ]  # pylint: disable=no-member
         if result.empty:
             raise LookupError(f"unable to find ticker: {ticker}")
@@ -94,7 +98,7 @@ class TickerReader:
         Returns:
             str: stock ticker
         """
-        result = self._data[self._data.cik_str == cik]  # pylint: disable=no-member
+        result = self.map_of_cik_to_ticker[self.map_of_cik_to_ticker.cik_str == cik]  # pylint: disable=no-member
         return result.ticker.iloc[0]
 
     def contains(self, tickers: frozenset) -> bool:
@@ -431,13 +435,58 @@ class DataSetReader:
                 logger.debug(f"sub_dataframe:\n{sub_dataframe}")
                 continue
 
-            if filtered_data is None:
-                filtered_data = data
-            else:
-                filtered_data.merge(data)
+            filtered_data = cls.append(filtered_data, data)
 
         if filtered_data is not None:  # pragma: no cover
             logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
+        return filtered_data
+
+    @classmethod
+    def append(
+        cls, filtered_data: Optional[pd.DataFrame], data: pd.DataFrame
+    ) -> pd.DataFrame:
+        """Append data to the filtered_data and return the updated filtered DataFrame
+
+        >>> df1 = pd.DataFrame({"A": ["A0", "A1", "A2", "A3"]},index=[0,1,2,3])
+        >>> df2 = pd.DataFrame({"B": ["B0", "B1", "B2", "B3"]},index=[4,5,6,7])
+        >>> DataSetReader.append(df1, df2)
+             A    B
+        0   A0  NaN
+        1   A1  NaN
+        2   A2  NaN
+        3   A3  NaN
+        4  NaN   B0
+        5  NaN   B1
+        6  NaN   B2
+        7  NaN   B3
+        >>> DataSetReader.append(None, df1)
+            A
+        0  A0
+        1  A1
+        2  A2
+        3  A3
+        >>> DataSetReader.append(df1, df1)
+            A
+        0  A0
+        1  A1
+        2  A2
+        3  A3
+        0  A0
+        1  A1
+        2  A2
+        3  A3
+
+        Args:
+            filtered_data (Optional[pd.DataFrame]): Existing Data
+            data (pd.DataFrame): New data
+
+        Returns:
+            pd.DataFrame: Filtered Data
+        """
+        if filtered_data is None:
+            filtered_data = data
+        else:
+            filtered_data = pd.concat([filtered_data, data])
         return filtered_data
 
     @classmethod
@@ -472,10 +521,9 @@ class DataSetReader:
             data = chunk.query(query_str)
             if data.empty:
                 continue
-            if filtered_data is None:
-                filtered_data = data
-            else:
-                filtered_data = pd.concat([filtered_data, data])
+
+            filtered_data = cls.append(filtered_data, data)
+
         if filtered_data is not None:
             logger.debug(f"found {len(filtered_data.head())} filtered records")
         return filtered_data
@@ -581,19 +629,15 @@ class DataSetCollector:
             if isinstance(reader, DataSetReader):
                 try:
                     data = reader.process_zip(filter)
-                    if data is None or data.empty:
-                        logger.debug(f"no results captured in report {r}")
-                    elif data_frame is None:
-                        logger.debug(f"keys: {data.keys()}")
-                        data_frame = data
-                    else:
+                    if data_frame is not None:
                         logger.debug(f"current data: {len(data_frame)}")
+                    if data is not None:
                         logger.debug(f"new data: {len(data)}")
-                        data_frame = pd.concat([data_frame, data])
-                        # data_frame = data_frame.merge(right=data)
+                        data_frame = DataSetReader.append(data_frame, data)
                         logger.debug(
                             f"There are now {len(data_frame)} filtered data fields"
                         )
+
                 except ImportError:
                     # Note, when searching for annual reports, this will generally occur 1/4 times
                     # if we're only searching for one stock's tags
@@ -608,7 +652,7 @@ class DataSetCollector:
         # Now add an index for ticker values to pair with the cik
         # logger.debug(f"filtered_df_before_merge:\n{data_frame.to_csv()}")
         data_frame = data_frame.reset_index().merge(
-            right=self.download_manager.ticker_reader._data,
+            right=self.download_manager.ticker_reader.map_of_cik_to_ticker,
             how="inner",
             left_on="cik",
             right_on=["cik_str"],
