@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from alive_progress import alive_bar
 from beartype import beartype
-from beartype.typing import Any, Callable, Sequence
+from beartype.typing import Callable, Sequence
 from requests_cache import CachedSession, SQLiteCache
 
 logger = logging.getLogger(__name__)
@@ -573,9 +573,7 @@ class DownloadManager:
         file = f"{report_date.year}q{report_date.quarter}.zip"
         return "/".join([self._base_url, file])
 
-    def get_quarterly_report(
-        self, report_date: ReportDate, bar: Any = None
-    ) -> Optional[DataSetReader]:
+    def get_quarterly_report(self, report_date: ReportDate) -> Optional[DataSetReader]:
         """Retrieve from a cache or make a request archived quarterly data.
 
         This allows us to download data independent of actually processing it, allowing
@@ -583,7 +581,6 @@ class DownloadManager:
 
         Args:
             report_date (ReportDate): information specifying the quarterly dump to retrieve
-            bar (Any): If provided, it will update the status bar
 
         Returns:
             Optional[DataSetReader]: this object helps process the data received more granularly
@@ -592,11 +589,6 @@ class DownloadManager:
         response = self._data_session.get(request)
         if response.from_cache:
             logger.info(f"Retrieved {request} from cache")
-            if bar:
-                bar(1, skipped=True)
-        else:
-            if bar:
-                bar(1, skipped=False)
 
         if response.status_code == 200:
             return DataSetReader(response.content)
@@ -624,17 +616,17 @@ class DataSetCollector:
         report_dates = filter.required_reports
         logger.info(f"Creating Unified Data record for these reports: {report_dates}")
         with alive_bar(
-            total=len(report_dates) * 2,
+            # total=len(report_dates) * 2,
             theme="smooth",
             # stats=False,
-            title="Filtering",
+            title="Records Retrieved",
             file=sys.stderr,
             calibrate=5_000,
             dual_line=True,
         ) as bar:
             for r in report_dates:
                 bar.text(f"Downloading report {r}...")
-                reader = self.download_manager.get_quarterly_report(r, bar)
+                reader = self.download_manager.get_quarterly_report(r)
                 if isinstance(reader, DataSetReader):
                     try:
                         bar.text(f"Processing report {r}...")
@@ -644,8 +636,10 @@ class DataSetCollector:
                         if data is not None:
                             logger.debug(f"new data: {len(data)}")
                             data_frame = DataSetReader.append(data_frame, data)
+                            record_count = len(data_frame)
+                            bar(record_count)
                             logger.debug(
-                                f"There are now {len(data_frame)} filtered data fields"
+                                f"There are now {record_count} filtered data fields"
                             )
 
                     except ImportError:
@@ -655,7 +649,7 @@ class DataSetCollector:
                             f"{r} did not have any matches for the provided filter"
                         )
                         logger.debug(f"{filter}")
-                bar()
+
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
         if data_frame is None:
             raise LookupError("No data matching the filter was retrieved")
