@@ -69,9 +69,7 @@ class TestSec:
         )
         download_manager.get_quarterly_report = mock.MagicMock(return_value=data_reader)
 
-        with pytest.raises(
-            KeyError, match="cik"
-        ):
+        with pytest.raises(KeyError, match="cik"):
             sec.select_data(
                 tickers=frozenset(("aapl", "msft")),
                 filter=Filter.SecFilter(tags=["test"]),

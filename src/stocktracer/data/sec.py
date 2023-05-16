@@ -83,7 +83,8 @@ class TickerReader:
             np.int64: cik
         """
         result = self.map_of_cik_to_ticker[
-            self.map_of_cik_to_ticker.ticker == ticker.upper()  # pylint: disable=no-member
+            self.map_of_cik_to_ticker.ticker
+            == ticker.upper()  # pylint: disable=no-member
         ]  # pylint: disable=no-member
         if result.empty:
             raise LookupError(f"unable to find ticker: {ticker}")
@@ -98,7 +99,9 @@ class TickerReader:
         Returns:
             str: stock ticker
         """
-        result = self.map_of_cik_to_ticker[self.map_of_cik_to_ticker.cik_str == cik]  # pylint: disable=no-member
+        result = self.map_of_cik_to_ticker[
+            self.map_of_cik_to_ticker.cik_str == cik
+        ]  # pylint: disable=no-member
         return result.ticker.iloc[0]
 
     def contains(self, tickers: frozenset) -> bool:

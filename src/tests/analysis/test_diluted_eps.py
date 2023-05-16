@@ -29,7 +29,9 @@ class TestCliDilutedEps:
         logger.debug(f"diluted_eps_result:\n{result}")
         assert math.isclose(
             # result.loc["TMO"]["EarningsPerShareDiluted"], 17.683333, rel_tol=0.001 # EPS last qtr
-            result.loc["TMO"]["EarningsPerShareDiluted"], -0.820571, rel_tol=0.001 # trend
+            result.loc["TMO"]["EarningsPerShareDiluted"],
+            -0.820571,
+            rel_tol=0.001,  # trend
         )
 
     def test_invalid(self):
