@@ -33,7 +33,7 @@ The goal of this project is aggregate a variety of ways to consume information a
 pip install stocktracer
 
 # Perform analysis
-stocktracer analyze --tickers aapl,msft
+stocktracer analyze --tickers aapl,msft > report.txt
 
 # Help
 stocktracer
