@@ -33,8 +33,10 @@ class Analysis(AnalysisInterface):
         sec.select_data(tickers=self.options.tickers, filter=sec_filter)
 
         table = sec_filter.select()
-        # logger.debug(f"tags:\n{table.tags}")
-        # logger.debug(f"data:\n{table.data}")
+
+        # If you prefer to see columns that are not universal across all stocks, comment this out
+        table.data = table.data.dropna(axis=1,how='any')
+
         return table.data
 
     # Reuse documentation from parent
