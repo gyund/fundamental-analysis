@@ -13,27 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 @beartype
-def trendline(data: pd.Series, order: int = 1) -> float:
-    """Calculate the trend of a series.
-
-    >>> trendline(pd.Series((1,2,3)))
-    1.0000000000000004
-
-    Args:
-        data (pd.Series): _description_
-        order (int): _description_. Defaults to 1.
-
-    Returns:
-        float: slope of the trend line
-    """
-    coeffs = np.polyfit(data.index.values, list(data), order)
-    slope = coeffs[-2]
-    return float(slope)
-
-
-@beartype
 class Analysis(AnalysisInterface):
-    """Perform an analysis on the earnings per share over time."""
+    """Calculate the slope of EPS values over the course of the past 5 years."""
 
     under_development = True
     years_of_analysis = 5
