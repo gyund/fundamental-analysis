@@ -175,7 +175,6 @@ class Filter:
         def get_value(self, ticker: str | int, tag: str) -> Number:
             # Lookup convert ticker to cik
             ticker = ticker.upper()
-            logger.debug(f"get_value:\n{self.data}")
             return self.data.loc[ticker].loc[tag]
 
     def __init__(
@@ -274,9 +273,10 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             data,
             values="value",
             columns="tag",
-            index=["ticker"],
+            index=["ticker","fy"],
             aggfunc=aggregate_func,
         )
+        
         return Filter.Table(table)
 
     @property
@@ -431,14 +431,15 @@ class DataSetReader:
                 data = data.query("tag in @tag_list")
 
             if data.empty:  # pragma: no cover
-                logger.debug(f"chunk:\n{chunk}")
-                logger.debug(f"sub_dataframe:\n{sub_dataframe}")
+                # logger.debug(f"chunk:\n{chunk}")
+                # logger.debug(f"sub_dataframe:\n{sub_dataframe}")
                 continue
 
             filtered_data = cls.append(filtered_data, data)
 
-        if filtered_data is not None:  # pragma: no cover
-            logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
+        
+        # if filtered_data is not None:  # pragma: no cover
+        #     logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
         return filtered_data
 
     @classmethod
@@ -505,7 +506,7 @@ class DataSetReader:
 
         oldest_fy = filter.last_report.year - filter.years
         query_str = f"cik in @cik_list and fp in @focus_periods and fy >= {oldest_fy}"
-        logger.debug(f"Query string: {query_str}")
+        # logger.debug(f"Query string: {query_str}")
         reader = pd.read_csv(
             filepath_or_buffer,
             delimiter="\t",
@@ -513,6 +514,7 @@ class DataSetReader:
             index_col=["adsh", "cik"],
             chunksize=DEFAULT_CHUNK_SIZE,
             parse_dates=["period"],
+            dtype={'cik':np.int32}
         )
         logger.debug(f"keeping only these focus periods: {focus_periods}")
         filtered_data: pd.DataFrame = None
@@ -632,14 +634,14 @@ class DataSetCollector:
                         bar.text(f"Processing report {r}...")
                         data = reader.process_zip(filter)
                         if data_frame is not None:
-                            logger.debug(f"current data: {len(data_frame)}")
+                            logger.debug(f"record count: {len(data_frame)}")
                         if data is not None:
-                            logger.debug(f"new data: {len(data)}")
+                            logger.debug(f"new record count: {len(data)}")
                             data_frame = DataSetReader.append(data_frame, data)
                             record_count = len(data_frame)
                             bar(record_count)
                             logger.debug(
-                                f"There are now {record_count} filtered data fields"
+                                f"There are now {record_count} filtered records"
                             )
 
                     except ImportError:
@@ -669,6 +671,7 @@ class DataSetCollector:
         # 1,0000097745-23-000008,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC.
         # 2,0000097745-23-000008,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC..
 
+        
         data_frame = data_frame.drop(columns=["cik_str", "adsh", "cik"]).set_index(
             ["ticker", "tag", "fy", "fp"]
         )
@@ -680,7 +683,7 @@ class DataSetCollector:
         # data_frame['fp'].mask(data_frame['fp'] == "Q4", 4, inplace=True)
         # data_frame = data_frame.set_index("fp", append=True)
 
-        logger.debug(f"filtered_df:\n{data_frame.to_csv()}")
+        # logger.debug(f"filtered_df:\n{data_frame.to_csv()}")
         filter.filtered_data = data_frame
 
 
