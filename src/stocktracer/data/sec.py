@@ -25,12 +25,14 @@ pd.set_option("mode.chained_assignment", "raise")
 
 @beartype
 class ReportDate:
+    """ReportDate is used to select and identify archives created by the SEC."""
+
     def __init__(
         self,
         year: int | None = None,
         quarter: int | None = None,
     ):
-        """ReportDate is used to select and identify archives created by the SEC.
+        """
 
         Args:
             year (int, optional): Year of the archive. Defaults to date.today().year.
@@ -65,6 +67,16 @@ class ReportDate:
 
 @beartype
 class TickerReader:
+    """This class provides translation services for CIK and Ticker values.
+
+    The SEC has a `json` file that provides mappings from CIK values to Tickers.
+    The data providing this conversion is injected into this class and then
+    this class provides helper methods for performing the conversion on this data set.
+
+    This class is provided CSV data which is parsed upon initialization. So creating
+    this object is the most expensive part.
+    """
+
     def __init__(self, data: str):
         self._cik_to_ticker_map = pd.read_json(data, orient="index")
 
@@ -148,6 +160,8 @@ def slope(data: pd.Series, order: int = 1) -> float:
 
 @beartype
 class Filter:
+    """Filter for SEC tools to scrape relevant information when processing records."""
+
     class Table:
         """This is a table that is the output from a `Filter.select()` call.
 
@@ -169,10 +183,25 @@ class Filter:
             return str(self.data)
 
         @property
-        def tags(self):
+        def tags(self) -> np.ndarray:
+            """List of tags that can be used on this data set.
+
+            Returns:
+                np.ndarray: array with results
+            """
             return self.data.columns.values
 
         def get_value(self, ticker: str | int, tag: str, year: int) -> Number:
+            """Retrieve the exact value of a table cell.
+
+            Args:
+                ticker (str | int): ticker identifying the equity of interest.
+                tag (str): attribute indicating the type of data to look at.
+                year (int): The year this data applies to.
+
+            Returns:
+                Number: value of result
+            """
             # Lookup convert ticker to cik
             ticker = ticker.upper()
             return self.data.loc[ticker].loc[year].loc[tag]
@@ -188,7 +217,7 @@ class Filter:
         last_report: ReportDate = ReportDate(),
         only_annual: bool = True,
     ) -> None:
-        """Filter for SEC tools to scrape relevant information when processing records.
+        """
 
         This is an important concept to dealing with large data sets. It allows us to chunk processing
         into batches and find/locate only records of interest. Without these filters, the tool would
@@ -449,7 +478,7 @@ class DataSetReader:
     def append(
         cls, filtered_data: Optional[pd.DataFrame], data: pd.DataFrame
     ) -> pd.DataFrame:
-        """Append data to the filtered_data and return the updated filtered DataFrame
+        """Append data to the filtered_data and return the updated filtered DataFrame.
 
         >>> df1 = pd.DataFrame({"A": ["A0", "A1", "A2", "A3"]},index=[0,1,2,3])
         >>> df2 = pd.DataFrame({"B": ["B0", "B1", "B2", "B3"]},index=[4,5,6,7])
@@ -536,6 +565,8 @@ class DataSetReader:
 
 @beartype
 class DownloadManager:
+    """This class is responsible for downloading and caching downloaded data sets from the SEC."""
+
     # Format of zip example: 2023q1.zip
     _base_url = "https://www.sec.gov/files/dera/data/financial-statement-data-sets"
 
@@ -691,8 +722,10 @@ class DataSetCollector:
 
 @beartype
 class Sec:
+    """Object for handling requests for information relating to SEC data dumps."""
+
     def __init__(self, storage_path: Path):
-        """Object for handling requests for information relating to SEC data dumps.
+        """
 
         Args:
             storage_path (Path): Where to store the results.

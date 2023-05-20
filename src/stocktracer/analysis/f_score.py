@@ -1,3 +1,4 @@
+"""Piotroski F-score is a number between 0 and 9 which is used to assess strength of company's financial position."""
 import logging
 from typing import Optional
 
@@ -13,8 +14,9 @@ logger = logging.getLogger(__name__)
 
 @beartype
 class Analysis(AnalysisInterface):
-    """Piotroski F-score is a number between 0 and 9 which is used to assess strength of company's
-    financial position. The score is used by financial investors in order to find the best value
+    """
+
+    The score is used by financial investors in order to find the best value
     stocks (nine being the best). The score is named after Stanford accounting professor Joseph Piotroski.
 
     Calculation procedure

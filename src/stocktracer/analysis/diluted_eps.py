@@ -1,3 +1,4 @@
+"""This analysis module determines the trend of EPS over the course of the past 5 years."""
 import logging
 from typing import Optional
 
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 @beartype
 class Analysis(AnalysisInterface):
-    """Calculate the slope of EPS values over the course of the past 5 years."""
+    """Class that calculates the EPS slope."""
 
     under_development = True
     years_of_analysis = 5

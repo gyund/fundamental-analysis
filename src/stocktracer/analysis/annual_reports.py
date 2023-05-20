@@ -1,3 +1,4 @@
+"""Download and retrieves annual reports for the specified stock tickers."""
 import logging
 from typing import Optional
 
@@ -35,7 +36,7 @@ def create_normalized_sec_table(
 
 @beartype
 class Analysis(AnalysisInterface):
-    """Perform an analysis on the earnings per share over time."""
+    """Class for collecting and processing annual report data."""
 
     under_development = True
 
