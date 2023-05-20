@@ -62,7 +62,7 @@ class Analysis(AnalysisInterface):
         sec.filter_data(tickers=self.options.tickers, filter=sec_filter)
 
         table = sec_filter.select()
-        table.data = table.data.dropna(axis=1, how="any")
+        table.normalize()
         assert (
             self.options.last_report.year + 1
             not in table.data.index.get_level_values(1)
