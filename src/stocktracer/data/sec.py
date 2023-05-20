@@ -548,18 +548,14 @@ class DataSetReader:
             parse_dates=["period"],
             dtype={"cik": np.int32},
         )
-        logger.debug(f"keeping only these focus periods: {focus_periods}")
+        logger.info(f"keeping only these focus periods: {focus_periods}")
         filtered_data: pd.DataFrame = None
         chunk: pd.DataFrame
         for chunk in reader:
             data = chunk.query(query_str)
             if data.empty:
                 continue
-
             filtered_data = cls.append(filtered_data, data)
-
-        if filtered_data is not None:
-            logger.debug(f"found {len(filtered_data.head())} filtered records")
         return filtered_data
 
 
@@ -674,7 +670,7 @@ class DataSetCollector:
                             data_frame = DataSetReader.append(data_frame, data)
                             record_count = len(data_frame)
                             status_bar(record_count)  # pylint: disable=not-callable
-                            logger.debug(
+                            logger.info(
                                 f"There are now {record_count} filtered records"
                             )
 
