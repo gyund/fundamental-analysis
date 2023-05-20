@@ -1,5 +1,6 @@
 """Piotroski F-score is a number between 0 and 9 which is used to assess strength of company's financial position."""
 import logging
+import math
 from typing import Optional
 
 import pandas as pd
@@ -72,9 +73,20 @@ class Analysis(AnalysisInterface):
         ]
         # f_score.pivot_table(index=['ticker'], columns=['fy','OperatingIncomeLoss'])
         logger.debug(f"f_score:\n{f_score}")
-        # assert f_score.loc["AAPL"].loc[2022]["ROA"] == 0.279144
-        # assert f_score.loc["AAPL"].loc[2022]["OperatingIncomeLoss"] == 9.822467e10
-        # assert f_score.loc["AAPL"].loc[2022]["delta-ROA"] == 1.850233e10
+        # logger.debug(f"{f_score.loc['AAPL']}")
+        # logger.debug(f"{f_score.loc['AAPL'].loc[2022]}")
+        # logger.debug(f"{f_score.loc['AAPL'].loc[2022]['ROA']}")
+        assert math.isclose(
+            f_score.loc["AAPL"].loc[2022]["ROA"], 0.2791437, rel_tol=0.00001
+        )
+        assert math.isclose(
+            f_score.loc["AAPL"].loc[2022]["OperatingIncomeLoss"],
+            9.822467e10,
+            rel_tol=0.00001,
+        )
+        assert math.isclose(
+            f_score.loc["AAPL"].loc[2022]["delta-ROA"], 1.850233e10, rel_tol=0.00001
+        )
         return f_score
 
     # Reuse documentation from parent
