@@ -58,25 +58,25 @@ class Cli:
     def analyze(  # pylint: disable=too-many-arguments
         self,
         tickers: Union[Sequence[str], str],
-        cache_path: str = str(get_default_cache_path()),
+        cache_path: Path = get_default_cache_path(),
         refresh: bool = False,
         analysis_plugin: str = "stocktracer.analysis.annual_reports",
         final_year: Optional[int] = None,
         final_quarter: Optional[int] = None,
-        report_format: Optional[ReportFormat] = "txt",
-        report_file: Optional[str] = None,
+        report_format: ReportFormat = "txt",
+        report_file: Optional[Path] = None,
     ) -> Optional[pd.DataFrame]:
         """Perform stock analysis.
 
         Args:
             tickers (Union[Sequence[str], str]): tickers to include in the analysis
-            cache_path (str): path where to cache data
+            cache_path (Path): path where to cache data
             refresh (bool): Whether to refresh the calculation or use the results from a prior one
             analysis_plugin (str): module to load for analysis
             final_year (Optional[int]): last year to consider for report collection
             final_quarter (Optional[int]): last quarter to consider for report collection
-            report_format (Optional[ReportFormat]): Format of the report. Options include: csv, json, md (markdown)
-            report_file (Optional[str]): Where to store the report. Required if report_format is specified.
+            report_format (ReportFormat): Format of the report. Options include: csv, json, md (markdown)
+            report_file (Optional[Path]): Where to store the report. Required if report_format is specified.
 
         Raises:
             LookupError: no analysis results found

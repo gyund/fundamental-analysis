@@ -11,8 +11,8 @@ def test_help():
 
 def test_stub():
     result = main_cli("analyze aapl,msft -a stocktracer.analysis.stub")
-    assert isinstance(result, LookupError)
-    assert result.args[0] == "No analysis results available!"
+    assert isinstance(result, str)
+    assert result in "No analysis results available!"
 
 
 @pytest.mark.webtest

@@ -2,10 +2,10 @@
 """This is the main entrypoint for the CLI."""
 
 import sys
+from typing import Optional
 
 import beartype.roar
 import fire
-from typing import Optional
 
 from stocktracer.cli import Cli
 
@@ -14,10 +14,10 @@ def main_cli(command: Optional[str] = None) -> str | int | None:
     """Entry point for the packaging script.
 
     Args:
-        command (str): alternative input for CLI arguments. Defaults to None.
+        command (Optional[str]): alternative input for CLI arguments. Defaults to None.
 
     Returns:
-        any: _description_
+        str | int | None: exit code
     """
     cli = Cli()
 
