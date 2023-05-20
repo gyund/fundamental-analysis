@@ -35,7 +35,7 @@ class Analysis(AnalysisInterface):
         table = sec_filter.select()
 
         # If you prefer to see columns that are not universal across all stocks, comment this out
-        table.data = table.data.dropna(axis=1,how='any')
+        table.data = table.data.dropna(axis=1, how="any")
 
         return table.data
 

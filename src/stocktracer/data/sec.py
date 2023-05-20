@@ -1,4 +1,5 @@
 """This data source grabs information from quarterly SEC data archives."""
+import copy
 import logging
 import sys
 from datetime import date, timedelta
@@ -13,6 +14,7 @@ import pandas as pd
 from alive_progress import alive_bar
 from beartype import beartype
 from beartype.typing import Callable, Sequence
+from numpy.linalg import LinAlgError
 from requests_cache import CachedSession, SQLiteCache
 
 logger = logging.getLogger(__name__)
@@ -140,7 +142,10 @@ def slope(data: pd.Series, order: int = 1) -> float:
     x = range(len(data.keys()))
     y = data.values
 
-    coeffs = np.polyfit(x, y, order)
+    try:
+        coeffs = np.polyfit(x, y, order)
+    except LinAlgError:
+        return float(0)
     slope = coeffs[0]
     # np.isclose()
     return slope
@@ -172,10 +177,10 @@ class Filter:
         def tags(self):
             return self.data.columns.values
 
-        def get_value(self, ticker: str | int, tag: str) -> Number:
+        def get_value(self, ticker: str | int, tag: str, year: int) -> Number:
             # Lookup convert ticker to cik
             ticker = ticker.upper()
-            return self.data.loc[ticker].loc[tag]
+            return self.data.loc[ticker].loc[year].loc[tag]
 
     def __init__(
         self,
@@ -273,10 +278,10 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             data,
             values="value",
             columns="tag",
-            index=["ticker","fy"],
+            index=["ticker", "fy"],
             aggfunc=aggregate_func,
         )
-        
+
         return Filter.Table(table)
 
     @property
@@ -348,7 +353,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             list[ReportDate]: list of report dates to retrieve
         """
         dl_list: list[ReportDate] = []
-        next_report = self.last_report
+        next_report = copy.deepcopy(self.last_report)
         final_report = ReportDate(
             self.last_report.year - self.years, self.last_report.quarter
         )
@@ -437,7 +442,6 @@ class DataSetReader:
 
             filtered_data = cls.append(filtered_data, data)
 
-        
         # if filtered_data is not None:  # pragma: no cover
         #     logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
         return filtered_data
@@ -514,7 +518,7 @@ class DataSetReader:
             index_col=["adsh", "cik"],
             chunksize=DEFAULT_CHUNK_SIZE,
             parse_dates=["period"],
-            dtype={'cik':np.int32}
+            dtype={"cik": np.int32},
         )
         logger.debug(f"keeping only these focus periods: {focus_periods}")
         filtered_data: pd.DataFrame = None
@@ -671,10 +675,9 @@ class DataSetCollector:
         # 1,0000097745-23-000008,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC.
         # 2,0000097745-23-000008,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC..
 
-        
-        data_frame = data_frame.drop(columns=["cik_str", "adsh", "cik"]).set_index(
-            ["ticker", "tag", "fy", "fp"]
-        )
+        filter.filtered_data = data_frame.drop(
+            columns=["cik_str", "adsh", "cik"]
+        ).set_index(["ticker", "tag", "fy", "fp"])
 
         # # Convert fp to number so we can sort easily
         # data_frame['fp'].mask(data_frame['fp'] == "Q1", 1, inplace=True)
@@ -683,8 +686,8 @@ class DataSetCollector:
         # data_frame['fp'].mask(data_frame['fp'] == "Q4", 4, inplace=True)
         # data_frame = data_frame.set_index("fp", append=True)
 
-        # logger.debug(f"filtered_df:\n{data_frame.to_csv()}")
-        filter.filtered_data = data_frame
+        # logger.debug(f"filtered_df:\n{data_frame}")
+        # filter.filtered_data = data_frame
 
 
 @beartype

@@ -11,15 +11,16 @@ from stocktracer.interface import Analysis as AnalysisInterface
 
 logger = logging.getLogger(__name__)
 
+
 @beartype
 class Analysis(AnalysisInterface):
-    """Piotroski F-score is a number between 0 and 9 which is used to assess strength of company's 
-    financial position. The score is used by financial investors in order to find the best value 
+    """Piotroski F-score is a number between 0 and 9 which is used to assess strength of company's
+    financial position. The score is used by financial investors in order to find the best value
     stocks (nine being the best). The score is named after Stanford accounting professor Joseph Piotroski.
-    
+
     Calculation procedure
     =====================
-        
+
     The score is calculated based on 9 criteria divided into 3 groups.[2]
 
     - Profitability
@@ -34,7 +35,7 @@ class Analysis(AnalysisInterface):
     - Operating Efficiency
         - Change in Gross Margin (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
         - Change in Asset Turnover ratio (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
-    
+
     Some adjustments that were done in calculation of the required financial ratios are discussed in the original paper.[2]
 
     The score is calculated based on the data from financial statement of a company. A company gets 1 point for each met criterion. Summing up of all achieved points gives Piotroski F-score (number between 0 and 9).
@@ -59,19 +60,28 @@ class Analysis(AnalysisInterface):
 
         # This is an expensive operation
         sec.select_data(tickers=self.options.tickers, filter=sec_filter)
-        
+
         table = sec_filter.select()
-        table.data = table.data.dropna(axis=1,how='any')
-        
+        table.data = table.data.dropna(axis=1, how="any")
+        assert (
+            self.options.last_report.year + 1
+            not in table.data.index.get_level_values(1)
+        )
+
         logger.debug(f"filtered_data:\n{table.data}")
 
-        f_score = pd.DataFrame(table.data['OperatingIncomeLoss'].div(table.data['Assets']),columns=['ROA'])
-        f_score = f_score.join(table.data['OperatingIncomeLoss'])
-        # f_score['delta-ROA'] = f_score.stack().groupby(level=0).apply(lambda x: x.nlargest(2).index.get_level_values(1).to_list())
-
+        f_score = pd.DataFrame(
+            table.data["OperatingIncomeLoss"].div(table.data["Assets"]), columns=["ROA"]
+        )
+        f_score = f_score.join(table.data["OperatingIncomeLoss"])
+        f_score["delta-ROA"] = f_score.groupby(by=["ticker"]).diff()[
+            "OperatingIncomeLoss"
+        ]
         # f_score.pivot_table(index=['ticker'], columns=['fy','OperatingIncomeLoss'])
-
         logger.debug(f"f_score:\n{f_score}")
+        # assert f_score.loc["AAPL"].loc[2022]["ROA"] == 0.279144
+        # assert f_score.loc["AAPL"].loc[2022]["OperatingIncomeLoss"] == 9.822467e10
+        # assert f_score.loc["AAPL"].loc[2022]["delta-ROA"] == 1.850233e10
         return f_score
 
     # Reuse documentation from parent

@@ -142,8 +142,14 @@ class TestSec:
         table = filter.select(aggregate_func=np.average)
         logger.debug(f"select_avg:\n{table}")
 
-        assert table.get_value("aapl", "EntityCommonStockSharesOutstanding") == 4000
-        assert table.get_value("AAPL", "FakeAttributeTag") == 400
+        assert (
+            table.get_value("aapl", "EntityCommonStockSharesOutstanding", 2023) == 6000
+        )
+        assert (
+            table.get_value("aapl", "EntityCommonStockSharesOutstanding", 2022) == 3500
+        )
+        assert table.get_value("AAPL", "FakeAttributeTag", 2023) == 600
+        assert table.get_value("AAPL", "FakeAttributeTag", 2022) == 350
 
         # TODO: See if there's a nice way to leverage pandas mapping to do this simultaneously
         # table = filter.select(aggregate_func={"EntityCommonStockSharesOutstanding":np.average,
@@ -162,50 +168,53 @@ class TestSec:
         table = filter.select(aggregate_func=np.average, tickers=["aapl"])
         assert table.data.empty == False
         logger.debug(f"processed-ticker:\n{table.data}")
-        assert table.get_value("aapl", "EntityCommonStockSharesOutstanding") == 4000
+        assert (
+            table.get_value("aapl", "EntityCommonStockSharesOutstanding", 2023) == 6000
+        )
         # assert table.data.loc[320193].loc["FakeAttributeTag"][0] == 400
         # assert table.data.loc[320193].loc["FakeAttributeTag"][0] == 400
-        assert table.get_value(ticker="aapl", tag="FakeAttributeTag") == 400
+        assert table.get_value(ticker="aapl", tag="FakeAttributeTag", year=2023) == 600
 
         assert (
             filter.select(aggregate_func="max", tickers=["aapl"]).get_value(
-                "aapl", tag="FakeAttributeTag"
+                "aapl", tag="FakeAttributeTag", year=2022
             )
-            == 600
+            == 500
         )
         assert (
             filter.select(aggregate_func="min", tickers=["aapl"]).get_value(
-                "aapl", tag="FakeAttributeTag"
+                "aapl", tag="FakeAttributeTag", year=2022
             )
             == 200
         )
         assert (
             filter.select(aggregate_func="mean", tickers=["aapl"]).get_value(
-                "aapl", tag="FakeAttributeTag"
+                "aapl", tag="FakeAttributeTag", year=2022
             )
-            == 400
+            == 350
         )
-        assert (
+        assert math.isclose(
             filter.select(aggregate_func="std", tickers=["aapl"]).get_value(
-                "aapl", tag="FakeAttributeTag"
-            )
-            == 158.11388300841898
+                "aapl", tag="FakeAttributeTag", year=2022
+            ),
+            129.09944487358,
         )
+
         assert (
             filter.select(aggregate_func="sum", tickers=["aapl"]).get_value(
-                "aapl", tag="FakeAttributeTag"
+                "aapl", tag="FakeAttributeTag", year=2022
             )
-            == 2000
+            == 1400
         )
         assert (
             filter.select(aggregate_func="var", tickers=["aapl"]).get_value(
-                "aapl", tag="FakeAttributeTag"
+                "aapl", tag="FakeAttributeTag", year=2022
             )
-            == 25000
+            == 16666.666666666668
         )
         assert math.isclose(
             filter.select(aggregate_func="slope", tickers=["aapl"]).get_value(
-                "aapl", tag="FakeAttributeTag"
+                "aapl", tag="FakeAttributeTag", year=2022
             ),
             100,
         )
