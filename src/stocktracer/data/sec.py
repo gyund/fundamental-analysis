@@ -112,13 +112,10 @@ class TickerReader:
         Returns:
             bool: if all the tickers are found
         """
-        for t in tickers:
-            self.convert_to_cik(t)
+        for ticker in tickers:
+            self.convert_to_cik(ticker)
 
         return True
-
-
-period_focus_options = Literal["FY", "Q1", "Q2", "Q3", "Q4"]
 
 
 @beartype
@@ -139,11 +136,11 @@ def slope(data: pd.Series, order: int = 1) -> float:
     Returns:
         float: slope of the trend line
     """
-    x = range(len(data.keys()))
-    y = data.values
+    x_axis = range(len(data.keys()))
+    y_axis = data.values
 
     try:
-        coeffs = np.polyfit(x, y, order)
+        coeffs = np.polyfit(x_axis, y_axis, order)
     except LinAlgError:
         return float(0)
     return coeffs[0]
@@ -631,13 +628,13 @@ class DataSetCollector:
             file=sys.stderr,
             calibrate=5_000,
             dual_line=True,
-        ) as bar:
-            for r in report_dates:
-                bar.text(f"Downloading report {r}...")
-                reader = self.download_manager.get_quarterly_report(r)
+        ) as status_bar:
+            for report_date in report_dates:
+                status_bar.text(f"Downloading report {report_date}...")
+                reader = self.download_manager.get_quarterly_report(report_date)
                 if isinstance(reader, DataSetReader):
                     try:
-                        bar.text(f"Processing report {r}...")
+                        status_bar.text(f"Processing report {report_date}...")
                         data = reader.process_zip(filter)
                         if data_frame is not None:
                             logger.debug(f"record count: {len(data_frame)}")
@@ -645,7 +642,7 @@ class DataSetCollector:
                             logger.debug(f"new record count: {len(data)}")
                             data_frame = DataSetReader.append(data_frame, data)
                             record_count = len(data_frame)
-                            bar(record_count)
+                            status_bar(record_count)  # pylint: disable=not-callable
                             logger.debug(
                                 f"There are now {record_count} filtered records"
                             )
@@ -654,7 +651,7 @@ class DataSetCollector:
                         # Note, when searching for annual reports, this will generally occur 1/4 times
                         # if we're only searching for one stock's tags
                         logger.debug(
-                            f"{r} did not have any matches for the provided filter"
+                            f"{report_date} did not have any matches for the provided filter"
                         )
                         logger.debug(f"{filter}")
 

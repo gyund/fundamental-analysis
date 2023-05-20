@@ -55,7 +55,7 @@ class Cli:
 
     return_results: bool = True
 
-    def analyze(
+    def analyze(  # pylint: disable=too-many-arguments
         self,
         tickers: Union[Sequence[str], str],
         cache_path: str = str(get_default_cache_path()),
