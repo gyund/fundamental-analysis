@@ -181,7 +181,7 @@ class Filter:
             # Lookup convert ticker to cik
             ticker = ticker.upper()
             return self.data.loc[ticker].loc[year].loc[tag]
-        
+
         def normalize(self):
             """Remove all values that are NaN."""
             self.data = self.data.dropna(axis=1, how="any")

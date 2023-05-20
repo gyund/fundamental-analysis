@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 @beartype
-def get_analysis_instance(module_name: str) -> AnalysisInterface:
+def get_analysis_instance(module_name: str, options: CliOptions) -> AnalysisInterface:
     """Dynamically import and load the Analysis class from a module.
 
     Args:
@@ -30,7 +30,7 @@ def get_analysis_instance(module_name: str) -> AnalysisInterface:
     """
     module = importlib.import_module(module_name)
     class_ = getattr(module, "Analysis")
-    instance = class_()
+    instance = class_(options)
     assert isinstance(instance, AnalysisInterface)
     return instance
 
@@ -91,12 +91,14 @@ class Cli:
         else:
             tickers = frozenset(tickers)
 
-        analysis_module: AnalysisInterface = get_analysis_instance(analysis_plugin)
-        analysis_module.options = CliOptions(
-            tickers=tickers,
-            cache_path=cache_path,
-            final_year=final_year,
-            final_quarter=final_quarter,
+        analysis_module: AnalysisInterface = get_analysis_instance(
+            analysis_plugin,
+            CliOptions(
+                tickers=tickers,
+                cache_path=cache_path,
+                final_year=final_year,
+                final_quarter=final_quarter,
+            ),
         )
 
         cache, results_key, results = self._get_cached_results(
