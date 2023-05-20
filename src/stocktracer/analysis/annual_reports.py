@@ -7,8 +7,30 @@ from beartype import beartype
 from stocktracer.data.sec import Filter as SecFilter
 from stocktracer.data.sec import Sec as SecDataSource
 from stocktracer.interface import Analysis as AnalysisInterface
+from stocktracer.interface import Options
 
 logger = logging.getLogger(__name__)
+
+
+def create_normalized_sec_table(
+    sec_filter: SecFilter, options: Options
+) -> SecFilter.Table:
+    """Create a normalized SEC table with all NA values removed.
+
+    Args:
+        sec_filter (SecFilter): filter to use for grabbing results
+        options (Options): user provided CLI options
+
+    Returns:
+        SecFilter.Table: An SEC table with normalized results
+    """
+    sec = SecDataSource(storage_path=options.cache_path)
+    sec.filter_data(tickers=options.tickers, filter=sec_filter)
+
+    table = sec_filter.select()
+    # If you prefer to see columns that are not universal across all stocks, comment this out
+    table.normalize()
+    return table
 
 
 @beartype
@@ -27,15 +49,7 @@ class Analysis(AnalysisInterface):
         )
 
         # Create an SEC Data Source
-        assert self.options is not None
-        assert self.options.cache_path is not None
-        sec = SecDataSource(storage_path=self.options.cache_path)
-        sec.filter_data(tickers=self.options.tickers, filter=sec_filter)
-
-        table = sec_filter.select()
-
-        # If you prefer to see columns that are not universal across all stocks, comment this out
-        table.data = table.data.dropna(axis=1, how="any")
+        table = create_normalized_sec_table(sec_filter, self.options)
 
         return table.data
 

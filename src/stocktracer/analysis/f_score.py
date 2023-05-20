@@ -1,12 +1,11 @@
 import logging
 from typing import Optional
 
-import numpy as np
 import pandas as pd
 from beartype import beartype
 
+from stocktracer.analysis.annual_reports import create_normalized_sec_table
 from stocktracer.data.sec import Filter as SecFilter
-from stocktracer.data.sec import Sec as SecDataSource
 from stocktracer.interface import Analysis as AnalysisInterface
 
 logger = logging.getLogger(__name__)
@@ -53,16 +52,8 @@ class Analysis(AnalysisInterface):
             only_annual=True,  # We only want the 10-K
         )
 
-        # Create an SEC Data Source
-        assert self.options is not None
-        assert self.options.cache_path is not None
-        sec = SecDataSource(storage_path=self.options.cache_path)
+        table = create_normalized_sec_table(sec_filter, self.options)
 
-        # This is an expensive operation
-        sec.filter_data(tickers=self.options.tickers, filter=sec_filter)
-
-        table = sec_filter.select()
-        table.normalize()
         assert (
             self.options.last_report.year + 1
             not in table.data.index.get_level_values(1)

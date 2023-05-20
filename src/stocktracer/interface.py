@@ -39,6 +39,8 @@ class Analysis(metaclass=abc.ABCMeta):
 
     def __init__(self, options: Options) -> None:
         self.options = options
+        assert self.options is not None
+        assert self.options.cache_path is not None
 
     @abc.abstractmethod
     def analyze(self) -> Optional[DataFrame]:

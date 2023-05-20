@@ -146,9 +146,7 @@ def slope(data: pd.Series, order: int = 1) -> float:
         coeffs = np.polyfit(x, y, order)
     except LinAlgError:
         return float(0)
-    slope = coeffs[0]
-    # np.isclose()
-    return slope
+    return coeffs[0]
 
 
 @beartype

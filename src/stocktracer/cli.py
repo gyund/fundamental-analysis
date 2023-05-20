@@ -24,6 +24,7 @@ def get_analysis_instance(module_name: str, options: CliOptions) -> AnalysisInte
 
     Args:
         module_name (str): full name of the module. For example, "my.module"
+        options (CliOptions): options provided from the CLI
 
     Returns:
         AnalysisInterface: analysis instance

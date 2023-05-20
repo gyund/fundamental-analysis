@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
 
-import numpy as np
 import pandas as pd
 from beartype import beartype
 
@@ -29,8 +28,6 @@ class Analysis(AnalysisInterface):
         )
 
         # Create an SEC Data Source
-        assert self.options is not None
-        assert self.options.cache_path is not None
         sec = SecDataSource(storage_path=self.options.cache_path)
 
         # This is an expensive operation
