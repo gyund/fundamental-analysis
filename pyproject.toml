@@ -106,7 +106,7 @@ ignore_self_only_init = true
 
 [tool.pylint.main]
 source-roots = ["src"]
-fail-under = 9
+fail-under = 9.5
 fail-on = [
     # "redefined-builtin",    # unintended sideaffects
     "unused-variable",      # cleaner code
