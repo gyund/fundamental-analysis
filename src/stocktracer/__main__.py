@@ -5,11 +5,12 @@ import sys
 
 import beartype.roar
 import fire
+from typing import Optional
 
 from stocktracer.cli import Cli
 
 
-def main_cli(command: str = None) -> any:
+def main_cli(command: Optional[str] = None) -> str | int | None:
     """Entry point for the packaging script.
 
     Args:
@@ -27,7 +28,7 @@ def main_cli(command: str = None) -> any:
     except Exception as app_exception:  # pylint: disable=broad-exception-caught
         if isinstance(app_exception, beartype.roar.BeartypeException):
             raise app_exception
-        return app_exception
+        return str(app_exception)
 
 
 if __name__ == "__main__":
