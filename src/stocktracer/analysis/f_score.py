@@ -59,7 +59,7 @@ class Analysis(AnalysisInterface):
         sec = SecDataSource(storage_path=self.options.cache_path)
 
         # This is an expensive operation
-        sec.select_data(tickers=self.options.tickers, filter=sec_filter)
+        sec.filter_data(tickers=self.options.tickers, filter=sec_filter)
 
         table = sec_filter.select()
         table.data = table.data.dropna(axis=1, how="any")

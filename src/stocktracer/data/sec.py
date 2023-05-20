@@ -714,7 +714,7 @@ class Sec:
         )
         self.download_manager = DownloadManager(ticker_session, data_session)
 
-    def select_data(self, tickers: frozenset[str], filter: Filter) -> Filter:
+    def filter_data(self, tickers: frozenset[str], filter: Filter) -> Filter:
         """Initiate the retrieval of ticker information based on the provided filters.
 
         Filtered data is stored with the filter

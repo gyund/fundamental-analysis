@@ -30,7 +30,7 @@ class Analysis(AnalysisInterface):
         assert self.options is not None
         assert self.options.cache_path is not None
         sec = SecDataSource(storage_path=self.options.cache_path)
-        sec.select_data(tickers=self.options.tickers, filter=sec_filter)
+        sec.filter_data(tickers=self.options.tickers, filter=sec_filter)
 
         table = sec_filter.select()
 
