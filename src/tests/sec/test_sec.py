@@ -46,7 +46,7 @@ def sec_harness() -> tuple[Sec, mock.MagicMock]:
 class TestSec:
     def test_init(self):
         with pytest.raises((TypeError, AssertionError)):
-            Sec()
+            Sec()  # type: ignore
 
     def test_select_data(
         self,

@@ -4,7 +4,6 @@ import logging
 import sys
 from datetime import date, timedelta
 from io import BytesIO
-from numbers import Number
 from pathlib import Path
 from typing import Literal, Optional
 from zipfile import ZipFile
@@ -191,7 +190,7 @@ class Filter:
             """
             return self.data.columns.values
 
-        def get_value(self, ticker: str | int, tag: str, year: int) -> Number:
+        def get_value(self, ticker: str | int, tag: str, year: int) -> int | float:
             """Retrieve the exact value of a table cell.
 
             Args:
@@ -200,7 +199,7 @@ class Filter:
                 year (int): The year this data applies to.
 
             Returns:
-                Number: value of result
+                int | float: value of result
             """
             # Lookup convert ticker to cik
             ticker = ticker.upper()
