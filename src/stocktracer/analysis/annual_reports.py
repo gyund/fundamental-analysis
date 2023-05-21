@@ -14,13 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 def create_normalized_sec_table(
-    sec_filter: SecFilter, options: Options
+    sec_filter: SecFilter, options: Options, normalize: bool = True
 ) -> SecFilter.Table:
     """Create a normalized SEC table with all NA values removed.
 
     Args:
         sec_filter (SecFilter): filter to use for grabbing results
         options (Options): user provided CLI options
+        normalize (bool): Remove all columns that contain at least one NA value
 
     Returns:
         SecFilter.Table: An SEC table with normalized results
@@ -30,7 +31,8 @@ def create_normalized_sec_table(
 
     table = sec_filter.select()
     # If you prefer to see columns that are not universal across all stocks, comment this out
-    table.normalize()
+    if normalize:
+        table.normalize()
     return table
 
 
@@ -50,7 +52,7 @@ class Analysis(AnalysisInterface):
         )
 
         # Create an SEC Data Source
-        table = create_normalized_sec_table(sec_filter, self.options)
+        table = create_normalized_sec_table(sec_filter, self.options, False)
 
         return table.data
 

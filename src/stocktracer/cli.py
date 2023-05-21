@@ -58,13 +58,13 @@ class Cli:
     def analyze(  # pylint: disable=too-many-arguments
         self,
         tickers: Union[Sequence[str], str],
-        cache_path: Path = get_default_cache_path(),
+        cache_path: Path | str = get_default_cache_path(),
         refresh: bool = False,
         analysis_plugin: str = "stocktracer.analysis.annual_reports",
         final_year: Optional[int] = None,
         final_quarter: Optional[int] = None,
         report_format: ReportFormat = "txt",
-        report_file: Optional[Path] = None,
+        report_file: Optional[Path | str] = None,
     ) -> Optional[pd.DataFrame]:
         """Perform stock analysis.
 
