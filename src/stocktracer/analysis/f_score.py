@@ -64,13 +64,30 @@ class Analysis(AnalysisInterface):
 
         logger.debug(f"filtered_data:\n{table.data}")
 
+        # - Profitability
+        #     - Return on Assets (ROA) (1 point if it is positive in the current year, 0 otherwise);
         f_score = pd.DataFrame(
             table.data["OperatingIncomeLoss"].div(table.data["Assets"]), columns=["ROA"]
         )
+        #     - Operating Cash Flow (1 point if it is positive in the current year, 0 otherwise);
         f_score = f_score.join(table.data["OperatingIncomeLoss"])
+        #     - Change in Return of Assets (ROA) (1 point if ROA is higher in the current year compared to the previous one, 0 otherwise);
         f_score["delta-ROA"] = f_score.groupby(by=["ticker"]).diff()[
             "OperatingIncomeLoss"
         ]
+        #     - Accruals (1 point if Operating Cash Flow/Total Assets is higher than ROA in the current year, 0 otherwise);
+        f_score["accruals"] = table.data["NetCashProvidedByUsedInOperatingActivities"] / table.data["Assets"]
+        # - Leverage, Liquidity and Source of Funds
+        #     - Change in Leverage (long-term) ratio (1 point if the ratio is lower this year compared to the previous one, 0 otherwise);
+        f_score["debt-to-assets"] = table.data["LiabilitiesCurrent"] / table.data["AssetsCurrent"] # TODO: This is probably not right
+        #     - Change in Current ratio (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
+        f_score["current-ratio"] = table.data["AssetsCurrent"] / table.data["LiabilitiesCurrent"]
+        #     - Change in the number of shares (1 point if no new shares were issued during the last year);
+        # - Operating Efficiency
+        #     - Change in Gross Margin (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
+        #     - Change in Asset Turnover ratio (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
+
+
         # f_score.pivot_table(index=['ticker'], columns=['fy','OperatingIncomeLoss'])
         logger.debug(f"f_score:\n{f_score}")
         # logger.debug(f"{f_score.loc['AAPL']}")
