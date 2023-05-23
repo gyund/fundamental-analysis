@@ -45,7 +45,7 @@ stocktracer
 Make sure you have `pipenv` installed through a package manager or through pip.
 
 ```sh
-pipenv install --dev
+pipenv sync --dev
 
 # Perform analysis
 PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft
