@@ -55,7 +55,8 @@ class Analysis(AnalysisInterface):
             only_annual=True,  # We only want the 10-K
         )
 
-        table = create_normalized_sec_table(sec_filter, self.options)
+        table = create_normalized_sec_table(sec_filter, self.options, False)
+        table.data.fillna(0, inplace=True)
 
         assert (
             self.options.last_report.year + 1
@@ -69,27 +70,36 @@ class Analysis(AnalysisInterface):
         f_score = pd.DataFrame(
             table.data["OperatingIncomeLoss"].div(table.data["Assets"]), columns=["ROA"]
         )
+
         #     - Operating Cash Flow (1 point if it is positive in the current year, 0 otherwise);
         f_score = f_score.join(table.data["OperatingIncomeLoss"])
+        f_score["NetIncome>0"] = f_score["OperatingIncomeLoss"] > 0
         #     - Change in Return of Assets (ROA) (1 point if ROA is higher in the current year compared to the previous one, 0 otherwise);
         f_score["delta-ROA"] = f_score.groupby(by=["ticker"]).diff()[
             "OperatingIncomeLoss"
         ]
+        f_score["ROA>0"] = f_score["delta-ROA"] > 0
         #     - Accruals (1 point if Operating Cash Flow/Total Assets is higher than ROA in the current year, 0 otherwise);
-        f_score["accruals"] = table.data["NetCashProvidedByUsedInOperatingActivities"] / table.data["Assets"]
+        f_score["accruals"] = (
+            table.data["NetCashProvidedByUsedInOperatingActivities"]
+            / table.data["Assets"]
+        )
         # - Leverage, Liquidity and Source of Funds
         #     - Change in Leverage (long-term) ratio (1 point if the ratio is lower this year compared to the previous one, 0 otherwise);
-        f_score["debt-to-assets"] = table.data["LiabilitiesCurrent"] / table.data["AssetsCurrent"] # TODO: This is probably not right
+        f_score["debt-to-assets"] = (
+            table.data["LiabilitiesCurrent"] / table.data["AssetsCurrent"]
+        )  # TODO: This is probably not right
         #     - Change in Current ratio (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
-        f_score["current-ratio"] = table.data["AssetsCurrent"] / table.data["LiabilitiesCurrent"]
+        f_score["current-ratio"] = (
+            table.data["AssetsCurrent"] / table.data["LiabilitiesCurrent"]
+        )
         #     - Change in the number of shares (1 point if no new shares were issued during the last year);
         # - Operating Efficiency
         #     - Change in Gross Margin (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
         #     - Change in Asset Turnover ratio (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
 
-
         # f_score.pivot_table(index=['ticker'], columns=['fy','OperatingIncomeLoss'])
-        logger.debug(f"f_score:\n{f_score}")
+        # logger.debug(f"f_score:\n{f_score}")
         # logger.debug(f"{f_score.loc['AAPL']}")
         # logger.debug(f"{f_score.loc['AAPL'].loc[2022]}")
         # logger.debug(f"{f_score.loc['AAPL'].loc[2022]['ROA']}")
