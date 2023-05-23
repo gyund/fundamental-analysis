@@ -19,15 +19,15 @@ class TestCliAnnualReports:
     def test_analyze(self):
         self.cli.return_results = True
         result = self.cli.analyze(
-            tickers=["aapl", "tmo", "msft"],
+            tickers=["aapl", "tmo", "msft", "goog", "wm", "acn"],
             analysis_plugin="stocktracer.analysis.annual_reports",
             refresh=True,
             final_year=2023,
             final_quarter=1,
         )
         assert result is not None
-        logger.debug(f"annual_reports:\n{result}")
-        assert len(result.index) == 3
+        logger.debug(f"annual_reports:\n{result.transpose().to_string()}")
+        assert len(result.index) == 6
 
     def test_invalid(self):
         with pytest.raises(LookupError, match="unable to find ticker: invalid"):

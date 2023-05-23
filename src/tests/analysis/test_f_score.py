@@ -26,7 +26,7 @@ class TestCliFScore:
             final_quarter=1,
         )
         assert result is not None
-        logger.debug(f"f_score_result:\n{result}")
+        logger.debug(f"f_score_result:\n{result.to_string()}")
         # assert math.isclose(
         #     # result.loc["TMO"]["EarningsPerShareDiluted"], 17.683333, rel_tol=0.001 # EPS last qtr
         #     result.loc["TMO"]["EarningsPerShareDiluted"],
