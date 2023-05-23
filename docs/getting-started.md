@@ -13,7 +13,7 @@ Make sure you have `pipenv` installed through a package manager or through pip.
     git clone https://github.com/gyund/fundamental-analysis.git
     cd fundamental-analysis.git
 
-    pipenv install --dev
+    pipenv sync --dev
 
     # Perform analysis
     PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft > report.txt
