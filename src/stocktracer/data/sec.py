@@ -219,31 +219,27 @@ class Filter:
             """Remove all values that are NaN."""
             self.data = self.data.dropna(axis=1, how="any")
 
-        def get_net_income(self) -> pd.Series:
+        def calculate_net_income(self, column_name: str):
             """Returns the net income stocks as a series.
 
             !!! example
                 ``` python
-                my_analysis['net-income'] = results.get_net_income()
+                results.calculate_net_income()
                 ```
-
-            Returns:
-                pd.Series: Net Income
             """
-            return self.data["OperatingIncomeLoss"]
+            self.data[column_name] = self.data["OperatingIncomeLoss"]
 
-        def get_return_on_assets(self) -> pd.Series:
+        def calculate_return_on_assets(self, column_name: str):
             """Returns the ROA of stocks as a series.
 
             !!! example
                 ``` python
-                my_analysis['ROA'] = results.get_return_on_assets()
+                results.calculate_return_on_assets('ROA')
                 ```
-
-            Returns:
-                pd.Series: Return on Assets
             """
-            return self.data["OperatingIncomeLoss"].div(self.data["Assets"])
+            self.data[column_name] = self.data["OperatingIncomeLoss"].div(
+                self.data["Assets"]
+            )
 
     def __init__(
         self,

@@ -82,7 +82,7 @@ class TestResults:
         )
         data = data.set_index(["ticker", "fy"])
         result = SecFilter.Results(data)
-        result.data["net-income"] = result.get_net_income()
+        result.calculate_net_income("net-income")
         logger.debug(f"\n{data}")
         assert result.data["net-income"].sum() == 30
         assert result.data.loc["AAPL"].loc[2022]["net-income"] == 20
@@ -98,7 +98,7 @@ class TestResults:
         )
         data = data.set_index(["ticker", "fy"])
         result = SecFilter.Results(data)
-        result.data["ROA"] = result.get_return_on_assets()
+        result.calculate_return_on_assets("ROA")
         logger.debug(f"\n{data}")
         assert result.data.loc["AAPL"].loc[2021]["ROA"] == 0.50
         assert result.data.loc["AAPL"].loc[2022]["ROA"] == 0.25
