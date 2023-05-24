@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def create_normalized_sec_table(
     sec_filter: SecFilter, options: Options, normalize: bool = True
-) -> SecFilter.Table:
+) -> SecFilter.Results:
     """Create a normalized SEC table with all NA values removed.
 
     Args:

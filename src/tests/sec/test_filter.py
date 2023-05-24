@@ -1,9 +1,14 @@
 from datetime import date
 
+import pandas as pd
 import pytest
+import logging
 
 import stocktracer.filter as Filter
+from stocktracer.data.sec import Filter as SecFilter
 from stocktracer.data.sec import ReportDate
+
+logger = logging.getLogger(__name__)
 
 
 class TestFilter:
@@ -64,3 +69,36 @@ def test_reportDate():
         pytest.fail("should throw and exception")
     except ValueError as ex:
         pass
+
+
+class TestResults:
+    def test_net_income(self):
+        data = pd.DataFrame(
+            data={
+                "ticker": ["AAPL", "AAPL"],
+                "fy": [2021, 2022],
+                "OperatingIncomeLoss": [10, 20],
+            },
+        )
+        data = data.set_index(["ticker", "fy"])
+        result = SecFilter.Results(data)
+        result.data["net-income"] = result.get_net_income()
+        logger.debug(f"\n{data}")
+        assert result.data["net-income"].sum() == 30
+        assert result.data.loc["AAPL"].loc[2022]["net-income"] == 20
+
+    def test_return_on_assets(self):
+        data = pd.DataFrame(
+            data={
+                "ticker": ["AAPL", "AAPL"],
+                "fy": [2021, 2022],
+                "OperatingIncomeLoss": [10, 20],
+                "Assets": [20, 80],
+            },
+        )
+        data = data.set_index(["ticker", "fy"])
+        result = SecFilter.Results(data)
+        result.data["ROA"] = result.get_return_on_assets()
+        logger.debug(f"\n{data}")
+        assert result.data.loc["AAPL"].loc[2021]["ROA"] == 0.50
+        assert result.data.loc["AAPL"].loc[2022]["ROA"] == 0.25

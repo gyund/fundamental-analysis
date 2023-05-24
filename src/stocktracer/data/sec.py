@@ -161,22 +161,32 @@ def slope(data: pd.Series, order: int = 1) -> float:
 class Filter:
     """Filter for SEC tools to scrape relevant information when processing records."""
 
-    class Table:
-        """This is a table that is the output from a `Filter.select()` call.
+    class Results:
+        """This is the results from a `Filter.select()` call.
 
-        When data is converted, it creates a pivot table that looks like the following:
+        The results table looks like the following:
 
-                                                        value
-            cik    tag
-            320193 EntityCommonStockSharesOutstanding   4000.0
-                    FakeAttributeTag                     400.0
-            ...
+        ```
+        tag            AccountsPayableCurrent  ...  WeightedAverageNumberOfSharesOutstandingBasic
+        ticker fy                              ...
+        AAPL   2021.0            4.852950e+10  ...                                   1.750824e+10
+               2022.0            5.943900e+10  ...                                   1.675645e+10
+        MSFT   2021.0            1.384650e+10  ...                                   7.610000e+09
+               2022.0            1.708150e+10  ...                                   7.551000e+09
+        TMO    2021.0            2.521000e+09  ...                                   3.966667e+08
+               2022.0            3.124000e+09  ...                                   3.940000e+08
+        ```
 
+        From here, you can call functions on this class like `get_value()` or `normalize()`.
+
+        !!! note
+            To get a list of all the tags, run the `annual_reports` analysis module and search through the output for meaningful tags.
 
         """
 
-        def __init__(self, table: pd.DataFrame) -> None:
-            self.data = table
+        def __init__(self, results: pd.DataFrame) -> None:
+            logger.debug(f"results:\n{results}")
+            self.data = results
 
         def __str__(self) -> str:
             return str(self.data)
@@ -208,6 +218,32 @@ class Filter:
         def normalize(self):
             """Remove all values that are NaN."""
             self.data = self.data.dropna(axis=1, how="any")
+
+        def get_net_income(self) -> pd.Series:
+            """Returns the net income stocks as a series.
+
+            !!! example
+                ``` python
+                my_analysis['net-income'] = results.get_net_income()
+                ```
+
+            Returns:
+                pd.Series: Net Income
+            """
+            return self.data["OperatingIncomeLoss"]
+
+        def get_return_on_assets(self) -> pd.Series:
+            """Returns the ROA of stocks as a series.
+
+            !!! example
+                ``` python
+                my_analysis['ROA'] = results.get_return_on_assets()
+                ```
+
+            Returns:
+                pd.Series: Return on Assets
+            """
+            return self.data["OperatingIncomeLoss"].div(self.data["Assets"])
 
     def __init__(
         self,
@@ -275,7 +311,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             Callable | Literal["mean", "std", "var", "sum", "min", "max", "slope"]
         ] = "mean",
         tickers: Optional[Sequence[str]] = None,
-    ) -> Table:
+    ) -> Results:
         """Select only a subset of the data matching the specified criteria.
 
         Args:
@@ -283,7 +319,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             tickers (Optional[Sequence[str]]): ticker symbol for the company
 
         Returns:
-            Filter.Table: Object that represents a pivot table with the data requested
+            Filter.Results: Object that represents a pivot table with the data requested
         """
         if tickers is not None:
             tickers = [t.upper() for t in tickers]
@@ -309,7 +345,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             aggfunc=aggregate_func,
         )
 
-        return Filter.Table(table)
+        return Filter.Results(table)
 
     @property
     def ciks(self) -> set[int]:
