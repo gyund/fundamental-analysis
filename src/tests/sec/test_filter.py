@@ -1,8 +1,8 @@
+import logging
 from datetime import date
 
 import pandas as pd
 import pytest
-import logging
 
 import stocktracer.filter as Filter
 from stocktracer.data.sec import Filter as SecFilter
