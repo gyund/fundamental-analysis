@@ -18,6 +18,6 @@ def sec_dataselector_2023q1(
     sec_instance: Sec, filter_aapl: Filter.Selectors
 ) -> Filter.Selectors:
     sec_instance.filter_data(
-        tickers=filter_aapl.ticker_filter, filter=filter_aapl.sec_filter
+        tickers=filter_aapl.ticker_filter, sec_filter=filter_aapl.sec_filter
     )
     return filter_aapl

@@ -27,7 +27,7 @@ def create_normalized_sec_table(
         SecFilter.Results: An SEC table with normalized results
     """
     sec = SecDataSource(storage_path=options.cache_path)
-    sec.filter_data(tickers=options.tickers, filter=sec_filter)
+    sec.filter_data(tickers=options.tickers, sec_filter=sec_filter)
 
     table = sec_filter.select()
     # If you prefer to see columns that are not universal across all stocks, comment this out

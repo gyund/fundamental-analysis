@@ -476,11 +476,11 @@ class DataSetReader:
     def __init__(self, zip_data: bytes) -> None:
         self.zip_data = BytesIO(zip_data)
 
-    def process_zip(self, filter: Filter) -> Optional[pd.DataFrame]:
+    def process_zip(self, sec_filter: Filter) -> Optional[pd.DataFrame]:
         """Process a zip archive with the provided filter.
 
         Args:
-            filter (Filter): results to filter out of the zip archive
+            sec_filter (Filter): results to filter out of the zip archive
 
         Raises:
             ImportError: the filter doesn't match anything
@@ -493,19 +493,19 @@ class DataSetReader:
             logger.debug("opening sub.txt")
             with myzip.open("sub.txt") as myfile:
                 # Get reports that are 10-K or 10-Q
-                sub_dataframe = DataSetReader._process_sub_text(myfile, filter)
+                sub_dataframe = DataSetReader._process_sub_text(myfile, sec_filter)
 
                 if sub_dataframe is None or sub_dataframe.empty:
                     raise ImportError("nothing found in sub.txt matching the filter")
 
                 with myzip.open("num.txt") as myfile:
                     return DataSetReader._process_num_text(
-                        myfile, filter, sub_dataframe
+                        myfile, sec_filter, sub_dataframe
                     )
 
     @classmethod
     def _process_num_text(
-        cls, filepath_or_buffer, filter: Filter, sub_dataframe: pd.DataFrame
+        cls, filepath_or_buffer, sec_filter: Filter, sub_dataframe: pd.DataFrame
     ) -> Optional[pd.DataFrame]:
         """Contains the numerical data.
 
@@ -529,8 +529,8 @@ class DataSetReader:
             data = chunk.join(sub_dataframe, how="inner")
 
             # Additional Filtering if needed
-            if filter.tags is not None:
-                tag_list = filter.tags  # pylint: disable=unused-variable
+            if sec_filter.tags is not None:
+                tag_list = sec_filter.tags  # pylint: disable=unused-variable
                 data = data.query("tag in @tag_list")
 
             if data.empty:  # pragma: no cover
@@ -594,7 +594,7 @@ class DataSetReader:
 
     @classmethod
     def _process_sub_text(
-        cls, filepath_or_buffer, filter: Filter
+        cls, filepath_or_buffer, sec_filter: Filter
     ) -> Optional[pd.DataFrame]:
         """Contains the submissions.
 
@@ -603,10 +603,10 @@ class DataSetReader:
         fye	form	period	fy	fp	filed	accepted	prevrpt	detail	instance	nciks	aciks
         """
         logger.debug("processing sub.txt")
-        focus_periods = filter.focus_period
-        cik_list = filter.ciks  # pylint: disable=unused-variable
+        focus_periods = sec_filter.focus_period
+        cik_list = sec_filter.ciks  # pylint: disable=unused-variable
 
-        oldest_fy = filter.last_report.year - filter.years
+        oldest_fy = sec_filter.last_report.year - sec_filter.years
         query_str = f"cik in @cik_list and fp in @focus_periods and fy >= {oldest_fy}"
         # logger.debug(f"Query string: {query_str}")
         reader = pd.read_csv(
@@ -704,18 +704,18 @@ class DataSetCollector:
     def __init__(self, download_manager: DownloadManager):
         self.download_manager = download_manager
 
-    def get_data(self, filter: Filter) -> None:
+    def get_data(self, sec_filter: Filter) -> None:
         """Collect data based on the provided filter.
 
         Args:
-            filter (Filter): SEC specific filter of how to filter the results
+            sec_filter (Filter): SEC specific filter of how to filter the results
 
         Raises:
             LookupError: when there are no results matching the filter
 
         """
         data_frame = None
-        report_dates = filter.required_reports
+        report_dates = sec_filter.required_reports
         logger.info(f"Creating Unified Data record for these reports: {report_dates}")
         with alive_bar(
             # total=len(report_dates) * 2,
@@ -732,7 +732,7 @@ class DataSetCollector:
                 if isinstance(reader, DataSetReader):
                     try:
                         status_bar.text(f"Processing report {report_date}...")
-                        data = reader.process_zip(filter)
+                        data = reader.process_zip(sec_filter)
                         if data_frame is not None:
                             logger.debug(f"record count: {len(data_frame)}")
                         if data is not None:
@@ -750,7 +750,7 @@ class DataSetCollector:
                         logger.debug(
                             f"{report_date} did not have any matches for the provided filter"
                         )
-                        logger.debug(f"{filter}")
+                        logger.debug(f"{sec_filter}")
 
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
         if data_frame is None:
@@ -771,7 +771,7 @@ class DataSetCollector:
         # 1,0000097745-23-000008,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC.
         # 2,0000097745-23-000008,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC..
 
-        filter.filtered_data = data_frame.drop(
+        sec_filter.filtered_data = data_frame.drop(
             columns=["cik_str", "adsh", "cik"]
         ).set_index(["ticker", "tag", "fy", "fp"])
 
@@ -812,14 +812,14 @@ class Sec:
         )
         self.download_manager = DownloadManager(ticker_session, data_session)
 
-    def filter_data(self, tickers: frozenset[str], filter: Filter) -> Filter:
+    def filter_data(self, tickers: frozenset[str], sec_filter: Filter) -> Filter:
         """Initiate the retrieval of ticker information based on the provided filters.
 
         Filtered data is stored with the filter
 
         Args:
             tickers (frozenset[str]): ticker symbols you want information about
-            filter (Filter): SEC specific data to scrape from the reports
+            sec_filter (Filter): SEC specific data to scrape from the reports
 
         Returns:
             Filter: filter with filtered data
@@ -827,7 +827,7 @@ class Sec:
         collector = DataSetCollector(self.download_manager)
         ticker_reader = self.download_manager.ticker_reader
         if ticker_reader.contains(tickers):
-            filter.populate_ciks(tickers=tickers, ticker_reader=ticker_reader)
-            collector.get_data(filter)
+            sec_filter.populate_ciks(tickers=tickers, ticker_reader=ticker_reader)
+            collector.get_data(sec_filter)
 
-        return filter
+        return sec_filter

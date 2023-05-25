@@ -72,7 +72,7 @@ class TestSec:
         with pytest.raises(KeyError, match="cik"):
             sec.filter_data(
                 tickers=frozenset(("aapl", "msft")),
-                filter=Filter.SecFilter(tags=["test"]),
+                sec_filter=Filter.SecFilter(tags=["test"]),
             )
         ticker_reader.contains.assert_called()
         download_manager.get_quarterly_report.assert_called()
@@ -122,7 +122,7 @@ class TestSec:
 
         filter = sec.filter_data(
             tickers=frozenset("aapl"),
-            filter=Filter.SecFilter(last_report=ReportDate(2023, 1)),
+            sec_filter=Filter.SecFilter(last_report=ReportDate(2023, 1)),
         )
 
         logger.debug(f"\n{filter.filtered_data.to_csv()}")

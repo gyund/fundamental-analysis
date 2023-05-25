@@ -31,7 +31,8 @@ def test_benchmark_DataSetReader_processNumText(
     filter_aapl.sec_filter._cik_list = set()
     filter_aapl.sec_filter._cik_list.add(320193)
     sub_df = DataSetReader._process_sub_text(
-        filepath_or_buffer=io.StringIO(sub_txt_sample), filter=filter_aapl.sec_filter
+        filepath_or_buffer=io.StringIO(sub_txt_sample),
+        sec_filter=filter_aapl.sec_filter,
     )
     benchmark.pedantic(
         DataSetReader._process_num_text,
@@ -44,7 +45,8 @@ def test_DataSetReader_processSubText(filter_aapl: Filter.Selectors, sub_txt_sam
     filter_aapl.sec_filter._cik_list = set()
     filter_aapl.sec_filter._cik_list.add(320193)
     sub_df = DataSetReader._process_sub_text(
-        filepath_or_buffer=io.StringIO(sub_txt_sample), filter=filter_aapl.sec_filter
+        filepath_or_buffer=io.StringIO(sub_txt_sample),
+        sec_filter=filter_aapl.sec_filter,
     )
     logger.debug(f"sub keys: {sub_df.keys()}")
     logger.debug(sub_df)
