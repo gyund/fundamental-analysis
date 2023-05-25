@@ -234,7 +234,7 @@ class Filter:
 
             Args:
                 ticker (Optional[str  |  int]): _description_. Defaults to None.
-                tag (Optional[str]): _description_. Defaults to None.
+                tags (Optional[str]): _description_. Defaults to None.
                 year (Optional[int]): _description_. Defaults to None.
 
             Returns:
