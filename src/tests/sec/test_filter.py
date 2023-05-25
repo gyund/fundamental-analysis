@@ -119,7 +119,7 @@ class TestResults:
             },
         )
         expected_data = expected_data.set_index(["ticker", "fy"])
-        sliced = result.slice(tag="OperatingIncomeLoss")
+        sliced = result.slice(tags=["OperatingIncomeLoss"])
         logger.debug(sliced)
         assert sliced.equals(expected_data)
 

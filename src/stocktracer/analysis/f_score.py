@@ -64,14 +64,14 @@ class Analysis(AnalysisInterface):
         )
 
         logger.debug(f"filtered_data:\n{table.data}")
-        # max_year = table.data.index.get_level_values("fy").max()
+        max_year = int(table.data.index.get_level_values("fy").max())
 
         # Do calculations
         table.calculate_return_on_assets("ROA")
         table.calculate_net_income("net-income")
         table.calculate_delta(column_name="delta-ROA", delta_of="ROA")
 
-        fscore = pd.DataFrame(index=table.data.index)
+        # fscore = pd.DataFrame(index=table.data.index)
         # logger.debug(f"\n{fscore}")
 
         # - Profitability
@@ -82,21 +82,24 @@ class Analysis(AnalysisInterface):
 
         #     - Operating Cash Flow (1 point if it is positive in the current year, 0 otherwise);
 
-        fscore["NetIncome>0"] = pd.to_numeric(table.data["net-income"] > 0)
+        table.data["NetIncome>0"] = pd.to_numeric(table.data["net-income"] > 0)
+        f_score_tags = ["NetIncome>0"]
         #     - Change in Return of Assets (ROA) (1 point if ROA is higher in the current year compared to the previous one, 0 otherwise);
-        fscore["ROA>0"] = pd.to_numeric(fscore["delta-ROA"] > 0)
+        table.data["ROA>0"] = pd.to_numeric(table.data["delta-ROA"] > 0)
+        f_score_tags.append("ROA>0")
         #     - Accruals (1 point if Operating Cash Flow/Total Assets is higher than ROA in the current year, 0 otherwise);
-        fscore["accruals"] = (
-            table.data["NetCashProvidedByUsedInOperatingActivities"]
-            / table.data["Assets"]
+        table.data["accruals"] = (
+            table.data["OperatingIncomeLoss"] / table.data["Assets"]
         )
+        table.data["CF/Total-Assets>ROA"] = table.data["accruals"] > table.data["ROA"]
+        f_score_tags.append("CF/Total-Assets>ROA")
         # - Leverage, Liquidity and Source of Funds
         #     - Change in Leverage (long-term) ratio (1 point if the ratio is lower this year compared to the previous one, 0 otherwise);
-        fscore["debt-to-assets"] = (
+        table.data["debt-to-assets"] = (
             table.data["LiabilitiesCurrent"] / table.data["AssetsCurrent"]
         )  # TODO: This is probably not right
         #     - Change in Current ratio (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
-        fscore["current-ratio"] = (
+        table.data["current-ratio"] = (
             table.data["AssetsCurrent"] / table.data["LiabilitiesCurrent"]
         )
         #     - Change in the number of shares (1 point if no new shares were issued during the last year);
@@ -110,17 +113,19 @@ class Analysis(AnalysisInterface):
         # logger.debug(f"{f_score.loc['AAPL'].loc[2022]}")
         # logger.debug(f"{f_score.loc['AAPL'].loc[2022]['ROA']}")
         assert math.isclose(
-            fscore.loc["AAPL"].loc[2022]["ROA"], 0.2791437, rel_tol=0.00001
+            table.data.loc["AAPL"].loc[2022]["ROA"], 0.2791437, rel_tol=0.00001
         )
         assert math.isclose(
-            fscore.loc["AAPL"].loc[2022]["OperatingIncomeLoss"],
+            table.data.loc["AAPL"].loc[2022]["OperatingIncomeLoss"],
             9.822467e10,
             rel_tol=0.00001,
         )
+        logger.debug(f"ROA:\n{table.data['ROA']}")
+        logger.debug(f"delta ROA:\n{table.data['delta-ROA']}")
         assert math.isclose(
-            fscore.loc["AAPL"].loc[2022]["delta-ROA"], 1.850233e10, rel_tol=0.00001
+            table.data.loc["AAPL"].loc[2022]["delta-ROA"], 0.042891, rel_tol=0.00001
         )
-        return fscore
+        return table.slice(year=max_year, tags=f_score_tags)
 
     # Reuse documentation from parent
     analyze.__doc__ = AnalysisInterface.analyze.__doc__

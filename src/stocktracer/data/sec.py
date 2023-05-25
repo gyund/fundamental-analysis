@@ -228,7 +228,7 @@ class Filter:
             self,
             ticker: Optional[str | int] = None,
             year: Optional[int] = None,
-            tag: Optional[str] = None,
+            tags: Optional[list[str]] = None,
         ) -> pd.DataFrame:
             """Slice the results by the specified values
 
@@ -245,8 +245,8 @@ class Filter:
                 result = result.loc(axis=0)[ticker, :]
             if year:
                 result = result.loc(axis=0)[:, year, :]
-            if tag:
-                result = pd.DataFrame(result.loc[:, tag], columns=[tag])
+            if tags:
+                result = pd.DataFrame(result.loc[:, tags], columns=tags)
             return result
 
         def calculate_net_income(self, column_name: str):
