@@ -82,16 +82,18 @@ class Analysis(AnalysisInterface):
 
         #     - Operating Cash Flow (1 point if it is positive in the current year, 0 otherwise);
 
-        table.data["NetIncome>0"] = pd.to_numeric(table.data["net-income"] > 0)
+        table.data["NetIncome>0"] = (table.data["net-income"] > 0).astype(int)
         f_score_tags = ["NetIncome>0"]
         #     - Change in Return of Assets (ROA) (1 point if ROA is higher in the current year compared to the previous one, 0 otherwise);
-        table.data["ROA>0"] = pd.to_numeric(table.data["delta-ROA"] > 0)
+        table.data["ROA>0"] = (table.data["delta-ROA"] > 0).astype(int)
         f_score_tags.append("ROA>0")
         #     - Accruals (1 point if Operating Cash Flow/Total Assets is higher than ROA in the current year, 0 otherwise);
         table.data["accruals"] = (
             table.data["OperatingIncomeLoss"] / table.data["Assets"]
         )
-        table.data["CF/Total-Assets>ROA"] = table.data["accruals"] > table.data["ROA"]
+        table.data["CF/Total-Assets>ROA"] = (
+            table.data["accruals"] > table.data["ROA"]
+        ).astype(int)
         f_score_tags.append("CF/Total-Assets>ROA")
         # - Leverage, Liquidity and Source of Funds
         #     - Change in Leverage (long-term) ratio (1 point if the ratio is lower this year compared to the previous one, 0 otherwise);
