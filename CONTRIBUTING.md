@@ -8,11 +8,11 @@ Before anything else, please take a moment to read our [Code of Conduct](CODE_OF
 
 ## Reporting Bugs, Asking Questions, and Suggesting Features
 
-Have a suggestion or feedback? Please go to [Issues](https://github.com/gyund/fundamental-analysis/issues) and [open a new issue](https://github.com/gyund/fundamental-analysis/issues/new). Prefix the title with a category like _"Bug:"_, _"Question:"_, or _"Feature Request:"_. Screenshots help us resolve issues and answer questions faster, so thanks for including some if you can.
+Have a suggestion or feedback? Please go to [Issues](https://github.com/gyund/fundamental-analysis/issues) and [open a new issue](https://github.com/gyund/fundamental-analysis/issues/new). Prefix the title with a category like _"Bug:"_, _"Question:"_, or _"Feature Request:"_. Logs help us resolve issues and answer questions faster, so thanks for including some if you can.
 
 ## Submitting Code Changes
 
-If you plan to work on an issue, please indicate in the comments of the issue that you plan to work on it. This helps avoid anyone from spending time duplicating efforts to solve a particular problem. It happens, but we certainly don't want to waste anyone's time. Ask for clarification if there's things about the issue that aren't clear. 
+If you plan to work on an issue, coordinate with the team by commenting in the issue and discussing with maintainers before diving too deep on any sort of implementation. Committing a lot of effort only to have a PR rejected can be frustrating, so it's best to see if your ideas jive with the project for things you want to contribute back.  
 
 When submitting changes, we use black and isort to keep our code clean. Please run `./autoformat.sh` in the project directory to cleanup code before submitting. Checks will be performed by automated tools and give you a success message if the changes are expected to past all lint checks.
 
