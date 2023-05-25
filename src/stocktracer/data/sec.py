@@ -219,6 +219,31 @@ class Filter:
             """Remove all values that are NaN."""
             self.data = self.data.dropna(axis=1, how="any")
 
+        def slice(
+            self,
+            ticker: Optional[str | int] = None,
+            year: Optional[int] = None,
+            tag: Optional[str] = None,
+        ) -> pd.DataFrame:
+            """Slice the results by the specified values
+
+            Args:
+                ticker (Optional[str  |  int]): _description_. Defaults to None.
+                tag (Optional[str]): _description_. Defaults to None.
+                year (Optional[int]): _description_. Defaults to None.
+
+            Returns:
+                pd.DataFrame: _description_
+            """
+            result = self.data
+            if ticker:
+                result = result.loc(axis=0)[ticker, :]
+            if year:
+                result = result.loc(axis=0)[:, year, :]
+            if tag:
+                result = pd.DataFrame(result.loc[:, tag], columns=[tag])
+            return result
+
         def calculate_net_income(self, column_name: str):
             """Returns the net income stocks as a series.
 

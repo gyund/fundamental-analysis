@@ -72,6 +72,56 @@ def test_reportDate():
 
 
 class TestResults:
+    def test_slice(self):
+        data = pd.DataFrame(
+            data={
+                "ticker": ["AAPL", "MSFT"],
+                "fy": [2021, 2022],
+                "OperatingIncomeLoss": [10, 20],
+                "Stuff": [3, 4],
+            },
+        )
+        data = data.set_index(["ticker", "fy"])
+        result = SecFilter.Results(data)
+        logger.debug(result)
+
+        # Slice on Ticker, make sure we get the right results
+        expected_data = pd.DataFrame(
+            data={
+                "ticker": ["MSFT"],
+                "fy": [2022],
+                "OperatingIncomeLoss": [20],
+                "Stuff": [4],
+            },
+        )
+        expected_data = expected_data.set_index(["ticker", "fy"])
+        assert result.slice(ticker="MSFT").equals(expected_data)
+
+        expected_data = pd.DataFrame(
+            data={
+                "ticker": ["MSFT"],
+                "fy": [2022],
+                "OperatingIncomeLoss": [20],
+                "Stuff": [4],
+            },
+        )
+        expected_data = expected_data.set_index(["ticker", "fy"])
+        sliced = result.slice(year=2022)
+        logger.debug(sliced)
+        assert sliced.equals(expected_data)
+
+        expected_data = pd.DataFrame(
+            data={
+                "ticker": ["AAPL", "MSFT"],
+                "fy": [2021, 2022],
+                "OperatingIncomeLoss": [10, 20],
+            },
+        )
+        expected_data = expected_data.set_index(["ticker", "fy"])
+        sliced = result.slice(tag="OperatingIncomeLoss")
+        logger.debug(sliced)
+        assert sliced.equals(expected_data)
+
     def test_net_income(self):
         data = pd.DataFrame(
             data={
