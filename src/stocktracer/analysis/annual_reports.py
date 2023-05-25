@@ -24,7 +24,7 @@ def create_normalized_sec_table(
         normalize (bool): Remove all columns that contain at least one NA value
 
     Returns:
-        SecFilter.Table: An SEC table with normalized results
+        SecFilter.Results: An SEC table with normalized results
     """
     sec = SecDataSource(storage_path=options.cache_path)
     sec.filter_data(tickers=options.tickers, filter=sec_filter)

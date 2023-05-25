@@ -64,7 +64,7 @@ class Analysis(AnalysisInterface):
         )
 
         logger.debug(f"filtered_data:\n{table.data}")
-        max_year = table.data.index.get_level_values("fy").max()
+        # max_year = table.data.index.get_level_values("fy").max()
 
         # Do calculations
         table.calculate_return_on_assets("ROA")

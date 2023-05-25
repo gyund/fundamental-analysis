@@ -70,13 +70,13 @@ class Cli:
 
         Args:
             tickers (Union[Sequence[str], str]): tickers to include in the analysis
-            cache_path (Path): path where to cache data
+            cache_path (Path | str): path where to cache data
             refresh (bool): Whether to refresh the calculation or use the results from a prior one
             analysis_plugin (str): module to load for analysis
             final_year (Optional[int]): last year to consider for report collection
             final_quarter (Optional[int]): last quarter to consider for report collection
             report_format (ReportFormat): Format of the report. Options include: csv, json, md (markdown)
-            report_file (Optional[Path]): Where to store the report. Required if report_format is specified.
+            report_file (Optional[Path | str]): Where to store the report. Required if report_format is specified.
 
         Raises:
             LookupError: no analysis results found

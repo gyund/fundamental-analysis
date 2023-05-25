@@ -81,6 +81,11 @@ class TickerReader:
 
     @property
     def map_of_cik_to_ticker(self) -> pd.DataFrame:
+        """Dataframe containing mapping of cik and ticker information.
+
+        Returns:
+            pd.DataFrame: Dataframe with mapping information
+        """
         return self._cik_to_ticker_map
 
     def convert_to_cik(self, ticker: str) -> np.int64:
