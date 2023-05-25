@@ -266,6 +266,15 @@ class Filter:
                 self.data["Assets"]
             )
 
+        def calculate_delta(self, column_name: str, delta_of: str):
+            """Calculate the change between the latest row and the one before it within a ticker.
+
+            Args:
+                column_name (str): name to give the calculated column
+                delta_of (str): column name to calculate the delta of, such as ROI
+            """
+            self.data[column_name] = self.data.groupby(by=["ticker"]).diff()[delta_of]
+
     def __init__(
         self,
         tags: Optional[list[str]] = None,

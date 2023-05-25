@@ -2,6 +2,7 @@ import logging
 from datetime import date
 
 import pandas as pd
+import numpy as np
 import pytest
 
 import stocktracer.filter as Filter
@@ -152,3 +153,19 @@ class TestResults:
         logger.debug(f"\n{data}")
         assert result.data.loc["AAPL"].loc[2021]["ROA"] == 0.50
         assert result.data.loc["AAPL"].loc[2022]["ROA"] == 0.25
+
+    def test_calculate_delta(self):
+        data = pd.DataFrame(
+            data={
+                "ticker": ["AAPL", "AAPL"],
+                "fy": [2021, 2022],
+                "OperatingIncomeLoss": [10, 20],
+                "Assets": [20, 80],
+            },
+        )
+        data = data.set_index(["ticker", "fy"])
+        result = SecFilter.Results(data)
+        result.calculate_delta("delta", "OperatingIncomeLoss")
+        logger.debug(f"\n{data}")
+        assert np.isnan(result.data.loc["AAPL"].loc[2021]["delta"])
+        assert result.data.loc["AAPL"].loc[2022]["delta"] == 10
