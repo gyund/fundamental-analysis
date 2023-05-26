@@ -250,14 +250,30 @@ class Filter:
             return result
 
         def calculate_net_income(self, column_name: str):
-            """Returns the net income stocks as a series.
+            """Calculates the net income stocks as a series.
 
             !!! example
                 ``` python
                 results.calculate_net_income()
                 ```
+
+            Args:
+                column_name (str): name to assign to the column
             """
             self.data[column_name] = self.data["OperatingIncomeLoss"]
+
+        def calculate_debt_to_assets(self, column_name: str):
+            """Calculates the current debt to assets ratio.
+
+            Having more debt than assets is a risk indicator that could indicate
+            a potential for bankruptcy.
+
+            Args:
+                column_name (str): name to assign to the column
+            """
+            self.data[column_name] = (
+                self.data["LiabilitiesCurrent"] / self.data["AssetsCurrent"]
+            )
 
         def calculate_return_on_assets(self, column_name: str):
             """Returns the ROA of stocks as a series.
@@ -266,6 +282,8 @@ class Filter:
                 ``` python
                 results.calculate_return_on_assets('ROA')
                 ```
+            Args:
+                column_name (str): name to assign to the column
             """
             self.data[column_name] = self.data["OperatingIncomeLoss"].div(
                 self.data["Assets"]

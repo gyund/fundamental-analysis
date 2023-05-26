@@ -70,23 +70,27 @@ class Analysis(AnalysisInterface):
         table.calculate_return_on_assets("ROA")
         table.calculate_net_income("net-income")
         table.calculate_delta(column_name="delta-ROA", delta_of="ROA")
+        table.calculate_debt_to_assets("debt-to-assets")
 
         # fscore = pd.DataFrame(index=table.data.index)
         # logger.debug(f"\n{fscore}")
 
+        f_score_tags = []
+
         # - Profitability
         #     - Return on Assets (ROA) (1 point if it is positive in the current year, 0 otherwise);
-
+        table.data["ROA>0"] = (table.data["ROA"] > 0).astype(int)
+        f_score_tags.append("ROA>0")
         # TODO: select last year by ROA and assign a 1 if it's positive
         # logger.debug(f"\n{fscore}")
 
         #     - Operating Cash Flow (1 point if it is positive in the current year, 0 otherwise);
 
         table.data["NetIncome>0"] = (table.data["net-income"] > 0).astype(int)
-        f_score_tags = ["NetIncome>0"]
+        f_score_tags.append("NetIncome>0")
         #     - Change in Return of Assets (ROA) (1 point if ROA is higher in the current year compared to the previous one, 0 otherwise);
-        table.data["ROA>0"] = (table.data["delta-ROA"] > 0).astype(int)
-        f_score_tags.append("ROA>0")
+        table.data["delta-ROA>0"] = (table.data["delta-ROA"] > 0).astype(int)
+        f_score_tags.append("delta-ROA>0")
         #     - Accruals (1 point if Operating Cash Flow/Total Assets is higher than ROA in the current year, 0 otherwise);
         table.data["accruals"] = (
             table.data["OperatingIncomeLoss"] / table.data["Assets"]
@@ -97,9 +101,12 @@ class Analysis(AnalysisInterface):
         f_score_tags.append("CF/Total-Assets>ROA")
         # - Leverage, Liquidity and Source of Funds
         #     - Change in Leverage (long-term) ratio (1 point if the ratio is lower this year compared to the previous one, 0 otherwise);
-        table.data["debt-to-assets"] = (
-            table.data["LiabilitiesCurrent"] / table.data["AssetsCurrent"]
-        )  # TODO: This is probably not right
+        table.calculate_delta("debt-to-assets-delta", delta_of="debt-to-assets")
+        table.data["debt-to-assets<last-year"] = (
+            table.data["debt-to-assets-delta"] < 0
+        ).astype(int)
+        f_score_tags.append("debt-to-assets<last-year")
+
         #     - Change in Current ratio (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
         table.data["current-ratio"] = (
             table.data["AssetsCurrent"] / table.data["LiabilitiesCurrent"]
