@@ -47,7 +47,7 @@ class Analysis(AnalysisInterface):
     years_of_analysis = 2
 
     def analyze(self) -> Optional[pd.DataFrame]:
-        # Create the filter we'll use to scrape the results
+        # Create the filter to scrape the data we need for processing
         sec_filter = SecFilter(
             tags=[
                 "EarningsPerShareDiluted",
