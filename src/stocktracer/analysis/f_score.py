@@ -151,11 +151,6 @@ class Analysis(AnalysisInterface):
         #     - Change in Gross Margin (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
         #     - Change in Asset Turnover ratio (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
 
-        # f_score.pivot_table(index=['ticker'], columns=['fy','OperatingIncomeLoss'])
-        # logger.debug(f"f_score:\n{f_score}")
-        # logger.debug(f"{f_score.loc['AAPL']}")
-        # logger.debug(f"{f_score.loc['AAPL'].loc[2022]}")
-        # logger.debug(f"{f_score.loc['AAPL'].loc[2022]['ROA']}")
         return table.slice(year=max_year, tags=f_score_tags)
 
     # Reuse documentation from parent
