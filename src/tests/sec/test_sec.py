@@ -10,7 +10,7 @@ import pytest
 
 import stocktracer.filter as Filter
 from stocktracer.cli import Cli
-from stocktracer.data.sec import (
+from stocktracer.collector.sec import (
     DataSetReader,
     DownloadManager,
     ReportDate,

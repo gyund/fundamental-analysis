@@ -3,7 +3,7 @@ import pytest
 
 import stocktracer.filter as Filter
 from stocktracer.cli import Cli, get_default_cache_path
-from stocktracer.data.sec import Sec
+from stocktracer.collector.sec import Sec
 from tests.fixtures.unit import filter_aapl
 
 

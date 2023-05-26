@@ -6,8 +6,8 @@ import pandas as pd
 import pytest
 
 import stocktracer.filter as Filter
-from stocktracer.data.sec import Filter as SecFilter
-from stocktracer.data.sec import ReportDate
+from stocktracer.collector.sec import Filter as SecFilter
+from stocktracer.collector.sec import ReportDate
 
 logger = logging.getLogger(__name__)
 

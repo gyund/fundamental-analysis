@@ -6,7 +6,7 @@ from typing import Optional
 from beartype import beartype
 from pandas import DataFrame
 
-from stocktracer.data.sec import ReportDate
+from stocktracer.collector.sec import ReportDate
 
 
 @beartype

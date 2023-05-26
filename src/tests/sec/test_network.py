@@ -8,10 +8,10 @@ import mock
 import pytest
 
 import stocktracer.filter as Filter
-from stocktracer.data.sec import Filter as SecFilter
-from stocktracer.data.sec import ReportDate
-from stocktracer.data.sec import Sec
-from stocktracer.data.sec import Sec as SecDataSource
+from stocktracer.collector.sec import Filter as SecFilter
+from stocktracer.collector.sec import ReportDate
+from stocktracer.collector.sec import Sec
+from stocktracer.collector.sec import Sec as SecDataSource
 from tests.fixtures.network import filter_aapl, sec_dataselector_2023q1, sec_instance
 
 logger = logging.getLogger(__name__)

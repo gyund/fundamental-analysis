@@ -8,7 +8,7 @@ import pytest
 
 import stocktracer.filter as Filter
 from stocktracer.cli import Cli
-from stocktracer.data.sec import DataSetReader
+from stocktracer.collector.sec import DataSetReader
 from tests.fixtures.unit import data_txt_sample, filter_aapl, sub_txt_sample
 
 logger = logging.getLogger(__name__)
