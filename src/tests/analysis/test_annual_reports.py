@@ -27,7 +27,8 @@ class TestCliAnnualReports:
         )
         assert result is not None
         logger.debug(f"annual_reports:\n{result.transpose().to_string()}")
-        assert len(result.index) == 6
+        # Note: goog, and googl are pulled in, so it's 7 instead of 6
+        assert len(result.index) == 7
 
     def test_invalid(self):
         with pytest.raises(LookupError, match="unable to find ticker: invalid"):
