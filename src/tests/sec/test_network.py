@@ -49,7 +49,9 @@ class TestDownloadManager:
 def test_update(sec_instance: Sec, filter_aapl: Filter.Selectors):
     # pytest.skip(
     #     "skip until we can resolve performance issues with large data sets")
-    sec_instance.select_data(tickers=frozenset(["aapl"]), filter=filter_aapl.sec_filter)
+    sec_instance.filter_data(
+        tickers=frozenset(["aapl"]), sec_filter=filter_aapl.sec_filter
+    )
     assert filter_aapl.sec_filter.filtered_data.empty == False
     logger.debug(
         f"There are {len(filter_aapl.sec_filter.filtered_data)} records about apple"
@@ -78,7 +80,7 @@ def test_multi_stock_request_over_1year(sec_instance: SecDataSource):
         only_annual=True,  # We only want the 10-K
     )
     tickers = frozenset(["aapl", "msft", "goog", "tmo"])
-    sec_instance.select_data(tickers=tickers, filter=sec_filter)
+    sec_instance.filter_data(tickers=tickers, sec_filter=sec_filter)
     logger.debug(sec_filter.filtered_data)
     # Get series for data and make sure they're all yearly-focus(YF)/annual reports
     yearly_focus_periods = "FY"

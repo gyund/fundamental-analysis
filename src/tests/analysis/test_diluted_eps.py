@@ -30,7 +30,7 @@ class TestCliDilutedEps:
         assert math.isclose(
             # result.loc["TMO"]["EarningsPerShareDiluted"], 17.683333, rel_tol=0.001 # EPS last qtr
             result.loc["TMO"]["EarningsPerShareDiluted"],
-            -0.820571,
+            0.915,
             rel_tol=0.001,  # trend
         )
 

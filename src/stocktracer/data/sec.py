@@ -1,9 +1,9 @@
 """This data source grabs information from quarterly SEC data archives."""
+import copy
 import logging
 import sys
 from datetime import date, timedelta
 from io import BytesIO
-from numbers import Number
 from pathlib import Path
 from typing import Literal, Optional
 from zipfile import ZipFile
@@ -13,6 +13,7 @@ import pandas as pd
 from alive_progress import alive_bar
 from beartype import beartype
 from beartype.typing import Callable, Sequence
+from numpy.linalg import LinAlgError
 from requests_cache import CachedSession, SQLiteCache
 
 logger = logging.getLogger(__name__)
@@ -23,12 +24,14 @@ pd.set_option("mode.chained_assignment", "raise")
 
 @beartype
 class ReportDate:
+    """ReportDate is used to select and identify archives created by the SEC."""
+
     def __init__(
         self,
         year: int | None = None,
         quarter: int | None = None,
     ):
-        """ReportDate is used to select and identify archives created by the SEC.
+        """
 
         Args:
             year (int, optional): Year of the archive. Defaults to date.today().year.
@@ -63,11 +66,26 @@ class ReportDate:
 
 @beartype
 class TickerReader:
+    """This class provides translation services for CIK and Ticker values.
+
+    The SEC has a `json` file that provides mappings from CIK values to Tickers.
+    The data providing this conversion is injected into this class and then
+    this class provides helper methods for performing the conversion on this data set.
+
+    This class is provided CSV data which is parsed upon initialization. So creating
+    this object is the most expensive part.
+    """
+
     def __init__(self, data: str):
         self._cik_to_ticker_map = pd.read_json(data, orient="index")
 
     @property
     def map_of_cik_to_ticker(self) -> pd.DataFrame:
+        """Dataframe containing mapping of cik and ticker information.
+
+        Returns:
+            pd.DataFrame: Dataframe with mapping information
+        """
         return self._cik_to_ticker_map
 
     def convert_to_cik(self, ticker: str) -> np.int64:
@@ -110,13 +128,10 @@ class TickerReader:
         Returns:
             bool: if all the tickers are found
         """
-        for t in tickers:
-            self.convert_to_cik(t)
+        for ticker in tickers:
+            self.convert_to_cik(ticker)
 
         return True
-
-
-period_focus_options = Literal["FY", "Q1", "Q2", "Q3", "Q4"]
 
 
 @beartype
@@ -137,46 +152,164 @@ def slope(data: pd.Series, order: int = 1) -> float:
     Returns:
         float: slope of the trend line
     """
-    x = range(len(data.keys()))
-    y = data.values
+    x_axis = range(len(data.keys()))
+    y_axis = data.values
 
-    coeffs = np.polyfit(x, y, order)
-    slope = coeffs[0]
-    # np.isclose()
-    return slope
+    try:
+        coeffs = np.polyfit(x_axis, y_axis, order)
+    except LinAlgError:
+        return float(0)
+    return coeffs[0]
 
 
 @beartype
 class Filter:
-    class Table:
-        """This is a table that is the output from a `Filter.select()` call.
+    """Filter for SEC tools to scrape relevant information when processing records."""
 
-        When data is converted, it creates a pivot table that looks like the following:
+    class Results:
+        """This is the results from a `Filter.select()` call.
 
-                                                        value
-            cik    tag
-            320193 EntityCommonStockSharesOutstanding   4000.0
-                    FakeAttributeTag                     400.0
-            ...
+        The results table looks like the following:
 
+        ```
+        tag            AccountsPayableCurrent  ...  WeightedAverageNumberOfSharesOutstandingBasic
+        ticker fy                              ...
+        AAPL   2021.0            4.852950e+10  ...                                   1.750824e+10
+               2022.0            5.943900e+10  ...                                   1.675645e+10
+        MSFT   2021.0            1.384650e+10  ...                                   7.610000e+09
+               2022.0            1.708150e+10  ...                                   7.551000e+09
+        TMO    2021.0            2.521000e+09  ...                                   3.966667e+08
+               2022.0            3.124000e+09  ...                                   3.940000e+08
+        ```
+
+        From here, you can call functions on this class like `get_value()` or `normalize()`.
+
+        !!! note
+            To get a list of all the tags, run the `annual_reports` analysis module and search through the output for meaningful tags.
 
         """
 
-        def __init__(self, table: pd.DataFrame) -> None:
-            self.data = table
+        def __init__(self, results: pd.DataFrame) -> None:
+            logger.debug(f"results:\n{results}")
+            self.data = results
 
         def __str__(self) -> str:
             return str(self.data)
 
         @property
-        def tags(self):
+        def tags(self) -> np.ndarray:
+            """List of tags that can be used on this data set.
+
+            Returns:
+                np.ndarray: array with results
+            """
             return self.data.columns.values
 
-        def get_value(self, ticker: str | int, tag: str) -> Number:
+        def get_value(self, ticker: str | int, tag: str, year: int) -> int | float:
+            """Retrieve the exact value of a table cell.
+
+            Args:
+                ticker (str | int): ticker identifying the equity of interest.
+                tag (str): attribute indicating the type of data to look at.
+                year (int): The year this data applies to.
+
+            Returns:
+                int | float: value of result
+            """
             # Lookup convert ticker to cik
             ticker = ticker.upper()
-            logger.debug(f"get_value:\n{self.data}")
-            return self.data.loc[ticker].loc[tag]
+            return self.data.loc[ticker].loc[year].loc[tag]
+
+        def normalize(self):
+            """Remove all values that are NaN."""
+            self.data = self.data.dropna(axis=1, how="any")
+
+        def slice(
+            self,
+            ticker: Optional[str | int] = None,
+            year: Optional[int] = None,
+            tags: Optional[list[str]] = None,
+        ) -> pd.DataFrame:
+            """Slice the results by the specified values
+
+            Args:
+                ticker (Optional[str  |  int]): _description_. Defaults to None.
+                tags (Optional[str]): _description_. Defaults to None.
+                year (Optional[int]): _description_. Defaults to None.
+
+            Returns:
+                pd.DataFrame: _description_
+            """
+            result = self.data
+            if ticker:
+                result = result.loc(axis=0)[ticker, :]
+            if year:
+                result = result.loc(axis=0)[:, year, :]
+            if tags:
+                result = pd.DataFrame(result.loc[:, tags], columns=tags)
+            return result
+
+        def calculate_net_income(self, column_name: str):
+            """Calculates the net income stocks as a series.
+
+            !!! example
+                ``` python
+                results.calculate_net_income()
+                ```
+
+            Args:
+                column_name (str): name to assign to the column
+            """
+            self.data[column_name] = self.data["OperatingIncomeLoss"]
+
+        def calculate_current_ratio(self, column_name: str):
+            """Calculate the current ratio.
+
+            The current ratio is a liquidity ratio that measures a company’s
+            ability to pay short-term obligations or those due within one year.
+
+            Args:
+                column_name (str): _description_
+            """
+            self.data[column_name] = (
+                self.data["AssetsCurrent"] / self.data["LiabilitiesCurrent"]
+            )
+
+        def calculate_debt_to_assets(self, column_name: str):
+            """Calculates the current debt to assets ratio.
+
+            Having more debt than assets is a risk indicator that could indicate
+            a potential for bankruptcy.
+
+            Args:
+                column_name (str): name to assign to the column
+            """
+            self.data[column_name] = (
+                self.data["LiabilitiesCurrent"] / self.data["AssetsCurrent"]
+            )
+
+        def calculate_return_on_assets(self, column_name: str):
+            """Returns the ROA of stocks as a series.
+
+            !!! example
+                ``` python
+                results.calculate_return_on_assets('ROA')
+                ```
+            Args:
+                column_name (str): name to assign to the column
+            """
+            self.data[column_name] = self.data["OperatingIncomeLoss"].div(
+                self.data["Assets"]
+            )
+
+        def calculate_delta(self, column_name: str, delta_of: str):
+            """Calculate the change between the latest row and the one before it within a ticker.
+
+            Args:
+                column_name (str): name to give the calculated column
+                delta_of (str): column name to calculate the delta of, such as ROI
+            """
+            self.data[column_name] = self.data.groupby(by=["ticker"]).diff()[delta_of]
 
     def __init__(
         self,
@@ -185,7 +318,7 @@ class Filter:
         last_report: ReportDate = ReportDate(),
         only_annual: bool = True,
     ) -> None:
-        """Filter for SEC tools to scrape relevant information when processing records.
+        """
 
         This is an important concept to dealing with large data sets. It allows us to chunk processing
         into batches and find/locate only records of interest. Without these filters, the tool would
@@ -244,7 +377,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             Callable | Literal["mean", "std", "var", "sum", "min", "max", "slope"]
         ] = "mean",
         tickers: Optional[Sequence[str]] = None,
-    ) -> Table:
+    ) -> Results:
         """Select only a subset of the data matching the specified criteria.
 
         Args:
@@ -252,7 +385,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             tickers (Optional[Sequence[str]]): ticker symbol for the company
 
         Returns:
-            Filter.Table: Object that represents a pivot table with the data requested
+            Filter.Results: Object that represents a pivot table with the data requested
         """
         if tickers is not None:
             tickers = [t.upper() for t in tickers]
@@ -274,10 +407,11 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             data,
             values="value",
             columns="tag",
-            index=["ticker"],
+            index=["ticker", "fy"],
             aggfunc=aggregate_func,
         )
-        return Filter.Table(table)
+
+        return Filter.Results(table)
 
     @property
     def ciks(self) -> set[int]:
@@ -348,7 +482,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
             list[ReportDate]: list of report dates to retrieve
         """
         dl_list: list[ReportDate] = []
-        next_report = self.last_report
+        next_report = copy.deepcopy(self.last_report)
         final_report = ReportDate(
             self.last_report.year - self.years, self.last_report.quarter
         )
@@ -373,11 +507,11 @@ class DataSetReader:
     def __init__(self, zip_data: bytes) -> None:
         self.zip_data = BytesIO(zip_data)
 
-    def process_zip(self, filter: Filter) -> Optional[pd.DataFrame]:
+    def process_zip(self, sec_filter: Filter) -> Optional[pd.DataFrame]:
         """Process a zip archive with the provided filter.
 
         Args:
-            filter (Filter): results to filter out of the zip archive
+            sec_filter (Filter): results to filter out of the zip archive
 
         Raises:
             ImportError: the filter doesn't match anything
@@ -390,19 +524,19 @@ class DataSetReader:
             logger.debug("opening sub.txt")
             with myzip.open("sub.txt") as myfile:
                 # Get reports that are 10-K or 10-Q
-                sub_dataframe = DataSetReader._process_sub_text(myfile, filter)
+                sub_dataframe = DataSetReader._process_sub_text(myfile, sec_filter)
 
                 if sub_dataframe is None or sub_dataframe.empty:
                     raise ImportError("nothing found in sub.txt matching the filter")
 
                 with myzip.open("num.txt") as myfile:
                     return DataSetReader._process_num_text(
-                        myfile, filter, sub_dataframe
+                        myfile, sec_filter, sub_dataframe
                     )
 
     @classmethod
     def _process_num_text(
-        cls, filepath_or_buffer, filter: Filter, sub_dataframe: pd.DataFrame
+        cls, filepath_or_buffer, sec_filter: Filter, sub_dataframe: pd.DataFrame
     ) -> Optional[pd.DataFrame]:
         """Contains the numerical data.
 
@@ -426,26 +560,26 @@ class DataSetReader:
             data = chunk.join(sub_dataframe, how="inner")
 
             # Additional Filtering if needed
-            if filter.tags is not None:
-                tag_list = filter.tags  # pylint: disable=unused-variable
+            if sec_filter.tags is not None:
+                tag_list = sec_filter.tags  # pylint: disable=unused-variable
                 data = data.query("tag in @tag_list")
 
             if data.empty:  # pragma: no cover
-                logger.debug(f"chunk:\n{chunk}")
-                logger.debug(f"sub_dataframe:\n{sub_dataframe}")
+                # logger.debug(f"chunk:\n{chunk}")
+                # logger.debug(f"sub_dataframe:\n{sub_dataframe}")
                 continue
 
             filtered_data = cls.append(filtered_data, data)
 
-        if filtered_data is not None:  # pragma: no cover
-            logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
+        # if filtered_data is not None:  # pragma: no cover
+        #     logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
         return filtered_data
 
     @classmethod
     def append(
         cls, filtered_data: Optional[pd.DataFrame], data: pd.DataFrame
     ) -> pd.DataFrame:
-        """Append data to the filtered_data and return the updated filtered DataFrame
+        """Append data to the filtered_data and return the updated filtered DataFrame.
 
         >>> df1 = pd.DataFrame({"A": ["A0", "A1", "A2", "A3"]},index=[0,1,2,3])
         >>> df2 = pd.DataFrame({"B": ["B0", "B1", "B2", "B3"]},index=[4,5,6,7])
@@ -491,7 +625,7 @@ class DataSetReader:
 
     @classmethod
     def _process_sub_text(
-        cls, filepath_or_buffer, filter: Filter
+        cls, filepath_or_buffer, sec_filter: Filter
     ) -> Optional[pd.DataFrame]:
         """Contains the submissions.
 
@@ -500,12 +634,12 @@ class DataSetReader:
         fye	form	period	fy	fp	filed	accepted	prevrpt	detail	instance	nciks	aciks
         """
         logger.debug("processing sub.txt")
-        focus_periods = filter.focus_period
-        cik_list = filter.ciks  # pylint: disable=unused-variable
+        focus_periods = sec_filter.focus_period
+        cik_list = sec_filter.ciks  # pylint: disable=unused-variable
 
-        oldest_fy = filter.last_report.year - filter.years
+        oldest_fy = sec_filter.last_report.year - sec_filter.years
         query_str = f"cik in @cik_list and fp in @focus_periods and fy >= {oldest_fy}"
-        logger.debug(f"Query string: {query_str}")
+        # logger.debug(f"Query string: {query_str}")
         reader = pd.read_csv(
             filepath_or_buffer,
             delimiter="\t",
@@ -513,24 +647,23 @@ class DataSetReader:
             index_col=["adsh", "cik"],
             chunksize=DEFAULT_CHUNK_SIZE,
             parse_dates=["period"],
+            dtype={"cik": np.int32},
         )
-        logger.debug(f"keeping only these focus periods: {focus_periods}")
+        logger.info(f"keeping only these focus periods: {focus_periods}")
         filtered_data: pd.DataFrame = None
         chunk: pd.DataFrame
         for chunk in reader:
             data = chunk.query(query_str)
             if data.empty:
                 continue
-
             filtered_data = cls.append(filtered_data, data)
-
-        if filtered_data is not None:
-            logger.debug(f"found {len(filtered_data.head())} filtered records")
         return filtered_data
 
 
 @beartype
 class DownloadManager:
+    """This class is responsible for downloading and caching downloaded data sets from the SEC."""
+
     # Format of zip example: 2023q1.zip
     _base_url = "https://www.sec.gov/files/dera/data/financial-statement-data-sets"
 
@@ -602,18 +735,18 @@ class DataSetCollector:
     def __init__(self, download_manager: DownloadManager):
         self.download_manager = download_manager
 
-    def get_data(self, filter: Filter) -> None:
+    def get_data(self, sec_filter: Filter) -> None:
         """Collect data based on the provided filter.
 
         Args:
-            filter (Filter): SEC specific filter of how to filter the results
+            sec_filter (Filter): SEC specific filter of how to filter the results
 
         Raises:
             LookupError: when there are no results matching the filter
 
         """
         data_frame = None
-        report_dates = filter.required_reports
+        report_dates = sec_filter.required_reports
         logger.info(f"Creating Unified Data record for these reports: {report_dates}")
         with alive_bar(
             # total=len(report_dates) * 2,
@@ -623,32 +756,32 @@ class DataSetCollector:
             file=sys.stderr,
             calibrate=5_000,
             dual_line=True,
-        ) as bar:
-            for r in report_dates:
-                bar.text(f"Downloading report {r}...")
-                reader = self.download_manager.get_quarterly_report(r)
+        ) as status_bar:
+            for report_date in report_dates:
+                status_bar.text(f"Downloading report {report_date}...")
+                reader = self.download_manager.get_quarterly_report(report_date)
                 if isinstance(reader, DataSetReader):
                     try:
-                        bar.text(f"Processing report {r}...")
-                        data = reader.process_zip(filter)
+                        status_bar.text(f"Processing report {report_date}...")
+                        data = reader.process_zip(sec_filter)
                         if data_frame is not None:
-                            logger.debug(f"current data: {len(data_frame)}")
+                            logger.debug(f"record count: {len(data_frame)}")
                         if data is not None:
-                            logger.debug(f"new data: {len(data)}")
+                            logger.debug(f"new record count: {len(data)}")
                             data_frame = DataSetReader.append(data_frame, data)
                             record_count = len(data_frame)
-                            bar(record_count)
-                            logger.debug(
-                                f"There are now {record_count} filtered data fields"
+                            status_bar(record_count)  # pylint: disable=not-callable
+                            logger.info(
+                                f"There are now {record_count} filtered records"
                             )
 
                     except ImportError:
                         # Note, when searching for annual reports, this will generally occur 1/4 times
                         # if we're only searching for one stock's tags
                         logger.debug(
-                            f"{r} did not have any matches for the provided filter"
+                            f"{report_date} did not have any matches for the provided filter"
                         )
-                        logger.debug(f"{filter}")
+                        logger.debug(f"{sec_filter}")
 
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
         if data_frame is None:
@@ -669,9 +802,9 @@ class DataSetCollector:
         # 1,0000097745-23-000008,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC.
         # 2,0000097745-23-000008,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC..
 
-        data_frame = data_frame.drop(columns=["cik_str", "adsh", "cik"]).set_index(
-            ["ticker", "tag", "fy", "fp"]
-        )
+        sec_filter.filtered_data = data_frame.drop(
+            columns=["cik_str", "adsh", "cik"]
+        ).set_index(["ticker", "tag", "fy", "fp"])
 
         # # Convert fp to number so we can sort easily
         # data_frame['fp'].mask(data_frame['fp'] == "Q1", 1, inplace=True)
@@ -680,14 +813,16 @@ class DataSetCollector:
         # data_frame['fp'].mask(data_frame['fp'] == "Q4", 4, inplace=True)
         # data_frame = data_frame.set_index("fp", append=True)
 
-        logger.debug(f"filtered_df:\n{data_frame.to_csv()}")
-        filter.filtered_data = data_frame
+        # logger.debug(f"filtered_df:\n{data_frame}")
+        # filter.filtered_data = data_frame
 
 
 @beartype
 class Sec:
+    """Object for handling requests for information relating to SEC data dumps."""
+
     def __init__(self, storage_path: Path):
-        """Object for handling requests for information relating to SEC data dumps.
+        """
 
         Args:
             storage_path (Path): Where to store the results.
@@ -708,14 +843,14 @@ class Sec:
         )
         self.download_manager = DownloadManager(ticker_session, data_session)
 
-    def select_data(self, tickers: frozenset[str], filter: Filter) -> Filter:
+    def filter_data(self, tickers: frozenset[str], sec_filter: Filter) -> Filter:
         """Initiate the retrieval of ticker information based on the provided filters.
 
         Filtered data is stored with the filter
 
         Args:
             tickers (frozenset[str]): ticker symbols you want information about
-            filter (Filter): SEC specific data to scrape from the reports
+            sec_filter (Filter): SEC specific data to scrape from the reports
 
         Returns:
             Filter: filter with filtered data
@@ -723,7 +858,7 @@ class Sec:
         collector = DataSetCollector(self.download_manager)
         ticker_reader = self.download_manager.ticker_reader
         if ticker_reader.contains(tickers):
-            filter.populate_ciks(tickers=tickers, ticker_reader=ticker_reader)
-            collector.get_data(filter)
+            sec_filter.populate_ciks(tickers=tickers, ticker_reader=ticker_reader)
+            collector.get_data(sec_filter)
 
-        return filter
+        return sec_filter

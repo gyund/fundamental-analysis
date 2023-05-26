@@ -1,3 +1,4 @@
+"""Download and retrieves annual reports for the specified stock tickers."""
 import logging
 from typing import Optional
 
@@ -7,13 +8,37 @@ from beartype import beartype
 from stocktracer.data.sec import Filter as SecFilter
 from stocktracer.data.sec import Sec as SecDataSource
 from stocktracer.interface import Analysis as AnalysisInterface
+from stocktracer.interface import Options
 
 logger = logging.getLogger(__name__)
 
 
+def create_normalized_sec_table(
+    sec_filter: SecFilter, options: Options, normalize: bool = True
+) -> SecFilter.Results:
+    """Create a normalized SEC table with all NA values removed.
+
+    Args:
+        sec_filter (SecFilter): filter to use for grabbing results
+        options (Options): user provided CLI options
+        normalize (bool): Remove all columns that contain at least one NA value
+
+    Returns:
+        SecFilter.Results: An SEC table with normalized results
+    """
+    sec = SecDataSource(storage_path=options.cache_path)
+    sec.filter_data(tickers=options.tickers, sec_filter=sec_filter)
+
+    table = sec_filter.select()
+    # If you prefer to see columns that are not universal across all stocks, comment this out
+    if normalize:
+        table.normalize()
+    return table
+
+
 @beartype
 class Analysis(AnalysisInterface):
-    """Perform an analysis on the earnings per share over time."""
+    """Class for collecting and processing annual report data."""
 
     under_development = True
 
@@ -27,14 +52,8 @@ class Analysis(AnalysisInterface):
         )
 
         # Create an SEC Data Source
-        assert self.options is not None
-        assert self.options.cache_path is not None
-        sec = SecDataSource(storage_path=self.options.cache_path)
-        sec.select_data(tickers=self.options.tickers, filter=sec_filter)
+        table = create_normalized_sec_table(sec_filter, self.options, False)
 
-        table = sec_filter.select()
-        # logger.debug(f"tags:\n{table.tags}")
-        # logger.debug(f"data:\n{table.data}")
         return table.data
 
     # Reuse documentation from parent

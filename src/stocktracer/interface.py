@@ -37,8 +37,10 @@ class Options:
 class Analysis(metaclass=abc.ABCMeta):
     """Base class for all analysis techniques."""
 
-    def __init__(self) -> None:
-        self.options: Optional[Options] = None
+    def __init__(self, options: Options) -> None:
+        self.options = options
+        assert self.options is not None
+        assert self.options.cache_path is not None
 
     @abc.abstractmethod
     def analyze(self) -> Optional[DataFrame]:

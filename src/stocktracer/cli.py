@@ -19,18 +19,19 @@ logger = logging.getLogger(__name__)
 
 
 @beartype
-def get_analysis_instance(module_name: str) -> AnalysisInterface:
+def get_analysis_instance(module_name: str, options: CliOptions) -> AnalysisInterface:
     """Dynamically import and load the Analysis class from a module.
 
     Args:
         module_name (str): full name of the module. For example, "my.module"
+        options (CliOptions): options provided from the CLI
 
     Returns:
         AnalysisInterface: analysis instance
     """
     module = importlib.import_module(module_name)
     class_ = getattr(module, "Analysis")
-    instance = class_()
+    instance = class_(options)
     assert isinstance(instance, AnalysisInterface)
     return instance
 
@@ -54,28 +55,28 @@ class Cli:
 
     return_results: bool = True
 
-    def analyze(
+    def analyze(  # pylint: disable=too-many-arguments
         self,
         tickers: Union[Sequence[str], str],
-        cache_path: str = str(get_default_cache_path()),
+        cache_path: Path | str = get_default_cache_path(),
         refresh: bool = False,
         analysis_plugin: str = "stocktracer.analysis.annual_reports",
         final_year: Optional[int] = None,
         final_quarter: Optional[int] = None,
-        report_format: Optional[ReportFormat] = "txt",
-        report_file: Optional[str] = None,
+        report_format: ReportFormat = "txt",
+        report_file: Optional[Path | str] = None,
     ) -> Optional[pd.DataFrame]:
         """Perform stock analysis.
 
         Args:
             tickers (Union[Sequence[str], str]): tickers to include in the analysis
-            cache_path (str): path where to cache data
+            cache_path (Path | str): path where to cache data
             refresh (bool): Whether to refresh the calculation or use the results from a prior one
             analysis_plugin (str): module to load for analysis
             final_year (Optional[int]): last year to consider for report collection
             final_quarter (Optional[int]): last quarter to consider for report collection
-            report_format (Optional[ReportFormat]): Format of the report. Options include: csv, json, md (markdown)
-            report_file (Optional[str]): Where to store the report. Required if report_format is specified.
+            report_format (ReportFormat): Format of the report. Options include: csv, json, md (markdown)
+            report_file (Optional[Path | str]): Where to store the report. Required if report_format is specified.
 
         Raises:
             LookupError: no analysis results found
@@ -91,12 +92,14 @@ class Cli:
         else:
             tickers = frozenset(tickers)
 
-        analysis_module: AnalysisInterface = get_analysis_instance(analysis_plugin)
-        analysis_module.options = CliOptions(
-            tickers=tickers,
-            cache_path=cache_path,
-            final_year=final_year,
-            final_quarter=final_quarter,
+        analysis_module: AnalysisInterface = get_analysis_instance(
+            analysis_plugin,
+            CliOptions(
+                tickers=tickers,
+                cache_path=cache_path,
+                final_year=final_year,
+                final_quarter=final_quarter,
+            ),
         )
 
         cache, results_key, results = self._get_cached_results(

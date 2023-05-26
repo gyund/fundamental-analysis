@@ -1,7 +1,7 @@
+"""This analysis module determines the trend of EPS over the course of the past 5 years."""
 import logging
 from typing import Optional
 
-import numpy as np
 import pandas as pd
 from beartype import beartype
 
@@ -13,27 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 @beartype
-def trendline(data: pd.Series, order: int = 1) -> float:
-    """Calculate the trend of a series.
-
-    >>> trendline(pd.Series((1,2,3)))
-    1.0000000000000004
-
-    Args:
-        data (pd.Series): _description_
-        order (int): _description_. Defaults to 1.
-
-    Returns:
-        float: slope of the trend line
-    """
-    coeffs = np.polyfit(data.index.values, list(data), order)
-    slope = coeffs[-2]
-    return float(slope)
-
-
-@beartype
 class Analysis(AnalysisInterface):
-    """Perform an analysis on the earnings per share over time."""
+    """Class that calculates the EPS slope."""
 
     under_development = True
     years_of_analysis = 5
@@ -48,12 +29,10 @@ class Analysis(AnalysisInterface):
         )
 
         # Create an SEC Data Source
-        assert self.options is not None
-        assert self.options.cache_path is not None
         sec = SecDataSource(storage_path=self.options.cache_path)
 
         # This is an expensive operation
-        sec.select_data(tickers=self.options.tickers, filter=sec_filter)
+        sec.filter_data(tickers=self.options.tickers, sec_filter=sec_filter)
         return sec_filter.select("slope").data
 
     # Reuse documentation from parent

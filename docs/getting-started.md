@@ -32,6 +32,9 @@ Make sure you have `pipenv` installed through a package manager or through pip.
 python -m ticker analyze --tickers aapl,msft > report.txt
 ```
 
+!!! tip
+    If you want to figure out a list of tags you can filter the reports on, run the default analysis report. This shows the annual report and will then filter out any columns that contain `null` or `NaN` values. From here, you can establish what algorithms you can use and apply consistently across the stocks of interest. You may find that different sectors or 10-K/10-Q reports will have different data sets.
+
 
 ## Plugins
 

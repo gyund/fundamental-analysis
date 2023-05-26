@@ -12,8 +12,10 @@ logger = logging.getLogger(__name__)
 
 @beartype
 class Analysis(AnalysisInterface):
+    """Stub for analyzing the report."""
+
     def analyze(self) -> Optional[pd.DataFrame]:
-        """Analyze the report.
+        """
 
         As a stub, this does nothing
 

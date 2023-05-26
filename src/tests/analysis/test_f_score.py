@@ -1,6 +1,6 @@
 import logging
+import math
 
-import mock
 import pytest
 
 from stocktracer.analysis.diluted_eps import Analysis
@@ -12,23 +12,27 @@ logger = logging.getLogger(__name__)
 Analysis.years_of_analysis = 1
 
 
-class TestCliAnnualReports:
+class TestCliFScore:
     cli: Cli = Cli()
 
     @pytest.mark.webtest
     def test_analyze(self):
         self.cli.return_results = True
         result = self.cli.analyze(
-            tickers=["aapl", "tmo", "msft", "goog", "wm", "acn"],
-            analysis_plugin="stocktracer.analysis.annual_reports",
+            tickers=["aapl", "tmo", "msft"],
+            analysis_plugin="stocktracer.analysis.f_score",
             refresh=True,
             final_year=2023,
             final_quarter=1,
         )
         assert result is not None
-        logger.debug(f"annual_reports:\n{result.transpose().to_string()}")
-        # Note: goog, and googl are pulled in, so it's 7 instead of 6
-        assert len(result.index) == 7
+        logger.debug(f"f_score_result:\n{result.to_string()}")
+        # assert math.isclose(
+        #     # result.loc["TMO"]["EarningsPerShareDiluted"], 17.683333, rel_tol=0.001 # EPS last qtr
+        #     result.loc["TMO"]["EarningsPerShareDiluted"],
+        #     -0.820571,
+        #     rel_tol=0.001,  # trend
+        # )
 
     def test_invalid(self):
         with pytest.raises(LookupError, match="unable to find ticker: invalid"):

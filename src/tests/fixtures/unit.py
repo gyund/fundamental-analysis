@@ -84,11 +84,12 @@ def sec_fake_report(
     filter_aapl.sec_filter._cik_list = set()
     filter_aapl.sec_filter._cik_list.add(320193)
     sub_df = DataSetReader._process_sub_text(
-        filepath_or_buffer=io.StringIO(sub_txt_sample), filter=filter_aapl.sec_filter
+        filepath_or_buffer=io.StringIO(sub_txt_sample),
+        sec_filter=filter_aapl.sec_filter,
     )
     num_df = DataSetReader._process_num_text(
         filepath_or_buffer=io.StringIO(data_txt_sample),
-        filter=filter_aapl.sec_filter,
+        sec_filter=filter_aapl.sec_filter,
         sub_dataframe=sub_df,
     )
     ticker_reader = mock.MagicMock(TickerReader)
@@ -113,11 +114,11 @@ def sec_manufactured_fake_report_impl(
     selector.sec_filter.tags.append("FakeAttributeTag")
     sub_df = DataSetReader._process_sub_text(
         filepath_or_buffer=io.StringIO(sub_txt),
-        filter=selector.sec_filter,
+        sec_filter=selector.sec_filter,
     )
     num_df = DataSetReader._process_num_text(
         filepath_or_buffer=io.StringIO(data_txt),
-        filter=selector.sec_filter,
+        sec_filter=selector.sec_filter,
         sub_dataframe=sub_df,
     )
     assert num_df is not None
