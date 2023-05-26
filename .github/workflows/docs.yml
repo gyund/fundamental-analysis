@@ -1,21 +1,21 @@
-name: docs 
+name: docs
 on:
   push:
     branches:
       - main
     paths:
-    - 'src/**'
-    - 'docs/**'
-    - '.github/workflows/docs.yml'
-    - 'mkdocs.yml'
-    - 'Pipfile.lock'
+      - "src/**"
+      - "docs/**"
+      - ".github/workflows/docs.yml"
+      - "mkdocs.yml"
+      - "Pipfile.lock"
   pull_request:
     paths:
-    - 'src/**'
-    - 'docs/**'
-    - '.github/workflows/docs.yml'
-    - 'mkdocs.yml'
-    - 'Pipfile.lock'
+      - "src/**"
+      - "docs/**"
+      - ".github/workflows/docs.yml"
+      - "mkdocs.yml"
+      - "Pipfile.lock"
 permissions:
   contents: write
 
@@ -41,7 +41,7 @@ jobs:
       - name: Test
         if: github.ref != 'refs/heads/main'
         run: |
-            mkdocs build --strict
+          mkdocs build --strict
       - name: Deploy
         if: github.ref == 'refs/heads/main'
         run: |
