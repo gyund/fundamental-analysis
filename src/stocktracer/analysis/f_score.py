@@ -92,14 +92,23 @@ class Analysis(AnalysisInterface):
         #     - Change in Return of Assets (ROA) (1 point if ROA is higher in the current year compared to the previous one, 0 otherwise);
         table.data["delta-ROA>0"] = (table.data["delta-ROA"] > 0).astype(int)
         f_score_tags.append("delta-ROA>0")
+
+        logger.debug(f"ROA:\n{table.data['ROA']}")
+        logger.debug(f"delta ROA:\n{table.data['delta-ROA']}")
+
         #     - Accruals (1 point if Operating Cash Flow/Total Assets is higher than ROA in the current year, 0 otherwise);
         table.data["accruals"] = (
-            table.data["OperatingIncomeLoss"] / table.data["Assets"]
+            table.data["NetCashProvidedByUsedInOperatingActivities"]
+            / table.data["Assets"]
         )
         table.data["CF/Total-Assets>ROA"] = (
             table.data["accruals"] > table.data["ROA"]
         ).astype(int)
         f_score_tags.append("CF/Total-Assets>ROA")
+
+        logger.debug(f"accruals:\n{table.data['accruals']}")
+        logger.debug(f"CF/Total-Assets>ROA:\n{table.data['CF/Total-Assets>ROA']}")
+
         # - Leverage, Liquidity and Source of Funds
         #     - Change in Leverage (long-term) ratio (1 point if the ratio is lower this year compared to the previous one, 0 otherwise);
         table.calculate_delta("debt-to-assets-delta", delta_of="debt-to-assets")
@@ -108,12 +117,23 @@ class Analysis(AnalysisInterface):
         ).astype(int)
         f_score_tags.append("debt-to-assets<last-year")
 
+        logger.debug(f"debt-to-assets-delta:\n{table.data['debt-to-assets-delta']}")
+        logger.debug(
+            f"debt-to-assets<last-year:\n{table.data['debt-to-assets<last-year']}"
+        )
+
         #     - Change in Current ratio (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
         table.calculate_delta("current-ratio-delta", delta_of="current-ratio")
         table.data["current-ratio>last-year"] = (
             table.data["current-ratio-delta"] > 0
         ).astype(int)
         f_score_tags.append("current-ratio>last-year")
+
+        logger.debug(f"current-ratio-delta:\n{table.data['current-ratio-delta']}")
+        logger.debug(
+            f"current-ratio>last-year:\n{table.data['current-ratio>last-year']}"
+        )
+
         #     - Change in the number of shares (1 point if no new shares were issued during the last year);
         # - Operating Efficiency
         #     - Change in Gross Margin (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
@@ -124,19 +144,6 @@ class Analysis(AnalysisInterface):
         # logger.debug(f"{f_score.loc['AAPL']}")
         # logger.debug(f"{f_score.loc['AAPL'].loc[2022]}")
         # logger.debug(f"{f_score.loc['AAPL'].loc[2022]['ROA']}")
-        assert math.isclose(
-            table.data.loc["AAPL"].loc[2022]["ROA"], 0.2791437, rel_tol=0.00001
-        )
-        assert math.isclose(
-            table.data.loc["AAPL"].loc[2022]["OperatingIncomeLoss"],
-            9.822467e10,
-            rel_tol=0.00001,
-        )
-        logger.debug(f"ROA:\n{table.data['ROA']}")
-        logger.debug(f"delta ROA:\n{table.data['delta-ROA']}")
-        assert math.isclose(
-            table.data.loc["AAPL"].loc[2022]["delta-ROA"], 0.042891, rel_tol=0.00001
-        )
         return table.slice(year=max_year, tags=f_score_tags)
 
     # Reuse documentation from parent
