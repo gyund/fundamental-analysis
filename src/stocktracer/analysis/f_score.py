@@ -49,7 +49,15 @@ class Analysis(AnalysisInterface):
     def analyze(self) -> Optional[pd.DataFrame]:
         # Create the filter we'll use to scrape the results
         sec_filter = SecFilter(
-            # tags=["EarningsPerShareDiluted"],
+            tags=[
+                "EarningsPerShareDiluted",
+                "CommonStockSharesIssued",
+                "AssetsCurrent",
+                "LiabilitiesCurrent",
+                "Assets",
+                "OperatingIncomeLoss",
+                "NetCashProvidedByUsedInOperatingActivities",
+            ],
             years=self.years_of_analysis,
             last_report=self.options.last_report,
             only_annual=True,  # We only want the 10-K
@@ -135,10 +143,10 @@ class Analysis(AnalysisInterface):
         )
 
         #     - Change in the number of shares (1 point if no new shares were issued during the last year);
-        table.data["shares-issued"] = (
+        table.data["shares-issued==0"] = (
             table.data["CommonStockSharesIssued"] == 0
         ).astype(int)
-        f_score_tags.append("shares-issued")
+        f_score_tags.append("shares-issued==0")
         # - Operating Efficiency
         #     - Change in Gross Margin (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
         #     - Change in Asset Turnover ratio (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
