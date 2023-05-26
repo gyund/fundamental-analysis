@@ -169,3 +169,33 @@ class TestResults:
         logger.debug(f"\n{data}")
         assert np.isnan(result.data.loc["AAPL"].loc[2021]["delta"])
         assert result.data.loc["AAPL"].loc[2022]["delta"] == 10
+
+    def test_current_ratio(self):
+        data = pd.DataFrame(
+            data={
+                "ticker": ["AAPL", "AAPL"],
+                "fy": [2021, 2022],
+                "AssetsCurrent": [10, 20],
+                "LiabilitiesCurrent": [20, 80],
+            },
+        )
+        data = data.set_index(["ticker", "fy"])
+        result = SecFilter.Results(data)
+        result.calculate_current_ratio("CR")
+        assert result.data.loc["AAPL"].loc[2021]["CR"] == 0.5
+        assert result.data.loc["AAPL"].loc[2022]["CR"] == 0.25
+
+    def test_debt_to_assets(self):
+        data = pd.DataFrame(
+            data={
+                "ticker": ["AAPL", "AAPL"],
+                "fy": [2021, 2022],
+                "AssetsCurrent": [10, 20],
+                "LiabilitiesCurrent": [20, 80],
+            },
+        )
+        data = data.set_index(["ticker", "fy"])
+        result = SecFilter.Results(data)
+        result.calculate_debt_to_assets("CR")
+        assert result.data.loc["AAPL"].loc[2021]["CR"] == 2
+        assert result.data.loc["AAPL"].loc[2022]["CR"] == 4
