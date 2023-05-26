@@ -5,7 +5,7 @@ import pytest
 from pandas import DataFrame
 
 import stocktracer.filter as Filter
-from stocktracer.data.sec import DataSetReader, ReportDate, TickerReader
+from stocktracer.collector.sec import DataSetReader, ReportDate, TickerReader
 
 
 @pytest.fixture

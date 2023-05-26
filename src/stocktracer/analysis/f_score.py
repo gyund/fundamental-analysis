@@ -6,7 +6,7 @@ import pandas as pd
 from beartype import beartype
 
 from stocktracer.analysis.annual_reports import create_normalized_sec_table
-from stocktracer.data.sec import Filter as SecFilter
+from stocktracer.collector.sec import Filter as SecFilter
 from stocktracer.interface import Analysis as AnalysisInterface
 
 logger = logging.getLogger(__name__)

@@ -4,7 +4,7 @@ This may be removed or deprecated in the future. TBD.
 """
 from beartype import beartype
 
-from stocktracer.data.sec import Filter as SecFilter
+from stocktracer.collector.sec import Filter as SecFilter
 
 
 @beartype

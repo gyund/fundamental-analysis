@@ -5,8 +5,8 @@ from typing import Optional
 import pandas as pd
 from beartype import beartype
 
-from stocktracer.data.sec import Filter as SecFilter
-from stocktracer.data.sec import Sec as SecDataSource
+from stocktracer.collector.sec import Filter as SecFilter
+from stocktracer.collector.sec import Sec as SecDataSource
 from stocktracer.interface import Analysis as AnalysisInterface
 from stocktracer.interface import Options
 

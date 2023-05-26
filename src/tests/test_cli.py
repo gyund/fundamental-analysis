@@ -7,7 +7,7 @@ import pytest
 
 import stocktracer.filter as Filter
 from stocktracer.cli import Cli
-from stocktracer.data.sec import Sec
+from stocktracer.collector.sec import Sec
 from tests.sec.test_sec import sec_harness
 
 

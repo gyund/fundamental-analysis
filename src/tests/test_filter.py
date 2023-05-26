@@ -1,8 +1,8 @@
 import pytest
 
 import stocktracer.filter as Filter
-from stocktracer.data.sec import Filter as SecFilter
-from stocktracer.data.sec import ReportDate
+from stocktracer.collector.sec import Filter as SecFilter
+from stocktracer.collector.sec import ReportDate
 
 
 def test_Selectors_init():
