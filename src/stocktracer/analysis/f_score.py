@@ -135,6 +135,10 @@ class Analysis(AnalysisInterface):
         )
 
         #     - Change in the number of shares (1 point if no new shares were issued during the last year);
+        table.data["shares-issued"] = (
+            table.data["CommonStockSharesIssued"] == 0
+        ).astype(int)
+        f_score_tags.append("shares-issued")
         # - Operating Efficiency
         #     - Change in Gross Margin (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
         #     - Change in Asset Turnover ratio (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
