@@ -1,6 +1,5 @@
 """Piotroski F-score is a number between 0 and 9 which is used to assess strength of company's financial position."""
 import logging
-import math
 from typing import Optional
 
 import pandas as pd
