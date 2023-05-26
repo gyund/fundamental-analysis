@@ -71,6 +71,7 @@ class Analysis(AnalysisInterface):
         table.calculate_net_income("net-income")
         table.calculate_delta(column_name="delta-ROA", delta_of="ROA")
         table.calculate_debt_to_assets("debt-to-assets")
+        table.calculate_current_ratio("current-ratio")
 
         # fscore = pd.DataFrame(index=table.data.index)
         # logger.debug(f"\n{fscore}")
@@ -108,9 +109,11 @@ class Analysis(AnalysisInterface):
         f_score_tags.append("debt-to-assets<last-year")
 
         #     - Change in Current ratio (1 point if it is higher in the current year compared to the previous one, 0 otherwise);
-        table.data["current-ratio"] = (
-            table.data["AssetsCurrent"] / table.data["LiabilitiesCurrent"]
-        )
+        table.calculate_delta("current-ratio-delta", delta_of="current-ratio")
+        table.data["current-ratio>last-year"] = (
+            table.data["current-ratio-delta"] > 0
+        ).astype(int)
+        f_score_tags.append("current-ratio>last-year")
         #     - Change in the number of shares (1 point if no new shares were issued during the last year);
         # - Operating Efficiency
         #     - Change in Gross Margin (1 point if it is higher in the current year compared to the previous one, 0 otherwise);

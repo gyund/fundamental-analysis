@@ -262,6 +262,19 @@ class Filter:
             """
             self.data[column_name] = self.data["OperatingIncomeLoss"]
 
+        def calculate_current_ratio(self, column_name: str):
+            """Calculate the current ratio.
+
+            The current ratio is a liquidity ratio that measures a company’s
+            ability to pay short-term obligations or those due within one year.
+
+            Args:
+                column_name (str): _description_
+            """
+            self.data[column_name] = (
+                self.data["AssetsCurrent"] / self.data["LiabilitiesCurrent"]
+            )
+
         def calculate_debt_to_assets(self, column_name: str):
             """Calculates the current debt to assets ratio.
 
