@@ -226,14 +226,14 @@ class Filter:
 
         def slice(
             self,
-            ticker: Optional[str | int] = None,
+            ticker: Optional[str | list[str]] = None,
             year: Optional[int] = None,
             tags: Optional[list[str]] = None,
         ) -> pd.DataFrame:
             """Slice the results by the specified values
 
             Args:
-                ticker (Optional[str  |  int]): _description_. Defaults to None.
+                ticker (Optional[str | list[str]]): _description_. Defaults to None.
                 tags (Optional[str]): _description_. Defaults to None.
                 year (Optional[int]): _description_. Defaults to None.
 
