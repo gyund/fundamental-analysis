@@ -24,7 +24,7 @@ class Analysis(AnalysisInterface):
     def analyze(self) -> Optional[pd.DataFrame]:
         # Build a training set involving good companies
         sec_filter = SecFilter(
-            # tags=["EarningsPerShareDiluted"],
+            tags=["EarningsPerShareDiluted"],
             years=5,  # Over the past 5 years
             last_report=self.options.last_report,
             only_annual=True,  # We only want the 10-K
@@ -42,11 +42,11 @@ class Analysis(AnalysisInterface):
         # Create an SEC Data Source
         table = create_normalized_sec_table(sec_filter, self.options, False)
 
-        table.calculate_return_on_assets("ROA")
-        table.calculate_net_income("net-income")
-        table.calculate_delta(column_name="delta-ROA", delta_of="ROA")
-        table.calculate_debt_to_assets("debt-to-assets")
-        table.calculate_current_ratio("current-ratio")
+        # table.calculate_return_on_assets("ROA")
+        # table.calculate_net_income("net-income")
+        # table.calculate_delta(column_name="delta-ROA", delta_of="ROA")
+        # table.calculate_debt_to_assets("debt-to-assets")
+        # table.calculate_current_ratio("current-ratio")
 
         # Select Training Stocks
         train_df = table.slice(ticker=list(tickers))
@@ -54,8 +54,12 @@ class Analysis(AnalysisInterface):
         # Select Assessment Stocks
         test_df = table.slice(ticker=list(tickers.difference(self.options.tickers)))
 
-        train_ds = tfdf.keras.pd_dataframe_to_tf_dataset(train_df, label="my_label")
-        test_ds = tfdf.keras.pd_dataframe_to_tf_dataset(test_df, label="my_label")
+        train_ds = tfdf.keras.pd_dataframe_to_tf_dataset(
+            train_df, label="EarningsPerShareDiluted"
+        )
+        test_ds = tfdf.keras.pd_dataframe_to_tf_dataset(
+            test_df, label="EarningsPerShareDiluted"
+        )
 
         # Train a Random Forest model.
         model = tfdf.keras.RandomForestModel()

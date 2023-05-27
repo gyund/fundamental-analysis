@@ -242,6 +242,10 @@ class Filter:
             """
             result = self.data
             if ticker:
+                if isinstance(ticker, str):
+                    ticker = ticker.upper()
+                else:
+                    ticker = [t.upper() for t in ticker]
                 result = result.loc(axis=0)[ticker, :]
             if year:
                 result = result.loc(axis=0)[:, year, :]
