@@ -21,7 +21,6 @@ class TestCliAnnualReports:
         result = self.cli.analyze(
             tickers=["aapl", "tmo", "msft", "goog", "wm", "acn"],
             analysis_plugin="stocktracer.analysis.annual_reports",
-            refresh=True,
             final_year=2023,
             final_quarter=1,
         )

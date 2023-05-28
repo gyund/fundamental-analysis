@@ -9,15 +9,13 @@ from typing import Literal, Optional, Union
 import pandas as pd
 from beartype import beartype
 from beartype.typing import Sequence, Tuple
-from diskcache import Cache
 
-from stocktracer import settings
-from stocktracer.interface import Analysis as AnalysisInterface, ReportDate
+from stocktracer import cache
+from stocktracer.interface import Analysis as AnalysisInterface
 from stocktracer.interface import Options as CliOptions
+from stocktracer.interface import ReportDate
 
 logger = logging.getLogger(__name__)
-
-result_cache = Cache(directory=settings.storage_path / "results")
 
 
 @beartype
@@ -50,8 +48,6 @@ class Cli:
     def analyze(  # pylint: disable=too-many-arguments
         self,
         tickers: Union[Sequence[str], str],
-        cache_path: Path | str = settings.storage_path,
-        refresh: bool = False,
         analysis_plugin: str = "stocktracer.analysis.annual_reports",
         final_year: int = ReportDate().year,
         final_quarter: int = ReportDate().quarter,
@@ -62,8 +58,6 @@ class Cli:
 
         Args:
             tickers (Union[Sequence[str], str]): tickers to include in the analysis
-            cache_path (Path | str): path where to cache data
-            refresh (bool): Whether to refresh the calculation or use the results from a prior one
             analysis_plugin (str): module to load for analysis
             final_year (int): last year to consider for report collection
             final_quarter (int): last quarter to consider for report collection
@@ -76,7 +70,6 @@ class Cli:
         Returns:
             Optional[pd.DataFrame]: results of analysis
         """
-        settings.storage_path = Path(cache_path)
         if report_file:
             report_file = Path(report_file)
         if isinstance(tickers, str):
@@ -124,7 +117,7 @@ class Cli:
         if isinstance(report_file, io.StringIO):
             print(report_file.getvalue())
 
-    @result_cache.memoize(typed=True, expire=60 * 60 * 24 * 7, tag="results")
+    @cache.results.memoize(typed=True, expire=60 * 60 * 24 * 7, tag="results")
     def _get_result(
         self,
         tickers: list[str],
@@ -147,23 +140,3 @@ class Cli:
         if results is None or results.empty:
             raise LookupError("No analysis results available!")
         return results, analysis_module
-
-
-@beartype
-def get_cached_results_key(tickers: frozenset[str], analysis_module: str) -> str:
-    """Get the key used for caching results from analyzed data.
-
-    >>> get_cached_results_key(frozenset({"aapl","msft"}),"my.analysis")
-    'my.analysis-aapl-msft'
-
-    Args:
-        tickers (frozenset[str]): tickers to check
-        analysis_module (str): name of analysis module
-
-    Returns:
-        str: string with the cached key
-    """
-    sorted_tickers = list(tickers)
-    sorted_tickers.sort()
-    results_key = "-".join(sorted_tickers)
-    return "-".join((analysis_module, results_key))

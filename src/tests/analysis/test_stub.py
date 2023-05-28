@@ -13,7 +13,6 @@ class TestCliStub:
     def test_analyze(self):
         with pytest.raises(LookupError, match="No analysis results available!"):
             self.cli.analyze(
-                refresh=True,
                 tickers=["aapl"],
                 analysis_plugin="stocktracer.analysis.stub",
             )

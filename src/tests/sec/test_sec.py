@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 
 import stocktracer.filter as Filter
-from stocktracer.cli import Cli
+from stocktracer import cache
 from stocktracer.collector.sec import (
     DataSetReader,
     DownloadManager,

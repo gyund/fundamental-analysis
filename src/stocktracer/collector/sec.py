@@ -2,7 +2,7 @@
 import copy
 import logging
 import sys
-from datetime import date, timedelta
+from datetime import date
 from io import BytesIO
 from typing import Literal, Optional
 from zipfile import ZipFile
@@ -13,30 +13,13 @@ from alive_progress import alive_bar
 from beartype import beartype
 from beartype.typing import Callable, Sequence
 from numpy.linalg import LinAlgError
-from requests_cache import CachedSession, SQLiteCache
 
-from stocktracer.settings import storage_path
+from stocktracer import cache
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_CHUNK_SIZE = 1000000
 pd.set_option("mode.chained_assignment", "raise")
-
-storage_path.mkdir(parents=True, exist_ok=True)
-
-data_session = CachedSession(
-    "data",
-    backend=SQLiteCache(db_path=storage_path / "data"),
-    serializer="pickle",
-    expire_after=timedelta(days=365 * 5),
-    stale_if_error=True,
-)
-ticker_session = CachedSession(
-    "tickers",
-    backend=SQLiteCache(db_path=storage_path / "tickers"),
-    expire_after=timedelta(days=365),
-    stale_if_error=True,
-)
 
 
 @beartype
@@ -707,7 +690,7 @@ class DownloadManager:
             TickerReader: maps cik to stock ticker
 
         """
-        response = ticker_session.get(self._company_tickers_url)
+        response = cache.sec_tickers.get(self._company_tickers_url)
         if response.from_cache:  # pragma: no cover
             logger.info("Retrieved tickers->cik mapping from cache")
         if response.status_code == 200:  # pragma: no cover
@@ -731,7 +714,7 @@ class DownloadManager:
             Optional[DataSetReader]: this object helps process the data received more granularly
         """
         request = self._create_download_uri(report_date)
-        response = data_session.get(request)
+        response = cache.sec_data.get(request)
         if response.from_cache:
             logger.info(f"Retrieved {request} from cache")
 
@@ -836,6 +819,7 @@ class Sec:
     def __init__(self):
         self.download_manager = DownloadManager()
 
+    @cache.results.memoize(typed=True, expire=60 * 60 * 24 * 7, tag="sec")
     def filter_data(self, tickers: frozenset[str], sec_filter: Filter) -> Filter:
         """Initiate the retrieval of ticker information based on the provided filters.
 
