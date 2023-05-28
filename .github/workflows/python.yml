@@ -47,7 +47,7 @@ jobs:
       - name: Cache Network Requests
         uses: actions/cache@v3
         with:
-          key: sqlite-${{ hashFiles('**/tests/fixtures/network.py') }}
+          key: sqlite-${{ hashFiles('**/tests/fixtures/network.py', '**/stocktracer/cache.py') }}
           path: |
             ${{ env.STOCKTRACER_CACHE_DIR }}
         if: ${{ !github.event.pull_request.draft }}
