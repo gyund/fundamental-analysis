@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SMOKE_OPTIONS=${SMOKE_OPTIONS:="--refresh"}
+SMOKE_OPTIONS=${SMOKE_OPTIONS:=""}
 
 dir=`dirname $0`
 results_dir='.results'

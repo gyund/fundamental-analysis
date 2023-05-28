@@ -2,7 +2,6 @@
 import importlib
 import io
 import logging
-import os
 import warnings
 from pathlib import Path
 from typing import Literal, Optional, Union
@@ -10,10 +9,11 @@ from typing import Literal, Optional, Union
 import pandas as pd
 from beartype import beartype
 from beartype.typing import Sequence, Tuple
-from diskcache import Cache
 
+from stocktracer import cache
 from stocktracer.interface import Analysis as AnalysisInterface
 from stocktracer.interface import Options as CliOptions
+from stocktracer.interface import ReportDate
 
 logger = logging.getLogger(__name__)
 
@@ -36,16 +36,6 @@ def get_analysis_instance(module_name: str, options: CliOptions) -> AnalysisInte
     return instance
 
 
-@beartype
-def get_default_cache_path() -> Path:
-    """Get the default path for caching data.
-
-    Returns:
-        Path: path to cache data
-    """
-    return Path(os.getcwd()) / ".ticker-cache"
-
-
 ReportFormat = Literal["csv", "md", "json", "txt"]
 
 
@@ -58,11 +48,9 @@ class Cli:
     def analyze(  # pylint: disable=too-many-arguments
         self,
         tickers: Union[Sequence[str], str],
-        cache_path: Path | str = get_default_cache_path(),
-        refresh: bool = False,
         analysis_plugin: str = "stocktracer.analysis.annual_reports",
-        final_year: Optional[int] = None,
-        final_quarter: Optional[int] = None,
+        final_year: int = ReportDate().year,
+        final_quarter: int = ReportDate().quarter,
         report_format: ReportFormat = "txt",
         report_file: Optional[Path | str] = None,
     ) -> Optional[pd.DataFrame]:
@@ -70,56 +58,30 @@ class Cli:
 
         Args:
             tickers (Union[Sequence[str], str]): tickers to include in the analysis
-            cache_path (Path | str): path where to cache data
-            refresh (bool): Whether to refresh the calculation or use the results from a prior one
             analysis_plugin (str): module to load for analysis
-            final_year (Optional[int]): last year to consider for report collection
-            final_quarter (Optional[int]): last quarter to consider for report collection
+            final_year (int): last year to consider for report collection
+            final_quarter (int): last quarter to consider for report collection
             report_format (ReportFormat): Format of the report. Options include: csv, json, md (markdown)
             report_file (Optional[Path | str]): Where to store the report. Required if report_format is specified.
-
-        Raises:
-            LookupError: no analysis results found
 
         Returns:
             Optional[pd.DataFrame]: results of analysis
         """
-        cache_path = Path(cache_path)
         if report_file:
             report_file = Path(report_file)
         if isinstance(tickers, str):
-            tickers = frozenset([tickers])
+            tickers = list([tickers])
         else:
-            tickers = frozenset(tickers)
+            tickers = list(tickers)
 
-        analysis_module: AnalysisInterface = get_analysis_instance(
-            analysis_plugin,
-            CliOptions(
-                tickers=tickers,
-                cache_path=cache_path,
-                final_year=final_year,
-                final_quarter=final_quarter,
-            ),
+        tickers.sort()
+
+        results, analysis_module = self._get_result(
+            tickers=tickers,
+            analysis_plugin=analysis_plugin,
+            final_year=final_year,
+            final_quarter=final_quarter,
         )
-
-        cache, results_key, results = self._get_cached_results(
-            tickers, cache_path, analysis_plugin
-        )
-
-        if (
-            refresh
-            or results is None
-            or not isinstance(results, pd.DataFrame)
-            or results.empty
-        ):
-            # Call analysis plugin
-            results = None
-            results = analysis_module.analyze()
-            if results is None or results.empty:
-                raise LookupError("No analysis results available!")
-
-            # Save one week expiry
-            cache.set(key=results_key, value=results, expire=3600 * 24 * 7)
 
         self._generate_report(report_format, report_file, results)
         if analysis_module.under_development:
@@ -152,31 +114,40 @@ class Cli:
         if isinstance(report_file, io.StringIO):
             print(report_file.getvalue())
 
-    def _get_cached_results(
-        self, tickers, cache_path, analysis_plugin
-    ) -> Tuple[Cache, str, Optional[pd.DataFrame]]:
-        assert isinstance(tickers, frozenset)
-        cache = Cache(directory=cache_path / "results")
-        results_key = get_cached_results_key(tickers, analysis_plugin)
-        results = cache.get(key=results_key, default=None)
-        return cache, results_key, results
+    @cache.results.memoize(typed=True, expire=60 * 60 * 24 * 7, tag="results")
+    def _get_result(
+        self,
+        tickers: list[str],
+        analysis_plugin: str,
+        final_year: int,
+        final_quarter: int,
+    ) -> Tuple[Optional[pd.DataFrame], AnalysisInterface]:
+        """Gets the results.
 
+        Args:
+            tickers (list[str]): _description_
+            analysis_plugin (str): _description_
+            final_year (int): _description_
+            final_quarter (int): _description_
 
-@beartype
-def get_cached_results_key(tickers: frozenset[str], analysis_module: str) -> str:
-    """Get the key used for caching results from analyzed data.
+        Raises:
+            LookupError: no analysis results found
 
-    >>> get_cached_results_key(frozenset({"aapl","msft"}),"my.analysis")
-    'my.analysis-aapl-msft'
+        Returns:
+            Tuple[Optional[pd.DataFrame], AnalysisInterface]: _description_
+        """
+        analysis_module: AnalysisInterface = get_analysis_instance(
+            analysis_plugin,
+            CliOptions(
+                tickers=frozenset(tickers),
+                final_year=final_year,
+                final_quarter=final_quarter,
+            ),
+        )
 
-    Args:
-        tickers (frozenset[str]): tickers to check
-        analysis_module (str): name of analysis module
-
-    Returns:
-        str: string with the cached key
-    """
-    sorted_tickers = list(tickers)
-    sorted_tickers.sort()
-    results_key = "-".join(sorted_tickers)
-    return "-".join((analysis_module, results_key))
+        # Call analysis plugin
+        results = None
+        results = analysis_module.analyze()
+        if results is None or results.empty:
+            raise LookupError("No analysis results available!")
+        return results, analysis_module

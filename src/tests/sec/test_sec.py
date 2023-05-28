@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 
 import stocktracer.filter as Filter
-from stocktracer.cli import Cli
+from stocktracer import cache
 from stocktracer.collector.sec import (
     DataSetReader,
     DownloadManager,
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture
 def sec_harness() -> tuple[Sec, mock.MagicMock]:
-    sec = Sec(Path(os.getcwd()) / ".test-cache")
+    sec = Sec()
 
     # Mock all objects that interact with network elements.
     # You will need to re-mock them in the test to get code completion
@@ -44,10 +44,6 @@ def sec_harness() -> tuple[Sec, mock.MagicMock]:
 
 
 class TestSec:
-    def test_init(self):
-        with pytest.raises((TypeError, AssertionError)):
-            Sec()  # type: ignore
-
     def test_select_data(
         self,
         sec_harness: tuple[Sec, mock.MagicMock],
@@ -70,7 +66,7 @@ class TestSec:
         download_manager.get_quarterly_report = mock.MagicMock(return_value=data_reader)
 
         with pytest.raises(KeyError, match="cik"):
-            sec.filter_data(
+            sec.filter_data_nocache(
                 tickers=frozenset(("aapl", "msft")),
                 sec_filter=Filter.SecFilter(tags=["test"]),
             )
@@ -120,7 +116,7 @@ class TestSec:
             orient="index",
         )
 
-        filter = sec.filter_data(
+        filter = sec.filter_data_nocache(
             tickers=frozenset("aapl"),
             sec_filter=Filter.SecFilter(last_report=ReportDate(2023, 1)),
         )
@@ -212,6 +208,7 @@ class TestSec:
             )
             == 16666.666666666668
         )
+        logger.debug(f"{filter.filtered_data.to_string()}")
         assert math.isclose(
             filter.select(aggregate_func="slope", tickers=["aapl"]).get_value(
                 "aapl", tag="FakeAttributeTag", year=2022
