@@ -52,9 +52,9 @@ sec_tickers = CachedSession(
 
 
 dir_name = os.path.dirname(__file__)
-opened_file = open(os.path.join(dir_name, "collector/sec.py"))
-readFile = opened_file.read()
-opened_file.close()
+with open(os.path.join(dir_name, "collector/sec.py"), encoding="utf8") as opened_file:
+    readFile = opened_file.read()
+
 
 SEC_FILE_HASH = hashlib.sha256(readFile.encode()).hexdigest()
 
