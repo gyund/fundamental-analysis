@@ -3,27 +3,49 @@ import atexit
 import hashlib
 import os
 from datetime import timedelta
+from pathlib import Path
 
+from beartype import beartype
 from diskcache import Cache
+from platformdirs import user_cache_dir
 from requests_cache import CachedSession, SQLiteCache
 
-from stocktracer import settings
 
-settings.storage_path.mkdir(parents=True, exist_ok=True)
+@beartype
+def get_cache_dir() -> Path:
+    """Get the cache directory used by stocktracer.
 
-results = Cache(directory=settings.storage_path / "results", tag_index=True)
+    Users can customize this directory on all systems using `STOCKTRACER_CACHE_DIR`
+    environment variable. By default, the cache directory is the user cache directory
+    under the stocktracer application.
+
+    This result is immediately set to a constant `stocktracer.cache.CACHE_DIR` as to avoid
+    repeated calls.
+
+    Returns:
+        Path: path to the cache directory
+    """
+    default_cache_dir = user_cache_dir("stocktracer")
+    cache_dir = Path(os.environ.get("STOCKTRACER_CACHE_DIR", default_cache_dir))
+    return cache_dir
+
+
+CACHE_DIR = get_cache_dir()
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+results = Cache(directory=CACHE_DIR / "results", tag_index=True)
 
 
 sec_data = CachedSession(
     "data",
-    backend=SQLiteCache(db_path=settings.storage_path / "data"),
+    backend=SQLiteCache(db_path=CACHE_DIR / "data"),
     serializer="pickle",
     expire_after=timedelta(days=365 * 5),
     stale_if_error=True,
 )
 sec_tickers = CachedSession(
     "tickers",
-    backend=SQLiteCache(db_path=settings.storage_path / "tickers"),
+    backend=SQLiteCache(db_path=CACHE_DIR / "tickers"),
     expire_after=timedelta(days=365),
     stale_if_error=True,
 )
