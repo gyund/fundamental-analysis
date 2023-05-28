@@ -21,7 +21,6 @@ class TestCliFScore:
         result = self.cli.analyze(
             tickers=["aapl", "tmo", "msft"],
             analysis_plugin="stocktracer.analysis.f_score",
-            refresh=True,
             final_year=2023,
             final_quarter=1,
         )

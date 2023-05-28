@@ -26,7 +26,7 @@ def create_normalized_sec_table(
     Returns:
         SecFilter.Results: An SEC table with normalized results
     """
-    sec = SecDataSource(storage_path=options.cache_path)
+    sec = SecDataSource()
     sec.filter_data(tickers=options.tickers, sec_filter=sec_filter)
 
     table = sec_filter.select()

@@ -2,9 +2,8 @@
 import copy
 import logging
 import sys
-from datetime import date, timedelta
+from datetime import date
 from io import BytesIO
-from pathlib import Path
 from typing import Literal, Optional
 from zipfile import ZipFile
 
@@ -14,7 +13,8 @@ from alive_progress import alive_bar
 from beartype import beartype
 from beartype.typing import Callable, Sequence
 from numpy.linalg import LinAlgError
-from requests_cache import CachedSession, SQLiteCache
+
+from stocktracer import cache
 
 logger = logging.getLogger(__name__)
 
@@ -334,11 +334,11 @@ class Filter:
         self.years = years
         self.last_report = last_report
         self.only_annual = only_annual
-        self._cik_list: set[int] = None
-        self._filtered_data: pd.DataFrame = None
+        self._cik_list: Optional[set[np.int64]] = None
+        self._filtered_data: Optional[pd.DataFrame] = None
 
     @property
-    def filtered_data(self) -> pd.DataFrame:
+    def filtered_data(self) -> Optional[pd.DataFrame]:
         """Filtered data looks like this(in csv format):
 
         Note that fp has the "Q" removed from the front so it can be stored as a simple number.
@@ -350,7 +350,7 @@ class Filter:
             AAPL,FakeAttributeTag,2022,Q1,2023-01-31,shares,200.0,2022-12-31,Apple Inc.
 
         Returns:
-            pd.DataFrame: _description_
+            Optional[pd.DataFrame]: _description_
         """
         return self._filtered_data
 
@@ -387,6 +387,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
         Returns:
             Filter.Results: Object that represents a pivot table with the data requested
         """
+        assert self.filtered_data is not None
         if tickers is not None:
             tickers = [t.upper() for t in tickers]
             logger.debug(f"ticker filter: {tickers}")
@@ -414,7 +415,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
         return Filter.Results(table)
 
     @property
-    def ciks(self) -> set[int]:
+    def ciks(self) -> set[np.int64]:
         """Retrieves a list of CIK values corresponding to the tickers being looked up.
 
         The SEC object will call populateCikList to generate this information. This helps
@@ -553,7 +554,7 @@ class DataSetReader:
             parse_dates=["ddate"],
         )
 
-        filtered_data: pd.DataFrame = None
+        filtered_data: Optional[pd.DataFrame] = None
         chunk: pd.DataFrame
         for chunk in reader:
             # We want only the tables in left if they join on the key, so inner it is
@@ -650,7 +651,7 @@ class DataSetReader:
             dtype={"cik": np.int32},
         )
         logger.info(f"keeping only these focus periods: {focus_periods}")
-        filtered_data: pd.DataFrame = None
+        filtered_data: Optional[pd.DataFrame] = None
         chunk: pd.DataFrame
         for chunk in reader:
             data = chunk.query(query_str)
@@ -668,12 +669,6 @@ class DownloadManager:
     _base_url = "https://www.sec.gov/files/dera/data/financial-statement-data-sets"
 
     _company_tickers_url = "https://www.sec.gov/files/company_tickers.json"
-
-    def __init__(
-        self, ticker_session: CachedSession, data_session: CachedSession
-    ) -> None:
-        self._ticker_session = ticker_session
-        self._data_session = data_session
 
     @property
     def ticker_reader(self) -> TickerReader:
@@ -695,12 +690,12 @@ class DownloadManager:
             TickerReader: maps cik to stock ticker
 
         """
-        response = self._ticker_session.get(self._company_tickers_url)
+        response = cache.sec_tickers.get(self._company_tickers_url)
         if response.from_cache:  # pragma: no cover
             logger.info("Retrieved tickers->cik mapping from cache")
         if response.status_code == 200:  # pragma: no cover
             return TickerReader(response.content.decode())
-        return TickerReader(pd.DataFrame())  # pragma: no cover
+        raise LookupError("unable to retrieve tickers")  # pragma: no cover
 
     def _create_download_uri(self, report_date: ReportDate) -> str:
         file = f"{report_date.year}q{report_date.quarter}.zip"
@@ -719,7 +714,7 @@ class DownloadManager:
             Optional[DataSetReader]: this object helps process the data received more granularly
         """
         request = self._create_download_uri(report_date)
-        response = self._data_session.get(request)
+        response = cache.sec_data.get(request)
         if response.from_cache:
             logger.info(f"Retrieved {request} from cache")
 
@@ -821,28 +816,10 @@ class DataSetCollector:
 class Sec:
     """Object for handling requests for information relating to SEC data dumps."""
 
-    def __init__(self, storage_path: Path):
-        """
+    def __init__(self):
+        self.download_manager = DownloadManager()
 
-        Args:
-            storage_path (Path): Where to store the results.
-        """
-        storage_path.mkdir(parents=True, exist_ok=True)
-        data_session = CachedSession(
-            "data",
-            backend=SQLiteCache(db_path=storage_path / "data"),
-            serializer="pickle",
-            expire_after=timedelta(days=365 * 5),
-            stale_if_error=True,
-        )
-        ticker_session = CachedSession(
-            "tickers",
-            backend=SQLiteCache(db_path=storage_path / "tickers"),
-            expire_after=timedelta(days=365),
-            stale_if_error=True,
-        )
-        self.download_manager = DownloadManager(ticker_session, data_session)
-
+    @cache.results.memoize(typed=True, expire=60 * 60 * 24 * 7, tag="sec")
     def filter_data(self, tickers: frozenset[str], sec_filter: Filter) -> Filter:
         """Initiate the retrieval of ticker information based on the provided filters.
 
@@ -854,6 +831,20 @@ class Sec:
 
         Returns:
             Filter: filter with filtered data
+        """
+        return self.filter_data_nocache(tickers, sec_filter)
+
+    def filter_data_nocache(
+        self, tickers: frozenset[str], sec_filter: Filter
+    ) -> Filter:
+        """Same as filter_data but no caching is applied.
+
+        Args:
+            tickers (frozenset[str]): _description_
+            sec_filter (Filter): _description_
+
+        Returns:
+            Filter: _description_
         """
         collector = DataSetCollector(self.download_manager)
         ticker_reader = self.download_manager.ticker_reader

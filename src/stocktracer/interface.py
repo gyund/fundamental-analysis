@@ -1,6 +1,5 @@
 """Interfaces for the StockTracer Module."""
 import abc
-from pathlib import Path
 from typing import Optional
 
 from beartype import beartype
@@ -16,7 +15,6 @@ class Options:
     def __init__(
         self,
         tickers: frozenset[str],
-        cache_path: Path,
         final_year: int | None,
         final_quarter: int | None,
     ):
@@ -24,12 +22,10 @@ class Options:
 
         Args:
             tickers (frozenset[str]): tickers to scrape from data sets
-            cache_path (Path): path to cache processed or downloaded information
             final_year (int | None): last year to consider for report collection
             final_quarter (int | None): last quarter to consider for report collection
         """
         self.tickers = tickers
-        self.cache_path = cache_path
         self.last_report = ReportDate(year=final_year, quarter=final_quarter)
 
 
@@ -40,7 +36,6 @@ class Analysis(metaclass=abc.ABCMeta):
     def __init__(self, options: Options) -> None:
         self.options = options
         assert self.options is not None
-        assert self.options.cache_path is not None
 
     @abc.abstractmethod
     def analyze(self) -> Optional[DataFrame]:

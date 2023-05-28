@@ -21,7 +21,6 @@ class TestCliDilutedEps:
         result = self.cli.analyze(
             tickers=["aapl", "tmo", "msft"],
             analysis_plugin="stocktracer.analysis.diluted_eps",
-            refresh=True,
             final_year=2023,
             final_quarter=1,
         )
