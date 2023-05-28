@@ -1,6 +1,5 @@
 """Interfaces for the StockTracer Module."""
 import abc
-from pathlib import Path
 from typing import Optional
 
 from beartype import beartype

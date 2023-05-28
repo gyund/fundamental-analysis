@@ -2,7 +2,6 @@
 import importlib
 import io
 import logging
-import os
 import warnings
 from pathlib import Path
 from typing import Literal, Optional, Union
@@ -12,9 +11,9 @@ from beartype import beartype
 from beartype.typing import Sequence, Tuple
 from diskcache import Cache
 
+from stocktracer import settings
 from stocktracer.interface import Analysis as AnalysisInterface
 from stocktracer.interface import Options as CliOptions
-import stocktracer.settings as settings
 
 logger = logging.getLogger(__name__)
 

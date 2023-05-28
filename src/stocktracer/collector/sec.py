@@ -4,7 +4,6 @@ import logging
 import sys
 from datetime import date, timedelta
 from io import BytesIO
-from pathlib import Path
 from typing import Literal, Optional
 from zipfile import ZipFile
 
@@ -15,6 +14,7 @@ from beartype import beartype
 from beartype.typing import Callable, Sequence
 from numpy.linalg import LinAlgError
 from requests_cache import CachedSession, SQLiteCache
+
 from stocktracer.settings import storage_path
 
 logger = logging.getLogger(__name__)
@@ -404,6 +404,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
         Returns:
             Filter.Results: Object that represents a pivot table with the data requested
         """
+        assert self.filtered_data is not None
         if tickers is not None:
             tickers = [t.upper() for t in tickers]
             logger.debug(f"ticker filter: {tickers}")
@@ -570,7 +571,7 @@ class DataSetReader:
             parse_dates=["ddate"],
         )
 
-        filtered_data: pd.DataFrame = None
+        filtered_data: Optional[pd.DataFrame] = None
         chunk: pd.DataFrame
         for chunk in reader:
             # We want only the tables in left if they join on the key, so inner it is

@@ -1,7 +1,8 @@
+"""Settings for the stocktracer package."""
 import os
+from pathlib import Path
 
 from beartype import beartype
-from pathlib import Path
 
 
 @beartype
