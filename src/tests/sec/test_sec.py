@@ -66,7 +66,7 @@ class TestSec:
         download_manager.get_quarterly_report = mock.MagicMock(return_value=data_reader)
 
         with pytest.raises(KeyError, match="cik"):
-            sec.filter_data(
+            sec.filter_data_nocache(
                 tickers=frozenset(("aapl", "msft")),
                 sec_filter=Filter.SecFilter(tags=["test"]),
             )
@@ -116,7 +116,7 @@ class TestSec:
             orient="index",
         )
 
-        filter = sec.filter_data(
+        filter = sec.filter_data_nocache(
             tickers=frozenset("aapl"),
             sec_filter=Filter.SecFilter(last_report=ReportDate(2023, 1)),
         )

@@ -12,6 +12,7 @@ settings.storage_path.mkdir(parents=True, exist_ok=True)
 
 results = Cache(directory=settings.storage_path / "results", tag_index=True)
 
+
 sec_data = CachedSession(
     "data",
     backend=SQLiteCache(db_path=settings.storage_path / "data"),

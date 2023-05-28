@@ -832,6 +832,11 @@ class Sec:
         Returns:
             Filter: filter with filtered data
         """
+        self.filter_data_nocache(tickers, sec_filter)
+
+    def filter_data_nocache(
+        self, tickers: frozenset[str], sec_filter: Filter
+    ) -> Filter:
         collector = DataSetCollector(self.download_manager)
         ticker_reader = self.download_manager.ticker_reader
         if ticker_reader.contains(tickers):
