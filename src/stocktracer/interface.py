@@ -22,7 +22,6 @@ class Options:
 
         Args:
             tickers (frozenset[str]): tickers to scrape from data sets
-            cache_path (Path): path to cache processed or downloaded information
             final_year (int | None): last year to consider for report collection
             final_quarter (int | None): last quarter to consider for report collection
         """
