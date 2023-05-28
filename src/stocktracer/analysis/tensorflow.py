@@ -11,6 +11,7 @@ from beartype import beartype
 from stocktracer.analysis.annual_reports import create_normalized_sec_table
 from stocktracer.collector.sec import Filter as SecFilter
 from stocktracer.interface import Analysis as AnalysisInterface
+from stocktracer import cache
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +73,7 @@ class Analysis(AnalysisInterface):
         model.evaluate(test_ds)
 
         # Export the model to a SavedModel.
-        model.save(str(self.options.cache_path / "tf-model"))
+        model.save(str(cache.CACHE_DIR / "tf-model"))
 
         return pd.DataFrame()
 
