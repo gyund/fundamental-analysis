@@ -49,7 +49,8 @@ jobs:
         with:
           key: sqlite-${{ hashFiles('**/tests/fixtures/network.py', '**/stocktracer/cache.py') }}
           path: |
-            ${{ env.STOCKTRACER_CACHE_DIR }}
+            ${{ env.STOCKTRACER_CACHE_DIR }}/data.sqlite
+            ${{ env.STOCKTRACER_CACHE_DIR }}/tickers.sqlite
         if: ${{ !github.event.pull_request.draft }}
       - name: Run - unit-tests
         run: |
