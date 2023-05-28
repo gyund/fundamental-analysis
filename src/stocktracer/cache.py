@@ -1,3 +1,4 @@
+"""This module takes care of managing caching configuration."""
 import atexit
 import hashlib
 import os
@@ -33,15 +34,16 @@ opened_file = open(os.path.join(dir_name, "collector/sec.py"))
 readFile = opened_file.read()
 opened_file.close()
 
-sec_file_hash = hashlib.sha256(readFile.encode()).hexdigest()
+SEC_FILE_HASH = hashlib.sha256(readFile.encode()).hexdigest()
 
-if sec_file_hash != results.get("sec_file_hash"):
+if SEC_FILE_HASH != results.get("sec_file_hash"):
     results.evict(tag="sec")
     results.evict(tag="results")
 
 
-def update_modified_file_cache():
-    results.set("sec_file_hash", sec_file_hash)
+def update_modified_file_cache() -> None:
+    """Update the cache that keeps track of when files are modified."""
+    results.set("sec_file_hash", SEC_FILE_HASH)
 
 
 atexit.register(update_modified_file_cache)

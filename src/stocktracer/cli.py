@@ -64,9 +64,6 @@ class Cli:
             report_format (ReportFormat): Format of the report. Options include: csv, json, md (markdown)
             report_file (Optional[Path | str]): Where to store the report. Required if report_format is specified.
 
-        Raises:
-            LookupError: no analysis results found
-
         Returns:
             Optional[pd.DataFrame]: results of analysis
         """
@@ -125,6 +122,20 @@ class Cli:
         final_year: int,
         final_quarter: int,
     ) -> Tuple[Optional[pd.DataFrame], AnalysisInterface]:
+        """Gets the results.
+
+        Args:
+            tickers (list[str]): _description_
+            analysis_plugin (str): _description_
+            final_year (int): _description_
+            final_quarter (int): _description_
+
+        Raises:
+            LookupError: no analysis results found
+
+        Returns:
+            Tuple[Optional[pd.DataFrame], AnalysisInterface]: _description_
+        """
         analysis_module: AnalysisInterface = get_analysis_instance(
             analysis_plugin,
             CliOptions(

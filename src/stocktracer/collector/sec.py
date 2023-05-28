@@ -837,6 +837,15 @@ class Sec:
     def filter_data_nocache(
         self, tickers: frozenset[str], sec_filter: Filter
     ) -> Filter:
+        """Same as filter_data but no caching is applied.
+
+        Args:
+            tickers (frozenset[str]): _description_
+            sec_filter (Filter): _description_
+
+        Returns:
+            Filter: _description_
+        """
         collector = DataSetCollector(self.download_manager)
         ticker_reader = self.download_manager.ticker_reader
         if ticker_reader.contains(tickers):
