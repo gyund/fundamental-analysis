@@ -9,7 +9,7 @@ set -e
 pushd ${dir} > /dev/null
 mkdir -p ${results_dir}
 
-base_command="python -m stocktracer analyze ${SMOKE_OPTIONS} --tickers aapl,msft,tmo,goog,googl,amzn,meta,acn,wm"
+base_command="python -m stocktracer analyze --tickers aapl,msft,tmo,goog,googl,amzn,meta,acn,wm"
 
 echo "Running default analysis..."
 PYTHONPATH=src pipenv run ${base_command} --report-format=csv  > ${results_dir}/default.csv

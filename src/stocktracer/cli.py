@@ -12,7 +12,7 @@ from beartype.typing import Sequence, Tuple
 from diskcache import Cache
 
 from stocktracer import settings
-from stocktracer.interface import Analysis as AnalysisInterface
+from stocktracer.interface import Analysis as AnalysisInterface, ReportDate
 from stocktracer.interface import Options as CliOptions
 
 logger = logging.getLogger(__name__)
@@ -53,8 +53,8 @@ class Cli:
         cache_path: Path | str = settings.storage_path,
         refresh: bool = False,
         analysis_plugin: str = "stocktracer.analysis.annual_reports",
-        final_year: Optional[int] = None,
-        final_quarter: Optional[int] = None,
+        final_year: int = ReportDate().year,
+        final_quarter: int = ReportDate().quarter,
         report_format: ReportFormat = "txt",
         report_file: Optional[Path | str] = None,
     ) -> Optional[pd.DataFrame]:
@@ -65,8 +65,8 @@ class Cli:
             cache_path (Path | str): path where to cache data
             refresh (bool): Whether to refresh the calculation or use the results from a prior one
             analysis_plugin (str): module to load for analysis
-            final_year (Optional[int]): last year to consider for report collection
-            final_quarter (Optional[int]): last quarter to consider for report collection
+            final_year (int): last year to consider for report collection
+            final_quarter (int): last quarter to consider for report collection
             report_format (ReportFormat): Format of the report. Options include: csv, json, md (markdown)
             report_file (Optional[Path | str]): Where to store the report. Required if report_format is specified.
 
@@ -80,35 +80,18 @@ class Cli:
         if report_file:
             report_file = Path(report_file)
         if isinstance(tickers, str):
-            tickers = frozenset([tickers])
+            tickers = list([tickers])
         else:
-            tickers = frozenset(tickers)
+            tickers = list(tickers)
 
-        analysis_module: AnalysisInterface = get_analysis_instance(
-            analysis_plugin,
-            CliOptions(
-                tickers=tickers,
-                final_year=final_year,
-                final_quarter=final_quarter,
-            ),
+        tickers.sort()
+
+        results, analysis_module = self._get_result(
+            tickers=tickers,
+            analysis_plugin=analysis_plugin,
+            final_year=final_year,
+            final_quarter=final_quarter,
         )
-
-        results_key, results = self._get_cached_results(tickers, analysis_plugin)
-
-        if (
-            refresh
-            or results is None
-            or not isinstance(results, pd.DataFrame)
-            or results.empty
-        ):
-            # Call analysis plugin
-            results = None
-            results = analysis_module.analyze()
-            if results is None or results.empty:
-                raise LookupError("No analysis results available!")
-
-            # Save one week expiry
-            result_cache.set(key=results_key, value=results, expire=3600 * 24 * 7)
 
         self._generate_report(report_format, report_file, results)
         if analysis_module.under_development:
@@ -141,13 +124,29 @@ class Cli:
         if isinstance(report_file, io.StringIO):
             print(report_file.getvalue())
 
-    def _get_cached_results(
-        self, tickers, analysis_plugin
-    ) -> Tuple[str, Optional[pd.DataFrame]]:
-        assert isinstance(tickers, frozenset)
-        results_key = get_cached_results_key(tickers, analysis_plugin)
-        results = result_cache.get(key=results_key, default=None)
-        return results_key, results
+    @result_cache.memoize(typed=True, expire=60 * 60 * 24 * 7, tag="results")
+    def _get_result(
+        self,
+        tickers: list[str],
+        analysis_plugin: str,
+        final_year: int,
+        final_quarter: int,
+    ) -> Tuple[Optional[pd.DataFrame], AnalysisInterface]:
+        analysis_module: AnalysisInterface = get_analysis_instance(
+            analysis_plugin,
+            CliOptions(
+                tickers=frozenset(tickers),
+                final_year=final_year,
+                final_quarter=final_quarter,
+            ),
+        )
+
+        # Call analysis plugin
+        results = None
+        results = analysis_module.analyze()
+        if results is None or results.empty:
+            raise LookupError("No analysis results available!")
+        return results, analysis_module
 
 
 @beartype
