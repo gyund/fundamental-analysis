@@ -135,6 +135,7 @@ dmypy.json
 .edgar-filings/
 *.sqlite3
 *.sqlite
+.stocktracer-cache
 .ticker-cache
 .ticker-report
 .results/

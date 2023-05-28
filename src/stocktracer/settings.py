@@ -11,7 +11,7 @@ def get_default_cache_path() -> Path:
     Returns:
         Path: path to cache data
     """
-    return Path(os.getcwd()) / ".ticker-cache"
+    return Path(os.getcwd()) / ".stocktracer-cache"
 
 
 storage_path: Path = get_default_cache_path()
