@@ -351,11 +351,11 @@ class Filter:
         self.years = years
         self.last_report = last_report
         self.only_annual = only_annual
-        self._cik_list: set[int] = None
-        self._filtered_data: pd.DataFrame = None
+        self._cik_list: Optional[set[np.int64]] = None
+        self._filtered_data: Optional[pd.DataFrame] = None
 
     @property
-    def filtered_data(self) -> pd.DataFrame:
+    def filtered_data(self) -> Optional[pd.DataFrame]:
         """Filtered data looks like this(in csv format):
 
         Note that fp has the "Q" removed from the front so it can be stored as a simple number.
@@ -367,7 +367,7 @@ class Filter:
             AAPL,FakeAttributeTag,2022,Q1,2023-01-31,shares,200.0,2022-12-31,Apple Inc.
 
         Returns:
-            pd.DataFrame: _description_
+            Optional[pd.DataFrame]: _description_
         """
         return self._filtered_data
 
@@ -431,7 +431,7 @@ Tags: {','.join(self.tags) if self.tags else 'None'}"""
         return Filter.Results(table)
 
     @property
-    def ciks(self) -> set[int]:
+    def ciks(self) -> set[np.int64]:
         """Retrieves a list of CIK values corresponding to the tickers being looked up.
 
         The SEC object will call populateCikList to generate this information. This helps
@@ -667,7 +667,7 @@ class DataSetReader:
             dtype={"cik": np.int32},
         )
         logger.info(f"keeping only these focus periods: {focus_periods}")
-        filtered_data: pd.DataFrame = None
+        filtered_data: Optional[pd.DataFrame] = None
         chunk: pd.DataFrame
         for chunk in reader:
             data = chunk.query(query_str)
