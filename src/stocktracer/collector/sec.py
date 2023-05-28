@@ -15,11 +15,28 @@ from beartype import beartype
 from beartype.typing import Callable, Sequence
 from numpy.linalg import LinAlgError
 from requests_cache import CachedSession, SQLiteCache
+from stocktracer.settings import storage_path
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_CHUNK_SIZE = 1000000
 pd.set_option("mode.chained_assignment", "raise")
+
+storage_path.mkdir(parents=True, exist_ok=True)
+
+data_session = CachedSession(
+    "data",
+    backend=SQLiteCache(db_path=storage_path / "data"),
+    serializer="pickle",
+    expire_after=timedelta(days=365 * 5),
+    stale_if_error=True,
+)
+ticker_session = CachedSession(
+    "tickers",
+    backend=SQLiteCache(db_path=storage_path / "tickers"),
+    expire_after=timedelta(days=365),
+    stale_if_error=True,
+)
 
 
 @beartype
@@ -669,12 +686,6 @@ class DownloadManager:
 
     _company_tickers_url = "https://www.sec.gov/files/company_tickers.json"
 
-    def __init__(
-        self, ticker_session: CachedSession, data_session: CachedSession
-    ) -> None:
-        self._ticker_session = ticker_session
-        self._data_session = data_session
-
     @property
     def ticker_reader(self) -> TickerReader:
         """Get the CIK ticker mappings. This must be done before processing reports.
@@ -695,12 +706,12 @@ class DownloadManager:
             TickerReader: maps cik to stock ticker
 
         """
-        response = self._ticker_session.get(self._company_tickers_url)
+        response = ticker_session.get(self._company_tickers_url)
         if response.from_cache:  # pragma: no cover
             logger.info("Retrieved tickers->cik mapping from cache")
         if response.status_code == 200:  # pragma: no cover
             return TickerReader(response.content.decode())
-        return TickerReader(pd.DataFrame())  # pragma: no cover
+        raise LookupError("unable to retrieve tickers")  # pragma: no cover
 
     def _create_download_uri(self, report_date: ReportDate) -> str:
         file = f"{report_date.year}q{report_date.quarter}.zip"
@@ -719,7 +730,7 @@ class DownloadManager:
             Optional[DataSetReader]: this object helps process the data received more granularly
         """
         request = self._create_download_uri(report_date)
-        response = self._data_session.get(request)
+        response = data_session.get(request)
         if response.from_cache:
             logger.info(f"Retrieved {request} from cache")
 
@@ -821,27 +832,8 @@ class DataSetCollector:
 class Sec:
     """Object for handling requests for information relating to SEC data dumps."""
 
-    def __init__(self, storage_path: Path):
-        """
-
-        Args:
-            storage_path (Path): Where to store the results.
-        """
-        storage_path.mkdir(parents=True, exist_ok=True)
-        data_session = CachedSession(
-            "data",
-            backend=SQLiteCache(db_path=storage_path / "data"),
-            serializer="pickle",
-            expire_after=timedelta(days=365 * 5),
-            stale_if_error=True,
-        )
-        ticker_session = CachedSession(
-            "tickers",
-            backend=SQLiteCache(db_path=storage_path / "tickers"),
-            expire_after=timedelta(days=365),
-            stale_if_error=True,
-        )
-        self.download_manager = DownloadManager(ticker_session, data_session)
+    def __init__(self):
+        self.download_manager = DownloadManager()
 
     def filter_data(self, tickers: frozenset[str], sec_filter: Filter) -> Filter:
         """Initiate the retrieval of ticker information based on the provided filters.

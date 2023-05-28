@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture
 def sec_harness() -> tuple[Sec, mock.MagicMock]:
-    sec = Sec(Path(os.getcwd()) / ".test-cache")
+    sec = Sec()
 
     # Mock all objects that interact with network elements.
     # You will need to re-mock them in the test to get code completion
@@ -44,10 +44,6 @@ def sec_harness() -> tuple[Sec, mock.MagicMock]:
 
 
 class TestSec:
-    def test_init(self):
-        with pytest.raises((TypeError, AssertionError)):
-            Sec()  # type: ignore
-
     def test_select_data(
         self,
         sec_harness: tuple[Sec, mock.MagicMock],
@@ -212,6 +208,7 @@ class TestSec:
             )
             == 16666.666666666668
         )
+        logger.debug(f"{filter.filtered_data.to_string()}")
         assert math.isclose(
             filter.select(aggregate_func="slope", tickers=["aapl"]).get_value(
                 "aapl", tag="FakeAttributeTag", year=2022

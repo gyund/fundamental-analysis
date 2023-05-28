@@ -14,8 +14,11 @@ from diskcache import Cache
 
 from stocktracer.interface import Analysis as AnalysisInterface
 from stocktracer.interface import Options as CliOptions
+import stocktracer.settings as settings
 
 logger = logging.getLogger(__name__)
+
+result_cache = Cache(directory=settings.storage_path / "results")
 
 
 @beartype
@@ -36,16 +39,6 @@ def get_analysis_instance(module_name: str, options: CliOptions) -> AnalysisInte
     return instance
 
 
-@beartype
-def get_default_cache_path() -> Path:
-    """Get the default path for caching data.
-
-    Returns:
-        Path: path to cache data
-    """
-    return Path(os.getcwd()) / ".ticker-cache"
-
-
 ReportFormat = Literal["csv", "md", "json", "txt"]
 
 
@@ -58,7 +51,7 @@ class Cli:
     def analyze(  # pylint: disable=too-many-arguments
         self,
         tickers: Union[Sequence[str], str],
-        cache_path: Path | str = get_default_cache_path(),
+        cache_path: Path | str = settings.storage_path,
         refresh: bool = False,
         analysis_plugin: str = "stocktracer.analysis.annual_reports",
         final_year: Optional[int] = None,
@@ -84,7 +77,7 @@ class Cli:
         Returns:
             Optional[pd.DataFrame]: results of analysis
         """
-        cache_path = Path(cache_path)
+        settings.storage_path = Path(cache_path)
         if report_file:
             report_file = Path(report_file)
         if isinstance(tickers, str):
@@ -96,15 +89,12 @@ class Cli:
             analysis_plugin,
             CliOptions(
                 tickers=tickers,
-                cache_path=cache_path,
                 final_year=final_year,
                 final_quarter=final_quarter,
             ),
         )
 
-        cache, results_key, results = self._get_cached_results(
-            tickers, cache_path, analysis_plugin
-        )
+        results_key, results = self._get_cached_results(tickers, analysis_plugin)
 
         if (
             refresh
@@ -119,7 +109,7 @@ class Cli:
                 raise LookupError("No analysis results available!")
 
             # Save one week expiry
-            cache.set(key=results_key, value=results, expire=3600 * 24 * 7)
+            result_cache.set(key=results_key, value=results, expire=3600 * 24 * 7)
 
         self._generate_report(report_format, report_file, results)
         if analysis_module.under_development:
@@ -153,13 +143,12 @@ class Cli:
             print(report_file.getvalue())
 
     def _get_cached_results(
-        self, tickers, cache_path, analysis_plugin
-    ) -> Tuple[Cache, str, Optional[pd.DataFrame]]:
+        self, tickers, analysis_plugin
+    ) -> Tuple[str, Optional[pd.DataFrame]]:
         assert isinstance(tickers, frozenset)
-        cache = Cache(directory=cache_path / "results")
         results_key = get_cached_results_key(tickers, analysis_plugin)
-        results = cache.get(key=results_key, default=None)
-        return cache, results_key, results
+        results = result_cache.get(key=results_key, default=None)
+        return results_key, results
 
 
 @beartype

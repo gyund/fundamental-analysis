@@ -16,7 +16,6 @@ class Options:
     def __init__(
         self,
         tickers: frozenset[str],
-        cache_path: Path,
         final_year: int | None,
         final_quarter: int | None,
     ):
@@ -29,7 +28,6 @@ class Options:
             final_quarter (int | None): last quarter to consider for report collection
         """
         self.tickers = tickers
-        self.cache_path = cache_path
         self.last_report = ReportDate(year=final_year, quarter=final_quarter)
 
 
@@ -40,7 +38,6 @@ class Analysis(metaclass=abc.ABCMeta):
     def __init__(self, options: Options) -> None:
         self.options = options
         assert self.options is not None
-        assert self.options.cache_path is not None
 
     @abc.abstractmethod
     def analyze(self) -> Optional[DataFrame]:

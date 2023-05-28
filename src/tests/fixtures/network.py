@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 import stocktracer.filter as Filter
-from stocktracer.cli import Cli, get_default_cache_path
+from stocktracer.cli import Cli
 from stocktracer.collector.sec import Sec
 from tests.fixtures.unit import filter_aapl
 
@@ -10,7 +10,7 @@ from tests.fixtures.unit import filter_aapl
 @pytest.fixture
 def sec_instance() -> Sec:
     # test using the real SEC adapter
-    return Sec(get_default_cache_path())
+    return Sec()
 
 
 @pytest.fixture

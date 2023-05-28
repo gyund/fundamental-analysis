@@ -29,7 +29,7 @@ class Analysis(AnalysisInterface):
         )
 
         # Create an SEC Data Source
-        sec = SecDataSource(storage_path=self.options.cache_path)
+        sec = SecDataSource()
 
         # This is an expensive operation
         sec.filter_data(tickers=self.options.tickers, sec_filter=sec_filter)
