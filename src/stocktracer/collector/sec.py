@@ -782,7 +782,7 @@ class DataSetCollector:
         # filter.filtered_data = data_frame
 
 
-@cache.results.memoize(expire=60 * 60 * 24 * 7, tag="sec")
+@cache.results.memoize(tag="sec")
 def filter_data(
     tickers: list[str], sec_filter: Filter, download_manager=DownloadManager()
 ) -> Results:
