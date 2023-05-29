@@ -18,7 +18,7 @@ def create_normalized_sec_table(
     """Create a normalized SEC table with all NA values removed.
 
     Args:
-        sec_filter (SecFilter): filter to use for grabbing results
+        sec_filter (Sec.Filter): filter to use for grabbing results
         options (Options): user provided CLI options
         normalize (bool): Remove all columns that contain at least one NA value
 

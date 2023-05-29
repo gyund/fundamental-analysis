@@ -74,7 +74,7 @@ def test_update(filter_aapl: Filter.Selectors):
 def test_multi_stock_request_over_1year():
     # Create the filter we'll use to scrape the results
     sec_filter = SecFilter(
-        tags=["EarningsPerShareDiluted"],
+        tags={"EarningsPerShareDiluted"},
         years=1,  # Over the past 1 year
         last_report=ReportDate(year=2023, quarter=1),
         only_annual=True,  # We only want the 10-K

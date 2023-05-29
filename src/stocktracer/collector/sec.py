@@ -168,12 +168,12 @@ class Filter:
     """Filter for SEC tools to scrape relevant information when processing records."""
 
     years: int = field(hash=True)
-    tags: Optional[list[str]] = field(default=None, hash=True)
+    tags: Optional[set[str]] = field(default=None, hash=True)
     last_report: ReportDate = field(default=ReportDate(), hash=True)
     only_annual: bool = field(default=True, hash=True)
 
     @property
-    def focus_period(self) -> list[str]:
+    def focus_period(self) -> frozenset[str]:
         """Get the focus period for the report.
 
         Companies file quarterly reports. The annual report replaces the quarterly
@@ -181,11 +181,11 @@ class Filter:
         for the annual reports.
 
         Returns:
-            list[str]: list of focus periods to use for the filter
+            frozenset[str]: list of focus periods to use for the filter
         """
         if self.only_annual:
-            return ["FY"]
-        return ["FY", "Q1", "Q2", "Q3", "Q4"]
+            return frozenset({"FY"})
+        return frozenset({"FY", "Q1", "Q2", "Q3", "Q4"})
 
     @property
     def required_reports(self) -> list[ReportDate]:
@@ -775,7 +775,7 @@ class DataSetCollector:
 
 @cache.results.memoize(tag="sec")
 def filter_data(
-    tickers: list[str],
+    tickers: set[str],
     sec_filter: Filter,
     download_manager: DownloadManager = DownloadManager(),
 ) -> Results:
@@ -784,7 +784,7 @@ def filter_data(
     Filtered data is stored with the filter
 
     Args:
-        tickers (list[str]): ticker symbols you want information about
+        tickers (set[str]): ticker symbols you want information about
         sec_filter (Filter): SEC specific data to scrape from the reports
         download_manager (DownloadManager): download manager to use
 
@@ -797,14 +797,14 @@ def filter_data(
 
 
 def filter_data_nocache(
-    tickers: list[str],
+    tickers: set[str],
     sec_filter: Filter,
     download_manager: DownloadManager = DownloadManager(),
 ) -> Results:
     """Same as filter_data but no caching is applied.
 
     Args:
-        tickers (list[str]): ticker symbols you want information about
+        tickers (set[str]): ticker symbols you want information about
         sec_filter (Filter): SEC specific data to scrape from the reports
         download_manager (DownloadManager): download manager to use
 

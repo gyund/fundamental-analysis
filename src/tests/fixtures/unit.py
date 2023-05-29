@@ -15,9 +15,9 @@ def filter_aapl():
 
 def filter_aapl_years(history_in_years: int = 0) -> Filter.Selectors:
     return Filter.Selectors(
-        ticker_filter=["aapl"],
+        ticker_filter={"aapl"},
         sec_filter=Filter.SecFilter(
-            tags=["EntityCommonStockSharesOutstanding"],
+            tags={"EntityCommonStockSharesOutstanding"},
             years=history_in_years,  # Just want the current
             last_report=ReportDate(year=2023, quarter=1),
             only_annual=False,
@@ -81,12 +81,12 @@ def fake_data_txt_sample() -> str:
 def sec_fake_report(
     filter_aapl: Filter.Selectors, sub_txt_sample, data_txt_sample
 ) -> Filter.Selectors:
-    filter_aapl.sec_filter._cik_list = set()
-    filter_aapl.sec_filter._cik_list.add(320193)
     sub_df = DataSetReader._process_sub_text(
         filepath_or_buffer=io.StringIO(sub_txt_sample),
         sec_filter=filter_aapl.sec_filter,
+        ciks=frozenset({320193}),
     )
+    assert sub_df is not None
     num_df = DataSetReader._process_num_text(
         filepath_or_buffer=io.StringIO(data_txt_sample),
         sec_filter=filter_aapl.sec_filter,
@@ -109,7 +109,7 @@ def sec_manufactured_fake_report(
 def sec_manufactured_fake_report_impl(
     selector: Filter.Selectors, sub_txt: str, data_txt: str
 ) -> DataFrame:
-    selector.sec_filter.tags.append("FakeAttributeTag")
+    selector.sec_filter.tags.add("FakeAttributeTag")
     sub_df = DataSetReader._process_sub_text(
         filepath_or_buffer=io.StringIO(sub_txt),
         sec_filter=selector.sec_filter,
