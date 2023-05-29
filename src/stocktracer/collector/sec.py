@@ -13,7 +13,6 @@ import pandas as pd
 from alive_progress import alive_bar
 from beartype import beartype
 from beartype.typing import Callable, Sequence
-from numpy.linalg import LinAlgError
 
 from stocktracer import cache
 
@@ -156,8 +155,12 @@ def slope(data: pd.Series, order: int = 1) -> float:
     y_axis = data.values
 
     try:
+        # An exception can be thrown if there's only one element of it's a nan
         coeffs = np.polyfit(x_axis, y_axis, order)
-    except LinAlgError:
+    except np.linalg.LinAlgError:
+        return float(0)
+    except Exception as e:
+        logger.warning(f"slope exception: {e}")
         return float(0)
     return coeffs[0]
 
