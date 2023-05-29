@@ -805,7 +805,7 @@ def filter_data(
     Args:
         tickers (list[str]): ticker symbols you want information about
         sec_filter (Filter): SEC specific data to scrape from the reports
-        download_manager(DownloadManager): download manager to use
+        download_manager (DownloadManager): download manager to use
 
     Returns:
         Results: results with filtered data
@@ -825,7 +825,7 @@ def filter_data_nocache(
     Args:
         tickers (list[str]): ticker symbols you want information about
         sec_filter (Filter): SEC specific data to scrape from the reports
-        download_manager(DownloadManager): download manager to use
+        download_manager (DownloadManager): download manager to use
 
     Returns:
         Results: results with filtered data
