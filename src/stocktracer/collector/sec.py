@@ -24,45 +24,25 @@ pd.set_option("mode.chained_assignment", "raise")
 
 
 @beartype
+@dataclass(frozen=True)
 class ReportDate:
     """ReportDate is used to select and identify archives created by the SEC."""
 
-    def __init__(
-        self,
-        year: int | None = None,
-        quarter: int | None = None,
-    ):
-        """
+    year: int = date.today().year
+    quarter: int = ((date.today().month - 1) // 3) + 1
 
-        Args:
-            year (int, optional): Year of the archive. Defaults to date.today().year.
-            quarter (int, optional): Quarter the archive was created. Defaults to ((date.today().month - 1) // 3)+1.
-
-        Raises:
-            ValueError: If the value for quarter or year is invalid
-        """
-        self.year = date.today().year if year is None else year
-        self.quarter = (
-            ((date.today().month - 1) // 3) + 1 if quarter is None else quarter
-        )
-
+    def __post_init__(self):
         if self.year > date.today().year:
             raise ValueError(
                 "you cannot request reports in the future...that would be illegal :)"
             )
         if self.quarter not in range(1, 5):
             raise ValueError(
-                f"the quarter must be a value between 1 and 4 - given: {quarter}"
+                f"the quarter must be a value between 1 and 4 - given: {self.quarter}"
             )
 
     def __str__(self) -> str:
         return f"{self.year}-q{self.quarter}"
-
-    def __repr__(self) -> str:
-        return f"ReportDate({self.year},{self.quarter})"
-
-    def __eq__(self, other: "ReportDate") -> bool:
-        return self.quarter == other.quarter and self.year == other.year
 
 
 @beartype
@@ -233,10 +213,11 @@ class Filter:
             if next_report == final_report:
                 break
             if 1 == next_report.quarter:
-                next_report.quarter = 4
-                next_report.year -= 1
+                next_report = ReportDate(year=next_report.year - 1, quarter=4)
             else:
-                next_report.quarter -= 1
+                next_report = ReportDate(
+                    year=next_report.year, quarter=next_report.quarter - 1
+                )
         return dl_list
 
 
