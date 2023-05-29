@@ -6,7 +6,7 @@ import pandas as pd
 from beartype import beartype
 
 import stocktracer.collector.sec as Sec
-from stocktracer.collector.sec import Filter as SecFilter
+from stocktracer.collector.sec import Filter as SecFilter, Results as SecResults
 from stocktracer.interface import Analysis as AnalysisInterface
 from stocktracer.interface import Options
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def create_normalized_sec_table(
     sec_filter: SecFilter, options: Options, normalize: bool = True
-) -> SecFilter.Results:
+) -> SecResults.Table:
     """Create a normalized SEC table with all NA values removed.
 
     Args:
@@ -24,11 +24,11 @@ def create_normalized_sec_table(
         normalize (bool): Remove all columns that contain at least one NA value
 
     Returns:
-        SecFilter.Results: An SEC table with normalized results
+        SecResults.Table: An SEC table with normalized results
     """
-    Sec.filter_data(tickers=options.tickers, sec_filter=sec_filter)
+    results = Sec.filter_data(tickers=options.tickers, sec_filter=sec_filter)
 
-    table = sec_filter.select()
+    table = results.select()
     # If you prefer to see columns that are not universal across all stocks, comment this out
     if normalize:
         table.normalize()

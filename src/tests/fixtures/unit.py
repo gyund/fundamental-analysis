@@ -109,13 +109,13 @@ def sec_manufactured_fake_report(
 def sec_manufactured_fake_report_impl(
     selector: Filter.Selectors, sub_txt: str, data_txt: str
 ) -> DataFrame:
-    selector.sec_filter._cik_list = set()
-    selector.sec_filter._cik_list.add(320193)
     selector.sec_filter.tags.append("FakeAttributeTag")
     sub_df = DataSetReader._process_sub_text(
         filepath_or_buffer=io.StringIO(sub_txt),
         sec_filter=selector.sec_filter,
+        ciks=frozenset({320193}),
     )
+    assert sub_df is not None
     num_df = DataSetReader._process_num_text(
         filepath_or_buffer=io.StringIO(data_txt),
         sec_filter=selector.sec_filter,

@@ -36,11 +36,11 @@ logger = logging.getLogger(__name__)
 def test_cache_key():
     key_1 = filter_data.__cache_key__(
         tickers=frozenset(["msft", "aapl"]),
-        sec_filter=Filter.SecFilter(years=1, tags=["Assets"], _cik_list=set().add(1)),
+        sec_filter=Filter.SecFilter(years=1, tags=["Assets"]),
     )
     key_2 = filter_data.__cache_key__(
         tickers=frozenset(["aapl", "msft"]),
-        sec_filter=Filter.SecFilter(years=1, tags=["Assets"], _cik_list=set().add(2)),
+        sec_filter=Filter.SecFilter(years=1, tags=["Assets"]),
     )
     logger.debug(key_1)
     assert key_1 == key_2
@@ -66,6 +66,7 @@ class TestSec:
             orient="index",
         )
         download_manager.get_quarterly_report = mock.MagicMock(return_value=data_reader)
+        ticker_reader.get_ciks = mock.Mock(return_value=frozenset({320193, 789019}))
 
         with pytest.raises(KeyError, match="cik"):
             filter_data_nocache(
@@ -117,6 +118,7 @@ class TestSec:
          "1":{"cik_str":789019,"ticker":"MSFT","title":"MICROSOFT CORP"}}""",
             orient="index",
         )
+        ticker_reader.get_ciks = mock.Mock(return_value=frozenset({320193, 789019}))
 
         filter = filter_data_nocache(
             tickers=list("aapl"),

@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 import stocktracer.filter as Filter
-from stocktracer.collector.sec import Filter as SecFilter
+from stocktracer.collector.sec import Filter as SecFilter, Results as SecResults
 from stocktracer.collector.sec import ReportDate
 
 logger = logging.getLogger(__name__)
@@ -84,7 +84,7 @@ class TestResults:
             },
         )
         data = data.set_index(["ticker", "fy"])
-        result = SecFilter.Results(data)
+        result = SecResults.Table(data)
         logger.debug(result)
 
         # Slice on Ticker, make sure we get the right results
@@ -133,7 +133,7 @@ class TestResults:
             },
         )
         data = data.set_index(["ticker", "fy"])
-        result = SecFilter.Results(data)
+        result = SecResults.Table(data)
         result.calculate_net_income("net-income")
         logger.debug(f"\n{data}")
         assert result.data["net-income"].sum() == 30
@@ -149,7 +149,7 @@ class TestResults:
             },
         )
         data = data.set_index(["ticker", "fy"])
-        result = SecFilter.Results(data)
+        result = SecResults.Table(data)
         result.calculate_return_on_assets("ROA")
         logger.debug(f"\n{data}")
         assert result.data.loc["AAPL"].loc[2021]["ROA"] == 0.50
@@ -165,7 +165,7 @@ class TestResults:
             },
         )
         data = data.set_index(["ticker", "fy"])
-        result = SecFilter.Results(data)
+        result = SecResults.Table(data)
         result.calculate_delta("delta", "OperatingIncomeLoss")
         logger.debug(f"\n{data}")
         assert np.isnan(result.data.loc["AAPL"].loc[2021]["delta"])
@@ -181,7 +181,7 @@ class TestResults:
             },
         )
         data = data.set_index(["ticker", "fy"])
-        result = SecFilter.Results(data)
+        result = SecResults.Table(data)
         result.calculate_current_ratio("CR")
         assert result.data.loc["AAPL"].loc[2021]["CR"] == 0.5
         assert result.data.loc["AAPL"].loc[2022]["CR"] == 0.25
@@ -196,7 +196,7 @@ class TestResults:
             },
         )
         data = data.set_index(["ticker", "fy"])
-        result = SecFilter.Results(data)
+        result = SecResults.Table(data)
         result.calculate_debt_to_assets("CR")
         assert result.data.loc["AAPL"].loc[2021]["CR"] == 2
         assert result.data.loc["AAPL"].loc[2022]["CR"] == 4
