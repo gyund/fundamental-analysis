@@ -9,9 +9,9 @@ import pytest
 
 import stocktracer.collector.sec as Sec
 import stocktracer.filter as Filter
-from stocktracer.collector.sec import DownloadManager, TickerReader
+from stocktracer.collector.sec import DownloadManager
 from stocktracer.collector.sec import Filter as SecFilter
-from stocktracer.collector.sec import ReportDate
+from stocktracer.collector.sec import ReportDate, TickerReader
 from tests.fixtures.network import filter_aapl, sec_dataselector_2023q1
 
 logger = logging.getLogger(__name__)

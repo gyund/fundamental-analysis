@@ -6,7 +6,8 @@ import pandas as pd
 from beartype import beartype
 
 import stocktracer.collector.sec as Sec
-from stocktracer.collector.sec import Filter as SecFilter, Results as SecResults
+from stocktracer.collector.sec import Filter as SecFilter
+from stocktracer.collector.sec import Results as SecResults
 from stocktracer.interface import Analysis as AnalysisInterface
 from stocktracer.interface import Options
 

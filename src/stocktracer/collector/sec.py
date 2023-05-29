@@ -1,6 +1,5 @@
 """This data source grabs information from quarterly SEC data archives."""
 import copy
-import json
 import logging
 import sys
 from dataclasses import dataclass, field
@@ -144,6 +143,9 @@ class TickerReader:
 
         Args:
             tickers (frozenset[str]): ticker symbols to search for
+
+        Returns:
+            frozenset[int]: CIKs values translated from the tickers specified
         """
         cik_list: set[int] = set()
         for ticker in tickers:
@@ -415,7 +417,7 @@ class Results:
             tickers (Optional[Sequence[str]]): ticker symbol for the company
 
         Returns:
-            Filter.Results: Object that represents a pivot table with the data requested
+            Results.Table: Object that represents a pivot table with the data requested
         """
         assert self.filtered_data is not None
         if tickers is not None:
@@ -480,6 +482,7 @@ class DataSetReader:
 
         Args:
             sec_filter (Filter): results to filter out of the zip archive
+            ciks (frozenset[int]): CIKs to filter data on
 
         Raises:
             ImportError: the filter doesn't match anything
@@ -595,7 +598,10 @@ class DataSetReader:
 
     @classmethod
     def _process_sub_text(
-        cls, filepath_or_buffer, sec_filter: Filter, ciks: frozenset[int]
+        cls,
+        filepath_or_buffer,
+        sec_filter: Filter,
+        ciks: frozenset[int],  # pylint: disable=unused-variable
     ) -> Optional[pd.DataFrame]:
         """Contains the submissions.
 
@@ -703,9 +709,13 @@ class DataSetCollector:
 
         Args:
             sec_filter (Filter): SEC specific filter of how to filter the results
+            ciks (frozenset[int]): CIK values to filter the datasets on
 
         Raises:
             LookupError: when there are no results matching the filter
+
+        Returns:
+            Results: filtered data results
 
         """
         data_frame = None
@@ -784,7 +794,9 @@ class DataSetCollector:
 
 @cache.results.memoize(tag="sec")
 def filter_data(
-    tickers: list[str], sec_filter: Filter, download_manager=DownloadManager()
+    tickers: list[str],
+    sec_filter: Filter,
+    download_manager: DownloadManager = DownloadManager(),
 ) -> Results:
     """Initiate the retrieval of ticker information based on the provided filters.
 
@@ -804,7 +816,9 @@ def filter_data(
 
 
 def filter_data_nocache(
-    tickers: list[str], sec_filter: Filter, download_manager=DownloadManager()
+    tickers: list[str],
+    sec_filter: Filter,
+    download_manager: DownloadManager = DownloadManager(),
 ) -> Results:
     """Same as filter_data but no caching is applied.
 
