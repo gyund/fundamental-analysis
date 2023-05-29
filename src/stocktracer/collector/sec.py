@@ -814,7 +814,7 @@ def filter_data_nocache(
         download_manager(DownloadManager): download manager to use
 
     Returns:
-        Results: _description_
+        Results: results with filtered data
     """
     ticker_set = frozenset(tickers)
     collector = DataSetCollector(download_manager)
