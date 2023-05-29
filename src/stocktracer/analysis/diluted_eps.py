@@ -6,7 +6,6 @@ import pandas as pd
 from beartype import beartype
 
 import stocktracer.collector.sec as Sec
-from stocktracer.collector.sec import Filter as SecFilter
 from stocktracer.interface import Analysis as AnalysisInterface
 
 logger = logging.getLogger(__name__)
@@ -21,7 +20,7 @@ class Analysis(AnalysisInterface):
 
     def analyze(self) -> Optional[pd.DataFrame]:
         # Create the filter we'll use to scrape the results
-        sec_filter = SecFilter(
+        sec_filter = Sec.Filter(
             tags=["EarningsPerShareDiluted"],
             years=self.years_of_analysis,
             last_report=self.options.last_report,
