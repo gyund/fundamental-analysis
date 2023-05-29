@@ -120,19 +120,21 @@ class TestSec:
         )
         ticker_reader.get_ciks = mock.Mock(return_value=frozenset({320193, 789019}))
 
-        filter = filter_data_nocache(
+        results = filter_data_nocache(
             tickers={"aapl"},
             sec_filter=Filter.SecFilter(years=1, last_report=ReportDate(2023, 1)),
             download_manager=download_manager,
         )
 
-        logger.debug(f"\n{filter.filtered_data.to_csv()}")
+        logger.debug(f"\n{results.filtered_data.to_csv()}")
         # Make sure our bulk processing isn't duplicating data
-        assert filter.filtered_data is not None
-        assert len(filter.filtered_data) == len(filter.filtered_data.drop_duplicates())
+        assert results.filtered_data is not None
+        assert len(results.filtered_data) == len(
+            results.filtered_data.drop_duplicates()
+        )
 
         table = pd.pivot_table(
-            filter.filtered_data,
+            results.filtered_data,
             values="value",
             index=["ticker", "tag"],
             aggfunc=np.average,
@@ -141,7 +143,7 @@ class TestSec:
         assert table.loc["AAPL"].loc["EntityCommonStockSharesOutstanding"][0] == 4000
         assert table.loc["AAPL"].loc["FakeAttributeTag"][0] == 400
 
-        table = filter.select(aggregate_func=np.average)
+        table = results.select(aggregate_func=np.average)
         logger.debug(f"select_avg:\n{table}")
 
         assert (
@@ -161,13 +163,13 @@ class TestSec:
         # assert table.get_value("aapl", "EntityCommonStockSharesOutstanding") == 4000
         # assert table.get_value("AAPL", "FakeAttributeTag") == 2000
 
-        table = filter.select(aggregate_func=np.average, tickers=["bad"])
+        table = results.select(aggregate_func=np.average, tickers=["bad"])
         # normally bad tickers throw exceptions, but we'll just have it filter on
         # an index we don't have so we get an empty value
         assert table.data.empty == True
 
         # Filter on aapl and get only thses results
-        table = filter.select(aggregate_func=np.average, tickers=["aapl"])
+        table = results.select(aggregate_func=np.average, tickers=["aapl"])
         assert table.data.empty == False
         logger.debug(f"processed-ticker:\n{table.data}")
         assert (
@@ -178,45 +180,45 @@ class TestSec:
         assert table.get_value(ticker="aapl", tag="FakeAttributeTag", year=2023) == 600
 
         assert (
-            filter.select(aggregate_func="max", tickers=["aapl"]).get_value(
+            results.select(aggregate_func="max", tickers=["aapl"]).get_value(
                 "aapl", tag="FakeAttributeTag", year=2022
             )
             == 500
         )
         assert (
-            filter.select(aggregate_func="min", tickers=["aapl"]).get_value(
+            results.select(aggregate_func="min", tickers=["aapl"]).get_value(
                 "aapl", tag="FakeAttributeTag", year=2022
             )
             == 200
         )
         assert (
-            filter.select(aggregate_func="mean", tickers=["aapl"]).get_value(
+            results.select(aggregate_func="mean", tickers=["aapl"]).get_value(
                 "aapl", tag="FakeAttributeTag", year=2022
             )
             == 350
         )
         assert math.isclose(
-            filter.select(aggregate_func="std", tickers=["aapl"]).get_value(
+            results.select(aggregate_func="std", tickers=["aapl"]).get_value(
                 "aapl", tag="FakeAttributeTag", year=2022
             ),
             129.09944487358,
         )
 
         assert (
-            filter.select(aggregate_func="sum", tickers=["aapl"]).get_value(
+            results.select(aggregate_func="sum", tickers=["aapl"]).get_value(
                 "aapl", tag="FakeAttributeTag", year=2022
             )
             == 1400
         )
         assert (
-            filter.select(aggregate_func="var", tickers=["aapl"]).get_value(
+            results.select(aggregate_func="var", tickers=["aapl"]).get_value(
                 "aapl", tag="FakeAttributeTag", year=2022
             )
             == 16666.666666666668
         )
-        logger.debug(f"{filter.filtered_data.to_string()}")
+        logger.debug(f"{results.filtered_data.to_string()}")
         assert math.isclose(
-            filter.select(aggregate_func="slope", tickers=["aapl"]).get_value(
+            results.select(aggregate_func="slope", tickers=["aapl"]).get_value(
                 "aapl", tag="FakeAttributeTag", year=2022
             ),
             100,
