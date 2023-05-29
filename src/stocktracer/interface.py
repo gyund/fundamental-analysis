@@ -1,7 +1,7 @@
 """Interfaces for the StockTracer Module."""
 import abc
-from typing import Optional
 from dataclasses import dataclass
+from typing import Optional
 
 from beartype import beartype
 from pandas import DataFrame

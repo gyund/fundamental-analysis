@@ -14,9 +14,9 @@ from stocktracer.collector.sec import (
     DataSetReader,
     DownloadManager,
     ReportDate,
+    TickerReader,
     filter_data,
     filter_data_nocache,
-    TickerReader,
 )
 from tests.fixtures.unit import (
     data_txt_sample,

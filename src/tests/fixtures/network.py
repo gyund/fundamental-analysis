@@ -1,9 +1,9 @@
 import pandas as pd
 import pytest
 
+import stocktracer.collector.sec as Sec
 import stocktracer.filter as Filter
 from stocktracer.cli import Cli
-import stocktracer.collector.sec as Sec
 from tests.fixtures.unit import filter_aapl
 
 

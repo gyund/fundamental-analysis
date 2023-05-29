@@ -7,10 +7,11 @@ from pathlib import Path
 import mock
 import pytest
 
-import stocktracer.filter as Filter
-from stocktracer.collector.sec import Filter as SecFilter
-from stocktracer.collector.sec import ReportDate, DownloadManager
 import stocktracer.collector.sec as Sec
+import stocktracer.filter as Filter
+from stocktracer.collector.sec import DownloadManager
+from stocktracer.collector.sec import Filter as SecFilter
+from stocktracer.collector.sec import ReportDate
 from tests.fixtures.network import filter_aapl, sec_dataselector_2023q1
 
 logger = logging.getLogger(__name__)

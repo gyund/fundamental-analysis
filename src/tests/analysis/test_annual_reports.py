@@ -3,9 +3,9 @@ import logging
 import mock
 import pytest
 
-from stocktracer.interface import Options as CliOptions
 from stocktracer.analysis.annual_reports import Analysis
 from stocktracer.cli import Cli
+from stocktracer.interface import Options as CliOptions
 
 logger = logging.getLogger(__name__)
 

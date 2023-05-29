@@ -1,13 +1,13 @@
 """This data source grabs information from quarterly SEC data archives."""
 import copy
+import json
 import logging
 import sys
+from dataclasses import dataclass, field
 from datetime import date
 from io import BytesIO
 from typing import Literal, Optional
 from zipfile import ZipFile
-from dataclasses import dataclass, field
-import json
 
 import numpy as np
 import pandas as pd
