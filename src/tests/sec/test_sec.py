@@ -14,7 +14,8 @@ from stocktracer.collector.sec import (
     DataSetReader,
     DownloadManager,
     ReportDate,
-    Sec,
+    filter_data,
+    filter_data_nocache,
     TickerReader,
 )
 from tests.fixtures.unit import (
@@ -32,25 +33,26 @@ from tests.fixtures.unit import (
 logger = logging.getLogger(__name__)
 
 
-@pytest.fixture
-def sec_harness() -> tuple[Sec, mock.MagicMock]:
-    sec = Sec()
-
-    # Mock all objects that interact with network elements.
-    # You will need to re-mock them in the test to get code completion
-    # for setting checks if the mock gets called.
-    sec.download_manager = mock.MagicMock(DownloadManager)
-    return sec, sec.download_manager
+def test_cache_key():
+    key_1 = filter_data.__cache_key__(
+        tickers=frozenset(["msft", "aapl"]),
+        sec_filter=Filter.SecFilter(years=1, tags=["Assets"], _cik_list=set().add(1)),
+    )
+    key_2 = filter_data.__cache_key__(
+        tickers=frozenset(["aapl", "msft"]),
+        sec_filter=Filter.SecFilter(years=1, tags=["Assets"], _cik_list=set().add(2)),
+    )
+    logger.debug(key_1)
+    assert key_1 == key_2
 
 
 class TestSec:
     def test_select_data(
         self,
-        sec_harness: tuple[Sec, mock.MagicMock],
         fake_sub_txt_sample: str,
         fake_data_txt_sample: str,
     ):
-        (sec, download_manager) = sec_harness
+        download_manager = mock.MagicMock(DownloadManager)
         data_reader = mock.MagicMock(DataSetReader)
         data_reader.process_zip = mock.MagicMock(return_value=pd.DataFrame())
 
@@ -66,9 +68,10 @@ class TestSec:
         download_manager.get_quarterly_report = mock.MagicMock(return_value=data_reader)
 
         with pytest.raises(KeyError, match="cik"):
-            sec.filter_data_nocache(
+            filter_data_nocache(
                 tickers=frozenset(("aapl", "msft")),
-                sec_filter=Filter.SecFilter(tags=["test"]),
+                sec_filter=Filter.SecFilter(years=1, tags=["test"]),
+                download_manager=download_manager,
             )
         ticker_reader.contains.assert_called()
         download_manager.get_quarterly_report.assert_called()
@@ -78,7 +81,6 @@ class TestSec:
 
     def test_select_and_pivot(
         self,
-        sec_harness: tuple[Sec, mock.MagicMock],
         fake_sub_txt_sample: str,
         fake_data_txt_sample: str,
     ):
@@ -96,7 +98,7 @@ class TestSec:
         0000320193-23-000006 EntityCommonStockSharesOutstanding 320193 2023-01-31  ...  Q1
                             FakeAttributeTag                   320193 2023-01-31  ...  Q1
         """
-        (sec, download_manager) = sec_harness
+        download_manager = mock.MagicMock(DownloadManager)
         aapl_filter = filter_aapl_years(1)
         data = sec_manufactured_fake_report_impl(
             aapl_filter, fake_sub_txt_sample, fake_data_txt_sample
@@ -116,13 +118,15 @@ class TestSec:
             orient="index",
         )
 
-        filter = sec.filter_data_nocache(
-            tickers=frozenset("aapl"),
-            sec_filter=Filter.SecFilter(last_report=ReportDate(2023, 1)),
+        filter = filter_data_nocache(
+            tickers=list("aapl"),
+            sec_filter=Filter.SecFilter(years=1, last_report=ReportDate(2023, 1)),
+            download_manager=download_manager,
         )
 
         logger.debug(f"\n{filter.filtered_data.to_csv()}")
         # Make sure our bulk processing isn't duplicating data
+        assert filter.filtered_data is not None
         assert len(filter.filtered_data) == len(filter.filtered_data.drop_duplicates())
 
         table = pd.pivot_table(

@@ -6,7 +6,7 @@ import pandas as pd
 from beartype import beartype
 
 from stocktracer.collector.sec import Filter as SecFilter
-from stocktracer.collector.sec import Sec as SecDataSource
+import stocktracer.collector.sec as Sec
 from stocktracer.interface import Analysis as AnalysisInterface
 
 logger = logging.getLogger(__name__)
@@ -28,11 +28,8 @@ class Analysis(AnalysisInterface):
             only_annual=True,  # We only want the 10-K
         )
 
-        # Create an SEC Data Source
-        sec = SecDataSource()
-
         # This is an expensive operation
-        sec.filter_data(tickers=self.options.tickers, sec_filter=sec_filter)
+        Sec.filter_data(tickers=self.options.tickers, sec_filter=sec_filter)
         return sec_filter.select("slope").data
 
     # Reuse documentation from parent

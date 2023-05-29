@@ -6,6 +6,8 @@ from datetime import date
 from io import BytesIO
 from typing import Literal, Optional
 from zipfile import ZipFile
+from dataclasses import dataclass, field
+import json
 
 import numpy as np
 import pandas as pd
@@ -163,9 +165,18 @@ def slope(data: pd.Series, order: int = 1) -> float:
 
 
 @beartype
+@dataclass(unsafe_hash=True)
 class Filter:
     """Filter for SEC tools to scrape relevant information when processing records."""
 
+    years: int = field(hash=True)
+    tags: Optional[list[str]] = field(default=None, hash=True)
+    last_report: ReportDate = field(default=ReportDate(), hash=True)
+    only_annual: bool = field(default=True, hash=True)
+    _cik_list: Optional[set[np.int64]] = None
+    _filtered_data: Optional[pd.DataFrame] = None
+
+    @dataclass
     class Results:
         """This is the results from a `Filter.select()` call.
 
@@ -189,9 +200,7 @@ class Filter:
 
         """
 
-        def __init__(self, results: pd.DataFrame) -> None:
-            logger.debug(f"results:\n{results}")
-            self.data = results
+        data: pd.DataFrame
 
         def __str__(self) -> str:
             return str(self.data)
@@ -205,11 +214,11 @@ class Filter:
             """
             return self.data.columns.values
 
-        def get_value(self, ticker: str | int, tag: str, year: int) -> int | float:
+        def get_value(self, ticker: str, tag: str, year: int) -> int | float:
             """Retrieve the exact value of a table cell.
 
             Args:
-                ticker (str | int): ticker identifying the equity of interest.
+                ticker (str): ticker identifying the equity of interest.
                 tag (str): attribute indicating the type of data to look at.
                 year (int): The year this data applies to.
 
@@ -310,32 +319,6 @@ class Filter:
                 delta_of (str): column name to calculate the delta of, such as ROI
             """
             self.data[column_name] = self.data.groupby(by=["ticker"]).diff()[delta_of]
-
-    def __init__(
-        self,
-        tags: Optional[list[str]] = None,
-        years: int = 1,
-        last_report: ReportDate = ReportDate(),
-        only_annual: bool = True,
-    ) -> None:
-        """
-
-        This is an important concept to dealing with large data sets. It allows us to chunk processing
-        into batches and find/locate only records of interest. Without these filters, the tool would
-        require absurd amounts of memory and storage to process.
-
-        Args:
-            tags (Optional[list[str]]): list of tags found in the SEC report, such as 'EntityCommonStockSharesOutstanding'
-            years (int): years of reports desired. Defaults to 1.
-            last_report (ReportDate): most recent SEC data dump identified by the year an quarter. Defaults to ReportDate().
-            only_annual (bool): If true, only scrape the annual reports. Defaults to True.
-        """
-        self.tags = tags
-        self.years = years
-        self.last_report = last_report
-        self.only_annual = only_annual
-        self._cik_list: Optional[set[np.int64]] = None
-        self._filtered_data: Optional[pd.DataFrame] = None
 
     @property
     def filtered_data(self) -> Optional[pd.DataFrame]:
@@ -812,44 +795,45 @@ class DataSetCollector:
         # filter.filtered_data = data_frame
 
 
-@beartype
-class Sec:
-    """Object for handling requests for information relating to SEC data dumps."""
+@cache.results.memoize(expire=60 * 60 * 24 * 7, tag="sec")
+def filter_data(
+    tickers: list[str], sec_filter: Filter, download_manager=DownloadManager()
+) -> Filter:
+    """Initiate the retrieval of ticker information based on the provided filters.
 
-    def __init__(self):
-        self.download_manager = DownloadManager()
+    Filtered data is stored with the filter
 
-    @cache.results.memoize(typed=True, expire=60 * 60 * 24 * 7, tag="sec")
-    def filter_data(self, tickers: frozenset[str], sec_filter: Filter) -> Filter:
-        """Initiate the retrieval of ticker information based on the provided filters.
+    Args:
+        tickers (list[str]): ticker symbols you want information about
+        sec_filter (Filter): SEC specific data to scrape from the reports
+        download_manager(DownloadManager): download manager to use
 
-        Filtered data is stored with the filter
+    Returns:
+        Filter: filter with filtered data
+    """
+    logger.debug(f"tickers:\n{repr(tickers)}")
+    logger.debug(f"sec_filter:\n{repr(sec_filter)}")
+    return filter_data_nocache(tickers, sec_filter, download_manager)
 
-        Args:
-            tickers (frozenset[str]): ticker symbols you want information about
-            sec_filter (Filter): SEC specific data to scrape from the reports
 
-        Returns:
-            Filter: filter with filtered data
-        """
-        return self.filter_data_nocache(tickers, sec_filter)
+def filter_data_nocache(
+    tickers: list[str], sec_filter: Filter, download_manager=DownloadManager()
+) -> Filter:
+    """Same as filter_data but no caching is applied.
 
-    def filter_data_nocache(
-        self, tickers: frozenset[str], sec_filter: Filter
-    ) -> Filter:
-        """Same as filter_data but no caching is applied.
+    Args:
+        tickers (list[str]): ticker symbols you want information about
+        sec_filter (Filter): SEC specific data to scrape from the reports
+        download_manager(DownloadManager): download manager to use
 
-        Args:
-            tickers (frozenset[str]): _description_
-            sec_filter (Filter): _description_
+    Returns:
+        Filter: _description_
+    """
+    ticker_set = frozenset(tickers)
+    collector = DataSetCollector(download_manager)
+    ticker_reader = download_manager.ticker_reader
+    if ticker_reader.contains(ticker_set):
+        sec_filter.populate_ciks(tickers=ticker_set, ticker_reader=ticker_reader)
+        collector.get_data(sec_filter)
 
-        Returns:
-            Filter: _description_
-        """
-        collector = DataSetCollector(self.download_manager)
-        ticker_reader = self.download_manager.ticker_reader
-        if ticker_reader.contains(tickers):
-            sec_filter.populate_ciks(tickers=tickers, ticker_reader=ticker_reader)
-            collector.get_data(sec_filter)
-
-        return sec_filter
+    return sec_filter

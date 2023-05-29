@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 class TestFilter:
     def test_getRequiredReports_default(self):
         filter = Filter.SecFilter(
+            years=1,
             tags=["dummy"],
             last_report=ReportDate(year=2022, quarter=4),
         )

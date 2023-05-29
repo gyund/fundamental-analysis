@@ -6,7 +6,7 @@ import pandas as pd
 from beartype import beartype
 
 from stocktracer.collector.sec import Filter as SecFilter
-from stocktracer.collector.sec import Sec as SecDataSource
+import stocktracer.collector.sec as Sec
 from stocktracer.interface import Analysis as AnalysisInterface
 from stocktracer.interface import Options
 
@@ -26,8 +26,7 @@ def create_normalized_sec_table(
     Returns:
         SecFilter.Results: An SEC table with normalized results
     """
-    sec = SecDataSource()
-    sec.filter_data(tickers=options.tickers, sec_filter=sec_filter)
+    Sec.filter_data(tickers=options.tickers, sec_filter=sec_filter)
 
     table = sec_filter.select()
     # If you prefer to see columns that are not universal across all stocks, comment this out
