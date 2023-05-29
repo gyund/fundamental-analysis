@@ -1,5 +1,6 @@
 """Interfaces for the StockTracer Module."""
 import abc
+from dataclasses import dataclass
 from typing import Optional
 
 from beartype import beartype
@@ -9,6 +10,7 @@ from stocktracer.collector.sec import ReportDate
 
 
 @beartype
+@dataclass
 class Options:
     """Command Line Options."""
 
@@ -25,7 +27,8 @@ class Options:
             final_year (int | None): last year to consider for report collection
             final_quarter (int | None): last quarter to consider for report collection
         """
-        self.tickers = tickers
+        self.tickers = list(tickers)
+        self.tickers.sort()
         self.last_report = ReportDate(year=final_year, quarter=final_quarter)
 
 

@@ -5,14 +5,14 @@ import mock
 import pandas as pd
 import pytest
 
+import stocktracer.collector.sec as Sec
 import stocktracer.filter as Filter
 from stocktracer.cli import Cli
-from stocktracer.collector.sec import Sec
-from tests.sec.test_sec import sec_harness
+from stocktracer.collector.sec import DownloadManager
 
 
-def test_generate(sec_harness: tuple[Sec, mock.MagicMock]):
-    (sec, download_manager) = sec_harness
+def test_generate():
+    download_manager = mock.MagicMock(DownloadManager)
     d = {"col1": [1, 2], "col2": [3, 4]}
     data_frame = pd.DataFrame(data=d)
     result = io.StringIO()

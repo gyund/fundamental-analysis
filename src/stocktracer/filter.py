@@ -2,12 +2,15 @@
 
 This may be removed or deprecated in the future. TBD.
 """
+from dataclasses import dataclass
+
 from beartype import beartype
 
 from stocktracer.collector.sec import Filter as SecFilter
 
 
 @beartype
+@dataclass(frozen=True)
 class Selectors:
     """Selectors provide an aggregation point for a number of built-in filter mechanics.
 
@@ -17,14 +20,5 @@ class Selectors:
     the class is needed.
     """
 
-    def __init__(
-        self, ticker_filter: set[str] | list[str], sec_filter: SecFilter
-    ) -> None:
-        """Entry for data to search for in various sources.
-
-        Args:
-            ticker_filter (set[str] | list[str]): list of stock tickers to get information about
-            sec_filter (SecFilter): filter for SEC reports
-        """
-        self.ticker_filter = frozenset(ticker_filter)
-        self.sec_filter = sec_filter
+    ticker_filter: set[str]
+    sec_filter: SecFilter
