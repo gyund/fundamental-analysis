@@ -601,7 +601,7 @@ class DataSetReader:
         cls,
         filepath_or_buffer,
         sec_filter: Filter,
-        ciks: frozenset[int],  # pylint: disable=unused-variable
+        ciks: frozenset[int],  # pylint: disable=unused-argument
     ) -> Optional[pd.DataFrame]:
         """Contains the submissions.
 
