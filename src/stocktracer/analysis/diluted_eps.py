@@ -5,8 +5,7 @@ from typing import Optional
 import pandas as pd
 from beartype import beartype
 
-from stocktracer.collector.sec import Filter as SecFilter
-from stocktracer.collector.sec import Sec as SecDataSource
+import stocktracer.collector.sec as Sec
 from stocktracer.interface import Analysis as AnalysisInterface
 
 logger = logging.getLogger(__name__)
@@ -21,19 +20,16 @@ class Analysis(AnalysisInterface):
 
     def analyze(self) -> Optional[pd.DataFrame]:
         # Create the filter we'll use to scrape the results
-        sec_filter = SecFilter(
-            tags=["EarningsPerShareDiluted"],
+        sec_filter = Sec.Filter(
+            tags={"EarningsPerShareDiluted"},
             years=self.years_of_analysis,
             last_report=self.options.last_report,
             only_annual=True,  # We only want the 10-K
         )
 
-        # Create an SEC Data Source
-        sec = SecDataSource()
-
         # This is an expensive operation
-        sec.filter_data(tickers=self.options.tickers, sec_filter=sec_filter)
-        return sec_filter.select("slope").data
+        results = Sec.filter_data(tickers=self.options.tickers, sec_filter=sec_filter)
+        return results.select("slope").data
 
     # Reuse documentation from parent
     analyze.__doc__ = AnalysisInterface.analyze.__doc__

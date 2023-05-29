@@ -69,15 +69,16 @@ class Cli:
         """
         if report_file:
             report_file = Path(report_file)
+        tickers_set = set()
         if isinstance(tickers, str):
-            tickers = list([tickers])
+            tickers_set.add(tickers)
         else:
-            tickers = list(tickers)
-
-        tickers.sort()
+            tickers_set = set()
+            for t in tickers:
+                tickers_set.add(t)
 
         results, analysis_module = self._get_result(
-            tickers=tickers,
+            tickers=tickers_set,
             analysis_plugin=analysis_plugin,
             final_year=final_year,
             final_quarter=final_quarter,
@@ -117,7 +118,7 @@ class Cli:
     @cache.results.memoize(typed=True, expire=60 * 60 * 24 * 7, tag="results")
     def _get_result(
         self,
-        tickers: list[str],
+        tickers: set[str],
         analysis_plugin: str,
         final_year: int,
         final_quarter: int,
@@ -125,7 +126,7 @@ class Cli:
         """Gets the results.
 
         Args:
-            tickers (list[str]): _description_
+            tickers (set[str]): _description_
             analysis_plugin (str): _description_
             final_year (int): _description_
             final_quarter (int): _description_

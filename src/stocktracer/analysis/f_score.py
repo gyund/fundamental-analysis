@@ -5,8 +5,8 @@ from typing import Optional
 import pandas as pd
 from beartype import beartype
 
+import stocktracer.collector.sec as Sec
 from stocktracer.analysis.annual_reports import create_normalized_sec_table
-from stocktracer.collector.sec import Filter as SecFilter
 from stocktracer.interface import Analysis as AnalysisInterface
 
 logger = logging.getLogger(__name__)
@@ -47,8 +47,8 @@ class Analysis(AnalysisInterface):
 
     def analyze(self) -> Optional[pd.DataFrame]:
         # Create the filter to scrape the data we need for processing
-        sec_filter = SecFilter(
-            tags=[
+        sec_filter = Sec.Filter(
+            tags={
                 "EarningsPerShareDiluted",
                 "CommonStockSharesIssued",
                 "AssetsCurrent",
@@ -56,7 +56,7 @@ class Analysis(AnalysisInterface):
                 "Assets",
                 "OperatingIncomeLoss",
                 "NetCashProvidedByUsedInOperatingActivities",
-            ],
+            },
             years=self.years_of_analysis,
             last_report=self.options.last_report,
             only_annual=True,  # We only want the 10-K

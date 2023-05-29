@@ -3,25 +3,47 @@ import logging
 import mock
 import pytest
 
+from stocktracer.analysis.annual_reports import Analysis
 from stocktracer.cli import Cli
+from stocktracer.interface import Options as CliOptions
 
 logger = logging.getLogger(__name__)
+
+tickers = ["aapl", "tmo", "msft", "goog", "wm", "acn"]
+final_year = 2023
+final_quarter = 1
 
 
 class TestCliAnnualReports:
     cli: Cli = Cli()
 
     @pytest.mark.webtest
+    def test_analyze_direct(self):
+        """Test direct calls so we can ensure caching occurs as well."""
+        options = CliOptions(
+            tickers=frozenset(tickers),
+            final_year=final_year,
+            final_quarter=final_quarter,
+        )
+        analyzer = Analysis(options)
+        result = analyzer.analyze()
+        assert result is not None
+
+        # logger.debug(f"annual_reports:\n{result.transpose().to_string()}")
+        # Note: goog, and googl are pulled in, so it's 7 instead of 6
+        assert len(result.index) == 7
+
+    @pytest.mark.webtest
     def test_analyze(self):
         self.cli.return_results = True
         result = self.cli.analyze(
-            tickers=["aapl", "tmo", "msft", "goog", "wm", "acn"],
+            tickers=tickers,
             analysis_plugin="stocktracer.analysis.annual_reports",
-            final_year=2023,
-            final_quarter=1,
+            final_year=final_year,
+            final_quarter=final_quarter,
         )
         assert result is not None
-        logger.debug(f"annual_reports:\n{result.transpose().to_string()}")
+        # logger.debug(f"annual_reports:\n{result.transpose().to_string()}")
         # Note: goog, and googl are pulled in, so it's 7 instead of 6
         assert len(result.index) == 7
 

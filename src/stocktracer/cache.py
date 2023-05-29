@@ -66,6 +66,7 @@ if SEC_FILE_HASH != results.get("sec_file_hash"):
 def update_modified_file_cache() -> None:
     """Update the cache that keeps track of when files are modified."""
     results.set("sec_file_hash", SEC_FILE_HASH)
+    results.close()
 
 
 atexit.register(update_modified_file_cache)
