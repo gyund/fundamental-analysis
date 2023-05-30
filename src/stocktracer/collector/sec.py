@@ -782,7 +782,7 @@ class DataSetCollector:
 
 @cache.results.memoize(tag="sec")
 def filter_data(
-    tickers: set[str],
+    tickers: list[str],
     sec_filter: Filter,
     download_manager: DownloadManager = DownloadManager(),
 ) -> Results:
@@ -791,7 +791,7 @@ def filter_data(
     Filtered data is stored with the filter
 
     Args:
-        tickers (set[str]): ticker symbols you want information about
+        tickers (list[str]): ticker symbols you want information about
         sec_filter (Filter): SEC specific data to scrape from the reports
         download_manager (DownloadManager): download manager to use
 
@@ -800,30 +800,29 @@ def filter_data(
     """
     logger.debug(f"tickers:\n{repr(tickers)}")
     logger.debug(f"sec_filter:\n{repr(sec_filter)}")
-    return filter_data_nocache(tickers, sec_filter, download_manager)
+    return filter_data_nocache(frozenset(tickers), sec_filter, download_manager)
 
 
 def filter_data_nocache(
-    tickers: set[str],
+    tickers: frozenset[str],
     sec_filter: Filter,
     download_manager: DownloadManager = DownloadManager(),
 ) -> Results:
     """Same as filter_data but no caching is applied.
 
     Args:
-        tickers (set[str]): ticker symbols you want information about
+        tickers (frozenset[str]): ticker symbols you want information about
         sec_filter (Filter): SEC specific data to scrape from the reports
         download_manager (DownloadManager): download manager to use
 
     Returns:
         Results: results with filtered data
     """
-    ticker_set = frozenset(tickers)
     collector = DataSetCollector(download_manager)
     ticker_reader = download_manager.ticker_reader
 
     # Returns true or throws
-    ticker_reader.contains(ticker_set)
+    ticker_reader.contains(tickers)
 
-    ciks = ticker_reader.get_ciks(tickers=ticker_set)
+    ciks = ticker_reader.get_ciks(tickers=tickers)
     return collector.get_data(sec_filter, ciks)

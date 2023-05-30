@@ -25,9 +25,9 @@ class Analysis(AnalysisInterface):
     def analyze(self) -> Optional[pd.DataFrame]:
         # Build a training set involving good companies
         sec_filter = SecFilter(
-            tags=["EarningsPerShareDiluted"],
+            tags={"EarningsPerShareDiluted"},
             years=5,  # Over the past 5 years
-            last_report=self.options.last_report,
+            last_report=self.options.final_report,
             only_annual=True,  # We only want the 10-K
         )
 
@@ -38,10 +38,10 @@ class Analysis(AnalysisInterface):
         tickers.add("hd")
         tickers.add("acn")
         tickers.add("nvda")
-        self.options.tickers = frozenset(tickers.union(self.options.tickers))
+        combined_tickers = list(tickers.union(self.options.tickers))
 
         # Create an SEC Data Source
-        table = create_normalized_sec_table(sec_filter, self.options, False)
+        table = create_normalized_sec_table(sec_filter, combined_tickers, False)
 
         # table.calculate_return_on_assets("ROA")
         # table.calculate_net_income("net-income")

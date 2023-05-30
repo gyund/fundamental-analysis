@@ -77,8 +77,12 @@ class Cli:
             for t in tickers:
                 tickers_set.add(t)
 
+        # prep for caching
+        tickers_list = list(tickers_set)
+        tickers_list.sort()
+
         results, analysis_module = self._get_result(
-            tickers=tickers_set,
+            tickers=tickers_list,
             analysis_plugin=analysis_plugin,
             final_year=final_year,
             final_quarter=final_quarter,
@@ -118,7 +122,7 @@ class Cli:
     @cache.results.memoize(typed=True, expire=60 * 60 * 24 * 7, tag="results")
     def _get_result(
         self,
-        tickers: set[str],
+        tickers: list[str],
         analysis_plugin: str,
         final_year: int,
         final_quarter: int,
@@ -126,7 +130,7 @@ class Cli:
         """Gets the results.
 
         Args:
-            tickers (set[str]): _description_
+            tickers (list[str]): _description_
             analysis_plugin (str): _description_
             final_year (int): _description_
             final_quarter (int): _description_
@@ -140,9 +144,8 @@ class Cli:
         analysis_module: AnalysisInterface = get_analysis_instance(
             analysis_plugin,
             CliOptions(
-                tickers=frozenset(tickers),
-                final_year=final_year,
-                final_quarter=final_quarter,
+                tickers=tickers,
+                final_report=ReportDate(year=final_year, quarter=final_quarter),
             ),
         )
 

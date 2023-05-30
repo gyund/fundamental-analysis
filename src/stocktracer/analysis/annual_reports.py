@@ -13,19 +13,21 @@ logger = logging.getLogger(__name__)
 
 
 def create_normalized_sec_table(
-    sec_filter: Sec.Filter, options: Options, normalize: bool = True
+    sec_filter: Sec.Filter, tickers: list[str], normalize: bool = True
 ) -> Sec.Results.Table:
     """Create a normalized SEC table with all NA values removed.
 
     Args:
         sec_filter (Sec.Filter): filter to use for grabbing results
-        options (Options): user provided CLI options
+        tickers (list[str]): tickers to retrieve
         normalize (bool): Remove all columns that contain at least one NA value
 
     Returns:
         Sec.Results.Table: An SEC table with normalized results
     """
-    results = Sec.filter_data(tickers=options.tickers, sec_filter=sec_filter)
+    # prep for caching
+    tickers.sort()
+    results = Sec.filter_data(tickers=tickers, sec_filter=sec_filter)
 
     table = results.select()
     # If you prefer to see columns that are not universal across all stocks, comment this out
@@ -45,12 +47,12 @@ class Analysis(AnalysisInterface):
         sec_filter = Sec.Filter(
             # tags=["EarningsPerShareDiluted"],
             years=1,  # Over the past 1 years
-            last_report=self.options.last_report,
+            last_report=self.options.final_report,
             only_annual=True,  # We only want the 10-K
         )
 
         # Create an SEC Data Source
-        table = create_normalized_sec_table(sec_filter, self.options, False)
+        table = create_normalized_sec_table(sec_filter, self.options.tickers, False)
 
         return table.data
 

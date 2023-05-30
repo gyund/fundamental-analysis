@@ -58,15 +58,15 @@ class Analysis(AnalysisInterface):
                 "NetCashProvidedByUsedInOperatingActivities",
             },
             years=self.years_of_analysis,
-            last_report=self.options.last_report,
+            last_report=self.options.final_report,
             only_annual=True,  # We only want the 10-K
         )
 
-        table = create_normalized_sec_table(sec_filter, self.options, False)
+        table = create_normalized_sec_table(sec_filter, self.options.tickers, False)
         table.data.fillna(0, inplace=True)
 
         assert (
-            self.options.last_report.year + 1
+            self.options.final_report.year + 1
             not in table.data.index.get_level_values(1)
         )
 

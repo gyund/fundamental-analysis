@@ -1,11 +1,10 @@
 import logging
 
-import mock
 import pytest
 
 from stocktracer.analysis.annual_reports import Analysis
 from stocktracer.cli import Cli
-from stocktracer.interface import Options as CliOptions
+from stocktracer.interface import Options as CliOptions, ReportDate
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +20,8 @@ class TestCliAnnualReports:
     def test_analyze_direct(self):
         """Test direct calls so we can ensure caching occurs as well."""
         options = CliOptions(
-            tickers=frozenset(tickers),
-            final_year=final_year,
-            final_quarter=final_quarter,
+            tickers=tickers,
+            final_report=ReportDate(final_year, final_quarter),
         )
         analyzer = Analysis(options)
         result = analyzer.analyze()
