@@ -50,7 +50,8 @@ class Analysis(AnalysisInterface):
         table.calculate_current_ratio("current-ratio")
         table.data["good-stock"] = False
 
-        table.data.loc(axis=0)[list(tickers), "good-stock"] = True
+        for t in tickers:
+            table.data.loc[t, "good-stock"] = True
 
         table.data.fillna(0, inplace=True)
 
