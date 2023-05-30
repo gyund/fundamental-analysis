@@ -152,6 +152,6 @@ class Cli:
         # Call analysis plugin
         results = None
         results = analysis_module.analyze()
-        if results is None or results.empty:
+        if results is None:
             raise LookupError("No analysis results available!")
         return results, analysis_module

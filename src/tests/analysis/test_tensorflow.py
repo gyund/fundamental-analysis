@@ -20,7 +20,8 @@ class TestCliTensorflow:
             final_year=2023,
             final_quarter=1,
         )
-        assert result is None
+        assert result is not None
+        assert result.empty == True
         # logger.debug(f"annual_reports:\n{result.transpose().to_string()}")
         # Note: goog, and googl are pulled in, so it's 7 instead of 6
         # assert len(result.index) == 7

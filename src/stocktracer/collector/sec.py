@@ -472,9 +472,6 @@ class DataSetReader:
             sec_filter (Filter): results to filter out of the zip archive
             ciks (frozenset[int]): CIKs to filter data on
 
-        Raises:
-            ImportError: the filter doesn't match anything
-
         Returns:
             Optional[pd.DataFrame]: filtered data
         """
@@ -488,7 +485,8 @@ class DataSetReader:
                 )
 
                 if sub_dataframe is None or sub_dataframe.empty:
-                    raise ImportError("nothing found in sub.txt matching the filter")
+                    logger.debug("nothing found in sub.txt matching the filter")
+                    return None
 
                 with myzip.open("num.txt") as myfile:
                     return DataSetReader._process_num_text(
@@ -700,7 +698,7 @@ class DataSetCollector:
             ciks (frozenset[int]): CIK values to filter the datasets on
 
         Raises:
-            LookupError: when there are no results matching the filter
+            ImportError: when a download for a quarterly report fails
 
         Returns:
             Results: filtered data results
@@ -721,28 +719,30 @@ class DataSetCollector:
             for report_date in report_dates:
                 status_bar.text(f"Downloading report {report_date}...")
                 reader = self.download_manager.get_quarterly_report(report_date)
-                if isinstance(reader, DataSetReader):
-                    try:
-                        status_bar.text(f"Processing report {report_date}...")
-                        data = reader.process_zip(sec_filter, ciks)
-                        if data_frame is not None:
-                            logger.debug(f"record count: {len(data_frame)}")
-                        if data is not None:
-                            logger.debug(f"new record count: {len(data)}")
-                            data_frame = DataSetReader.append(data_frame, data)
-                            record_count = len(data_frame)
-                            status_bar(record_count)  # pylint: disable=not-callable
-                            logger.info(
-                                f"There are now {record_count} filtered records"
-                            )
 
-                    except ImportError:
-                        # Note, when searching for annual reports, this will generally occur 1/4 times
-                        # if we're only searching for one stock's tags
-                        logger.debug(
-                            f"{report_date} did not have any matches for the provided filter"
-                        )
-                        logger.debug(f"{sec_filter}")
+                if reader is None:
+                    raise ImportError(f"missing quarterly report for {report_date}")
+
+                status_bar.text(f"Processing report {report_date}...")
+                data = reader.process_zip(sec_filter, ciks)
+
+                if data is None:
+                    # Note, when searching for annual reports, this will generally occur 1/4 times
+                    # if we're only searching for one stock's tags
+                    logger.debug(
+                        f"{report_date} did not have any matches for the provided filter"
+                    )
+                    logger.debug(f"{sec_filter}")
+                    continue
+
+                if data_frame is not None:
+                    logger.debug(f"record count: {len(data_frame)}")
+
+                logger.debug(f"new record count: {len(data)}")
+                data_frame = DataSetReader.append(data_frame, data)
+                record_count = len(data_frame)
+                status_bar(record_count)  # pylint: disable=not-callable
+                logger.info(f"There are now {record_count} filtered records")
 
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
         if data_frame is None:
