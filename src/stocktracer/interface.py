@@ -1,6 +1,6 @@
 """Interfaces for the StockTracer Module."""
 import abc
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 from beartype import beartype

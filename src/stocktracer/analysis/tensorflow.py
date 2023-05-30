@@ -8,10 +8,10 @@ import pandas as pd
 import tensorflow_decision_forests as tfdf
 from beartype import beartype
 
+from stocktracer import cache
 from stocktracer.analysis.annual_reports import create_normalized_sec_table
 from stocktracer.collector.sec import Filter as SecFilter
 from stocktracer.interface import Analysis as AnalysisInterface
-from stocktracer import cache
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,6 @@ from beartype import beartype
 
 import stocktracer.collector.sec as Sec
 from stocktracer.interface import Analysis as AnalysisInterface
-from stocktracer.interface import Options
 
 logger = logging.getLogger(__name__)
 

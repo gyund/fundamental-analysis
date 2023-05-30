@@ -4,7 +4,8 @@ import pytest
 
 from stocktracer.analysis.annual_reports import Analysis
 from stocktracer.cli import Cli
-from stocktracer.interface import Options as CliOptions, ReportDate
+from stocktracer.interface import Options as CliOptions
+from stocktracer.interface import ReportDate
 
 logger = logging.getLogger(__name__)
 
