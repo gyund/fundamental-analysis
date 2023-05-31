@@ -14,10 +14,10 @@ Make sure you have [poetry](https://python-poetry.org/docs/) installed.
     cd fundamental-analysis.git
 
     # Normal development install
-    poetry install
+    poetry install --sync
 
     # With mkdocs
-    poetry install --with docs
+    poetry install --sync --with docs
 
     # Perform analysis
     PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft > report.txt

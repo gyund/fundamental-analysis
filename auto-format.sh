@@ -8,17 +8,17 @@ set -e
 
 pushd $dir > /dev/null
 echo "Running auto-format tools..."
-pipenv run ruff check --fix .
-pipenv run isort src/
-pipenv run black src/
+poetry run ruff check --fix .
+poetry run isort src/
+poetry run black src/
 
 echo "Running pydoctest..."
-PYTHONPATH=src pipenv run pydoctest --config pydocktest.json
+PYTHONPATH=src poetry run pydoctest --config pydocktest.json
 
 # Note: false positivies in the src/test from fixtures, etc.
 echo "Running pylint..."
-pipenv run pylint ${PYLINT_FLAG} src/stocktracer
+poetry run pylint ${PYLINT_FLAG} src/stocktracer
 echo "Running pydocstyle... (not required to pass)"
-pipenv run pydocstyle || echo "warnings - see above for recommendations"
+poetry run pydocstyle || echo "warnings - see above for recommendations"
 echo "success!"
 popd > /dev/null
