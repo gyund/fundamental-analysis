@@ -10,9 +10,11 @@
 name: Test - Upload Python Package
 
 on:
-  push:
-    branches:
-      - release-*
+  # push:
+  #   branches:
+  #     - release-*
+  pull_request:
+    branches: ["main"]
 
 jobs:
   deploy:
