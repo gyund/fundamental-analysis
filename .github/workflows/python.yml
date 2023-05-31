@@ -34,16 +34,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pipenv
-          pipenv install --dev
+          cache: "poetry"
+      - run: poetry install
       - name: Cache Network Requests
         uses: actions/cache@v3
         with:
@@ -54,16 +52,16 @@ jobs:
         if: ${{ !github.event.pull_request.draft }}
       - name: Run - unit-tests
         run: |
-          pipenv run coverage run -m pytest --doctest-modules
-          pipenv run coverage report
+          poetry run coverage run -m pytest --doctest-modules
+          poetry run coverage report
       # Just to cut down on network testing while initially iterating
       - name: Run - network-tests
         run: |
-          pipenv run coverage run -a -m pytest -m webtest --run-webtest
+          poetry run coverage run -a -m pytest -m webtest --run-webtest
         if: ${{ !github.event.pull_request.draft }}
       - name: Coveralls
         run: |
-          pipenv run coveralls --service=github
+          poetry run coveralls --service=github
       # - name: Coveralls
       #   uses: coverallsapp/github-action@v2
       #   with:
@@ -85,18 +83,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
-          cache: "pip"
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pipenv
-          pipenv lock --dev
-          pipenv requirements --dev > requirements.txt
-          pip install -r requirements.txt
+          python-version: "3.11"
+          cache: "poetry"
+      - run: poetry install
       - name: Lint - Ruff
         run: |
           ruff src
@@ -119,22 +113,21 @@ jobs:
       #   if: ${{ always() }}
       - name: Lint - pydoctest
         run: |
-          PYTHONPATH=src pipenv run pydoctest --config pydocktest.json
+          PYTHONPATH=src poetry run pydoctest --config pydocktest.json
         if: ${{ always() }}
 
   verify-packaging:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pipenv
-          pipenv lock
+          python-version: "3.11"
+          cache: "poetry"
+      - run: poetry install
       - name: Run Test
         run: |
           ./verify-packaging.sh
