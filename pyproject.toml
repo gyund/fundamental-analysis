@@ -91,17 +91,18 @@ output-format = ["colorized"]
 
 [tool.poetry]
 name = "stocktracer"
-version = "0.3.0"
+version = "0.3.1"
 description = "Tools for aggregating efficient ways to consume and process publically traded equities on the US stock market. Includes support for SEC quarterly data processing."
 authors = ["Gary Yund <gyund@users.noreply.github.com>"]
 # Per https://github.com/python-poetry/poetry/issues/7786
-license = "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)"
+# license = "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)"
 readme = "README.md"
 # homepage = "https://gyund.github.io/fundamental-analysis/"
 repository = "https://github.com/gyund/fundamental-analysis/"
 documentation = "https://gyund.github.io/fundamental-analysis/"
 keywords = [ "sec-tools", "fundamental analysis", "stocks" ]
 classifiers = [
+    "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)"
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Office/Business :: Financial :: Investment",
