@@ -36,8 +36,8 @@ jobs:
       - name: Test
         if: github.ref != 'refs/heads/main'
         run: |
-          mkdocs build --strict
+          poetry run mkdocs build --strict
       - name: Deploy
         if: github.ref == 'refs/heads/main'
         run: |
-          mkdocs gh-deploy --force
+          poetry run mkdocs gh-deploy --force
