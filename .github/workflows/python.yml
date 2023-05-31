@@ -94,28 +94,23 @@ jobs:
           cache: "poetry"
       - run: poetry install
       - name: Lint - Ruff
-        run: |
-          ruff src
+        run: poetry run ruff src
         if: ${{ always() }}
       - name: Lint - Black
-        run: |
-          black --check src
+        run: poetry run black --check src
         if: ${{ always() }}
       - name: Lint - isort
-        run: |
-          isort --check src
+        run: poetry run isort --check src
         if: ${{ always() }}
       - name: Lint - pylint (src/stocktracer)
-        run: |
-          pylint -E src/stocktracer
+        run: poetry run pylint -E src/stocktracer
         if: ${{ always() }}
       # - name: Lint - pydocstyle
       #   run: |
       #     pydocstyle
       #   if: ${{ always() }}
       - name: Lint - pydoctest
-        run: |
-          PYTHONPATH=src poetry run pydoctest --config pydocktest.json
+        run: PYTHONPATH=src poetry run pydoctest --config pydocktest.json
         if: ${{ always() }}
 
   verify-packaging:
