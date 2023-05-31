@@ -101,6 +101,7 @@ repository = "https://github.com/gyund/fundamental-analysis/"
 documentation = "https://gyund.github.io/fundamental-analysis/"
 keywords = [ "sec-tools", "fundamental analysis", "stocks" ]
 classifiers = [
+    "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Information Analysis",
     "Topic :: Office/Business :: Financial :: Investment",
