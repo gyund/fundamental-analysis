@@ -7,6 +7,6 @@ set -e
 pushd ${dir} > /dev/null
 rm -rf dist/
 poetry build
-poetry remove --all
+poetry env remove --all
 poetry run pip install dist/*.whl
 popd > /dev/null
