@@ -4,7 +4,7 @@
 
 ## Install
 
-Make sure you have `pipenv` installed through a package manager or through pip.
+Make sure you have [poetry](https://python-poetry.org/docs/) installed.
 
 === "git"
 
@@ -13,23 +13,27 @@ Make sure you have `pipenv` installed through a package manager or through pip.
     git clone https://github.com/gyund/fundamental-analysis.git
     cd fundamental-analysis.git
 
-    pipenv install --dev
+    # Normal development install
+    poetry install
+
+    # With mkdocs
+    poetry install --with docs
 
     # Perform analysis
-    PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft > report.txt
+    PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft > report.txt
 
     # Help
-    PYTHONPATH=src pipenv run python -m stocktracer
+    PYTHONPATH=src poetry run python -m stocktracer
 
     # Run Unit Tests
-    pipenv run pytest
+    poetry run pytest
     ```
 
 ## Generating a Basic Report
 
 ```sh
 # Perform analysis
-python -m ticker analyze --tickers aapl,msft > report.txt
+python -m stocktracer analyze --tickers aapl,msft > report.txt
 ```
 
 !!! tip
