@@ -16,6 +16,8 @@ If you plan to work on an issue, coordinate with the team by commenting in the i
 
 When submitting changes, we use black and isort to keep our code clean. Please run `./autoformat.sh` in the project directory to cleanup code before submitting. Checks will be performed by automated tools and give you a success message if the changes are expected to past all lint checks.
 
+Unless you are a maintainer, you should not upgrade lock files. This helps avoid any crazy merge conflicts. Maintainers can update the lock files just before pulling in your changes.
+
 ### Continuous Integration
 
 When opening a PR from a fork, some of the CI checks must be manually triggered by a member of the team. That means you don't need to worry if some of the CI checks are not running—we'll take care of it when we review the PR and, if there are any issues, we'll let you know.
