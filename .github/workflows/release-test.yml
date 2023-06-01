@@ -13,6 +13,9 @@ on:
   push:
     branches:
       - release-*
+      - "*/issue106"
+  # pull_request:
+  #   branches: ["main"]
 
 jobs:
   deploy:
