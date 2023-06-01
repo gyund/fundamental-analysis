@@ -42,22 +42,26 @@ stocktracer
 
 ### Developers
 
-Make sure you have `pipenv` installed through a package manager or through pip.
+Make sure you have [poetry](https://python-poetry.org/docs/) installed.
 
 ```sh
-pipenv install --dev
+# Normal development install
+poetry install --sync
+
+# With mkdocs
+poetry install --sync --with docs
 
 # Perform analysis
-PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft
-PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps
-PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format csv
-PYTHONPATH=src pipenv run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format json --report-file my_results.json
+PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft
+PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps
+PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format csv
+PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format json --report-file my_results.json
 
 # Help
-PYTHONPATH=src pipenv run python -m stocktracer
+PYTHONPATH=src poetry run python -m stocktracer
 
 # Run Unit Tests
-pipenv run pytest
+poetry run pytest
 ```
 
 More information can be found in our [documentation](https://gyund.github.io/fundamental-analysis/)
