@@ -780,7 +780,7 @@ class DataSetCollector:
         # filter.filtered_data = data_frame
 
 
-@cache.results.memoize(tag="sec")
+@cache.results.memoize(tag="sec", ignore=("download_manager"))
 def filter_data(
     tickers: list[str],
     sec_filter: Filter,

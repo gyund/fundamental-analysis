@@ -52,29 +52,30 @@ class Analysis(AnalysisInterface):
         table = create_normalized_sec_table(sec_filter, combined_tickers, False)
 
         table.calculate_return_on_assets("ROA")
-        table.calculate_net_income("net-income")
-        table.calculate_delta(column_name="delta-ROA", delta_of="ROA")
-        table.calculate_debt_to_assets("debt-to-assets")
-        table.calculate_current_ratio("current-ratio")
-        table.data["good-stock"] = False
+        table.calculate_net_income("net_income")
+        table.calculate_delta(column_name="delta_ROA", delta_of="ROA")
+        table.calculate_debt_to_assets("debt_to_assets")
+        table.calculate_current_ratio("current_ratio")
+        table.data["good_stock"] = False
 
         for t in tickers:
-            table.data.loc[t, "good-stock"] = True
+            table.data.loc[t.upper(), ["good_stock"]] = True
 
         table.data.fillna(0, inplace=True)
 
         logging.debug(
-            f"there are {table.data['good-stock'].sum()} good stocks in the training set"
+            f"there are {table.data['good_stock'].sum()} good stocks in the training set"
         )
 
         # Select Training Stocks
         train_df = table.slice(ticker=list(tickers))
+        logging.debug(f"training_data:\n{train_df.to_string()}")
 
         # Select Assessment Stocks
         test_df = table.slice(ticker=list(tickers.difference(self.options.tickers)))
 
-        train_ds = tfdf.keras.pd_dataframe_to_tf_dataset(train_df, label="good-stock")
-        test_ds = tfdf.keras.pd_dataframe_to_tf_dataset(test_df, label="good-stock")
+        train_ds = tfdf.keras.pd_dataframe_to_tf_dataset(train_df, label="good_stock")
+        test_ds = tfdf.keras.pd_dataframe_to_tf_dataset(test_df, label="good_stock")
 
         # Train a Random Forest model.
         model = tfdf.keras.RandomForestModel()
