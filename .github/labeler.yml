@@ -1,0 +1,14 @@
+test:
+  - src/tests/**/*
+
+source:
+  - src/stocktracer/**/*
+
+documentation:
+  - docs/**/*
+
+workflow:
+  - .github/workflows/**/*
+
+dependencies:
+  - poetry.lock
