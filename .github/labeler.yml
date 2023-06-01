@@ -1,7 +1,6 @@
 test:
   - src/tests/**/*
 
-# Add 'source' label to any change to src files within the source dir EXCEPT for the docs sub-folder
 source:
   - src/stocktracer/**/*
 
