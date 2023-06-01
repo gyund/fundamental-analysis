@@ -21,7 +21,7 @@ echo "Running diluted_eps analysis..."
 PYTHONPATH=src poetry run ${base_command} -a stocktracer.analysis.diluted_eps --report-format=md --report-file=${results_dir}/diluted_eps.md
 
 echo "Running tensorflow analysis..."
-PYTHONPATH=src pipenv run ${base_command} -a stocktracer.analysis.tensorflow > ${results_dir}/tensorflow.txt
+PYTHONPATH=src poetry run ${base_command} -a stocktracer.analysis.tensorflow > ${results_dir}/tensorflow.txt
 
 
 popd > /dev/null
