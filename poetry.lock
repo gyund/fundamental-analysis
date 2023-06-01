@@ -24,13 +24,13 @@ files = [
 
 [[package]]
 name = "alive-progress"
-version = "3.1.3"
+version = "3.1.4"
 description = "A new kind of Progress Bar, with real-time throughput, ETA, and very cool animations!"
 optional = false
 python-versions = ">=3.7, <4"
 files = [
-    {file = "alive-progress-3.1.3.tar.gz", hash = "sha256:a6597f81429d20f21d31f74389b14528bb818eb189b0db75f79df742a73a5ddf"},
-    {file = "alive_progress-3.1.3-py3-none-any.whl", hash = "sha256:602b8909a9767c8ad8ca85b1282521a74ef8a203fb4459a80250485d15983790"},
+    {file = "alive-progress-3.1.4.tar.gz", hash = "sha256:74a95d8d0d42bc99d3a3725dbd06ebb852245f1b64e301a7c375b92b22663f7b"},
+    {file = "alive_progress-3.1.4-py3-none-any.whl", hash = "sha256:c80ad87ce9c1054b01135a87fae69ecebbfc2107497ae87cbe6aec7e534903db"},
 ]
 
 [package.dependencies]
@@ -51,7 +51,10 @@ files = [
 [package.dependencies]
 lazy-object-proxy = ">=1.4.0"
 typing-extensions = {version = ">=4.0.0", markers = "python_version < \"3.11\""}
-wrapt = {version = ">=1.11,<2", markers = "python_version < \"3.11\""}
+wrapt = [
+    {version = ">=1.11,<2", markers = "python_version < \"3.11\""},
+    {version = ">=1.14,<2", markers = "python_version >= \"3.11\""},
+]
 
 [[package]]
 name = "astunparse"
@@ -1188,7 +1191,10 @@ files = [
 ]
 
 [package.dependencies]
-numpy = {version = ">=1.21.2", markers = "python_version > \"3.9\""}
+numpy = [
+    {version = ">=1.23.3", markers = "python_version > \"3.10\""},
+    {version = ">=1.21.2", markers = "python_version > \"3.9\""},
+]
 
 [package.extras]
 dev = ["absl-py", "pyink", "pylint (>=2.6.0)", "pytest", "pytest-xdist"]
@@ -1337,7 +1343,10 @@ files = [
 ]
 
 [package.dependencies]
-numpy = {version = ">=1.21.0", markers = "python_version >= \"3.10\""}
+numpy = [
+    {version = ">=1.21.0", markers = "python_version >= \"3.10\""},
+    {version = ">=1.23.2", markers = "python_version >= \"3.11\""},
+]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
 tzdata = ">=2022.1"
@@ -1521,7 +1530,10 @@ files = [
 [package.dependencies]
 astroid = ">=2.15.4,<=2.17.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
-dill = {version = ">=0.2", markers = "python_version < \"3.11\""}
+dill = [
+    {version = ">=0.2", markers = "python_version < \"3.11\""},
+    {version = ">=0.3.6", markers = "python_version >= \"3.11\""},
+]
 isort = ">=4.2.5,<6"
 mccabe = ">=0.6,<0.8"
 platformdirs = ">=2.2.0"
@@ -2102,6 +2114,33 @@ typing-extensions = ">=3.6.6"
 wrapt = ">=1.11.0,<1.15"
 
 [[package]]
+name = "tensorflow-decision-forests"
+version = "1.3.0"
+description = "Collection of training and inference decision forest algorithms."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "tensorflow_decision_forests-1.3.0-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:51d1989e951b36a524cc95d7ade74da9ef50768aa473ba56576f1efe453aafd7"},
+    {file = "tensorflow_decision_forests-1.3.0-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:809e232a1057c59aa2e1bba50fa95edcecfa1b1f8f4ee3c135323996926780ac"},
+    {file = "tensorflow_decision_forests-1.3.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:dbd9b8563af9ad5d56381fe483d75e593c8ecb820f1f671a79cc74fafc906225"},
+    {file = "tensorflow_decision_forests-1.3.0-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:123c6a896b90ca6e21cb571c3909e848a0242f799d9e93cd36891eb5016509f0"},
+    {file = "tensorflow_decision_forests-1.3.0-cp38-cp38-macosx_12_0_arm64.whl", hash = "sha256:1cb4d94689a2e9836b986706feeac3ae32f304311d92878ea93895386ed98128"},
+    {file = "tensorflow_decision_forests-1.3.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9729973a6b16ee75161cf2e8d68a8fddef3988db8e05734b94a3fad6780a916d"},
+    {file = "tensorflow_decision_forests-1.3.0-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:2a26b36bbd84b9c13661c43e856baa39c049d03d96a9b03bed52e7e2fa832c86"},
+    {file = "tensorflow_decision_forests-1.3.0-cp39-cp39-macosx_12_0_arm64.whl", hash = "sha256:fbb2acfe0a2268d33a58045f152cb0b0b502dfcfffceb1a585ca7e53edc90b2b"},
+    {file = "tensorflow_decision_forests-1.3.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bb8b07d3e39e00153428288202e1393991308411c0af542afdc7b721856aa15a"},
+]
+
+[package.dependencies]
+absl-py = "*"
+numpy = "*"
+pandas = "*"
+six = "*"
+tensorflow = ">=2.12.0,<2.13.0"
+wheel = "*"
+wurlitzer = "*"
+
+[[package]]
 name = "tensorflow-estimator"
 version = "2.12.0"
 description = "TensorFlow Estimator."
@@ -2372,7 +2411,18 @@ files = [
     {file = "wrapt-1.14.1.tar.gz", hash = "sha256:380a85cf89e0e69b7cfbe2ea9f765f004ff419f34194018a6827ac0e3edfed4d"},
 ]
 
+[[package]]
+name = "wurlitzer"
+version = "3.0.3"
+description = "Capture C-level output in context managers"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "wurlitzer-3.0.3-py3-none-any.whl", hash = "sha256:ffcc584109f5ecd5244abfde4534f22140f8735a4890ce1abd90b4e503f5f427"},
+    {file = "wurlitzer-3.0.3.tar.gz", hash = "sha256:224f5fe70618be3872c05dfddc8c457191ec1870654596279fcc1edadebe3e5b"},
+]
+
 [metadata]
 lock-version = "2.0"
-python-versions = "~3.10"
-content-hash = "2f50a55c6a398f56a2b335d5f2354767fc32f491225153020378d3a063ec06ad"
+python-versions = ">=3.10, <3.12"
+content-hash = "255833681a6646b554971fc56a707034e4f921d3060e0641c5a34d061160e8e3"
