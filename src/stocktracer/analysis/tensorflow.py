@@ -39,14 +39,22 @@ class Analysis(AnalysisInterface):
             only_annual=True,  # We only want the 10-K
         )
 
-        tickers = set()
-        tickers.add("aapl")
-        tickers.add("msft")
-        tickers.add("goog")
-        tickers.add("hd")
-        tickers.add("acn")
-        tickers.add("nvda")
-        combined_tickers = list(tickers.union(self.options.tickers))
+        good_tickers = set()
+        good_tickers.add("aapl")
+        good_tickers.add("msft")
+        good_tickers.add("goog")
+        good_tickers.add("hd")
+        good_tickers.add("acn")
+        good_tickers.add("nvda")
+
+        bad_tickers = set()
+        bad_tickers.add("wdc")
+        bad_tickers.add("nclh")
+        bad_tickers.add("grpn")
+        bad_tickers.add("capr")
+        combined_tickers = list(
+            good_tickers.union(self.options.tickers).union(bad_tickers)
+        )
 
         # Create an SEC Data Source
         table = create_normalized_sec_table(sec_filter, combined_tickers, False)
@@ -58,21 +66,23 @@ class Analysis(AnalysisInterface):
         table.calculate_current_ratio("current_ratio")
         table.data["good_stock"] = False
 
-        for t in tickers:
+        for t in good_tickers:
             table.data.loc[t.upper(), ["good_stock"]] = True
 
         table.data.fillna(0, inplace=True)
 
-        logging.debug(
-            f"there are {table.data['good_stock'].sum()} good stocks in the training set"
-        )
-
         # Select Training Stocks
-        train_df = table.slice(ticker=list(tickers))
+        train_df = table.slice(ticker=list(good_tickers.union(bad_tickers)))
+
+        logging.debug(
+            f"there are {train_df['good_stock'].sum()} good stocks in the training set"
+        )
         logging.debug(f"training_data:\n{train_df.to_string()}")
 
         # Select Assessment Stocks
-        test_df = table.slice(ticker=list(tickers.difference(self.options.tickers)))
+        test_df = table.slice(
+            ticker=list(good_tickers.difference(self.options.tickers))
+        )
 
         train_ds = tfdf.keras.pd_dataframe_to_tf_dataset(train_df, label="good_stock")
         test_ds = tfdf.keras.pd_dataframe_to_tf_dataset(test_df, label="good_stock")

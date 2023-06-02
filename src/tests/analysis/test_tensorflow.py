@@ -4,6 +4,7 @@ import mock
 import pytest
 
 from stocktracer.cli import Cli
+from stocktracer import cache
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +74,7 @@ class TestCliTensorflow:
 
     @pytest.mark.webtest
     def test_analyze(self):
+        cache.results.clear()
         self.cli.return_results = True
         result = self.cli.analyze(
             tickers=ticker_scan,
