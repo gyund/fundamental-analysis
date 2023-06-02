@@ -74,6 +74,7 @@ class TestCliTensorflow:
 
     @pytest.mark.webtest
     def test_analyze(self):
+        pytest.importorskip("tensorflow_decision_forests")
         cache.results.clear()
         self.cli.return_results = True
         result = self.cli.analyze(
@@ -89,6 +90,7 @@ class TestCliTensorflow:
         # assert len(result.index) == 7
 
     def test_invalid(self):
+        pytest.importorskip("tensorflow_decision_forests")
         with pytest.raises(LookupError, match="unable to find ticker: invalid"):
             self.cli.analyze(
                 tickers="invalid", analysis_plugin="stocktracer.analysis.diluted_eps"
