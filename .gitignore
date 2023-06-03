@@ -139,3 +139,4 @@ dmypy.json
 .*-cache
 .*-report
 .results/
+docs/.smoke-tests
