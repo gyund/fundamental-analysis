@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 
 import stocktracer.filter as Filter
+import stocktracer.collector.sec
 from stocktracer import cache
 from stocktracer.collector.sec import (
     DataSetReader,
@@ -17,6 +18,8 @@ from stocktracer.collector.sec import (
     TickerReader,
     filter_data,
     filter_data_nocache,
+    Results,
+    Filter as SecFilter,
 )
 from tests.fixtures.unit import (
     data_txt_sample,
@@ -44,6 +47,51 @@ def test_cache_key():
     )
     logger.debug(key_1)
     assert key_1 == key_2
+
+
+@mock.patch(
+    "stocktracer.collector.sec.filter_data_nocache",
+    return_value=Results(pd.DataFrame()),
+)
+def test_caching(monkeypatch: pytest.MonkeyPatch):
+    cache.results.clear()
+    cache.results.stats(enable=True, reset=True)
+
+    filter_data(tickers=["test"], sec_filter=SecFilter(years=1))
+    filter_data(tickers=["test"], sec_filter=SecFilter(years=1))
+    hits, misses = cache.results.stats(enable=False, reset=True)
+    assert 1 == misses
+    assert 1 == hits
+
+
+@mock.patch(
+    "stocktracer.collector.sec.filter_data_nocache",
+    return_value=Results(pd.DataFrame()),
+)
+def test_caching_years(monkeypatch: pytest.MonkeyPatch):
+    cache.results.clear()
+    cache.results.stats(enable=True, reset=True)
+
+    filter_data(tickers=["test"], sec_filter=SecFilter(years=1))
+    filter_data(tickers=["test"], sec_filter=SecFilter(years=2))
+    hits, misses = cache.results.stats(enable=False, reset=True)
+    assert 2 == misses
+    assert 0 == hits
+
+
+@mock.patch(
+    "stocktracer.collector.sec.filter_data_nocache",
+    return_value=Results(pd.DataFrame()),
+)
+def test_caching_tickers(monkeypatch: pytest.MonkeyPatch):
+    cache.results.clear()
+    cache.results.stats(enable=True, reset=True)
+
+    filter_data(tickers=["test"], sec_filter=SecFilter(years=1))
+    filter_data(tickers=["test2"], sec_filter=SecFilter(years=1))
+    hits, misses = cache.results.stats(enable=False, reset=True)
+    assert 2 == misses
+    assert 0 == hits
 
 
 class TestSec:
