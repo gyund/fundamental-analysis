@@ -4,7 +4,20 @@
 
 ## Install
 
-Make sure you have [poetry](https://python-poetry.org/docs/) installed.
+=== "pip"
+    ```sh
+    # basic install
+    pip install stocktracer
+
+    # with tensorflow dependencies for analysis modules
+    pip install stocktracer[tensorflow]
+
+    # Perform analysis
+    stocktracer analyze --tickers aapl,msft > report.txt
+
+    # Help
+    stocktracer
+    ```
 
 === "git"
 
@@ -14,13 +27,19 @@ Make sure you have [poetry](https://python-poetry.org/docs/) installed.
     cd fundamental-analysis.git
 
     # Normal development install
-    poetry install --sync
+    poetry install --sync # (1)!
 
     # With mkdocs
     poetry install --sync --with docs
+    
+    # with mkdocs and tensorflow dependency support
+    poetry install --sync --extras "tensorflow"  --with docs
 
     # Perform analysis
-    PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft > report.txt
+    PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft
+    PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps
+    PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format csv
+    PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format json --report-file my_results.json
 
     # Help
     PYTHONPATH=src poetry run python -m stocktracer
@@ -28,13 +47,22 @@ Make sure you have [poetry](https://python-poetry.org/docs/) installed.
     # Run Unit Tests
     poetry run pytest
     ```
+    
+    1. Make sure you have [poetry](https://python-poetry.org/docs/) installed.
 
 ## Generating a Basic Report
 
-```sh
-# Perform analysis
-python -m stocktracer analyze --tickers aapl,msft > report.txt
-```
+=== "pip"
+    ```sh
+    # Perform analysis
+    stocktracer analyze --tickers appl,msft > report.txt
+    ```
+
+=== "git"
+    ```sh
+    # Perform analysis
+    python -m stocktracer analyze --tickers aapl,msft > report.txt
+    ```
 
 !!! tip
     If you want to figure out a list of tags you can filter the reports on, run the default analysis report. This shows the annual report and will then filter out any columns that contain `null` or `NaN` values. From here, you can establish what algorithms you can use and apply consistently across the stocks of interest. You may find that different sectors or 10-K/10-Q reports will have different data sets.

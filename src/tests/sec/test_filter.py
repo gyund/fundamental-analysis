@@ -17,7 +17,7 @@ class TestFilter:
     def test_getRequiredReports_default(self):
         filter = Filter.SecFilter(
             years=1,
-            tags={"dummy"},
+            tags=["dummy"],
             last_report=ReportDate(year=2022, quarter=4),
         )
 
@@ -34,7 +34,7 @@ class TestFilter:
 
     def test_getRequiredReports_quarterly(self):
         filter = Filter.SecFilter(
-            tags={"dummy"},
+            tags=["dummy"],
             years=1,
             last_report=ReportDate(year=2022, quarter=4),
             only_annual=False,

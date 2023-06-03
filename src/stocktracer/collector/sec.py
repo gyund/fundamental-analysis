@@ -171,7 +171,7 @@ class Filter:
     """Filter for SEC tools to scrape relevant information when processing records."""
 
     years: int = field(hash=True)
-    tags: Optional[set[str]] = field(default=None, hash=True)
+    tags: Optional[list[str]] = field(default=None, hash=True)
     last_report: ReportDate = field(default=ReportDate(), hash=True)
     only_annual: bool = field(default=True, hash=True)
 
@@ -302,14 +302,14 @@ class Results:
 
         def slice(
             self,
-            ticker: Optional[str | int] = None,
+            ticker: Optional[str | list[str]] = None,
             year: Optional[int] = None,
             tags: Optional[list[str]] = None,
         ) -> pd.DataFrame:
             """Slice the results by the specified values
 
             Args:
-                ticker (Optional[str  |  int]): _description_. Defaults to None.
+                ticker (Optional[str | list[str]]): _description_. Defaults to None.
                 tags (Optional[str]): _description_. Defaults to None.
                 year (Optional[int]): _description_. Defaults to None.
 
@@ -318,6 +318,10 @@ class Results:
             """
             result = self.data
             if ticker:
+                if isinstance(ticker, str):
+                    ticker = ticker.upper()
+                else:
+                    ticker = [t.upper() for t in ticker]
                 result = result.loc(axis=0)[ticker, :]
             if year:
                 result = result.loc(axis=0)[:, year, :]
@@ -468,9 +472,6 @@ class DataSetReader:
             sec_filter (Filter): results to filter out of the zip archive
             ciks (frozenset[int]): CIKs to filter data on
 
-        Raises:
-            ImportError: the filter doesn't match anything
-
         Returns:
             Optional[pd.DataFrame]: filtered data
         """
@@ -484,7 +485,8 @@ class DataSetReader:
                 )
 
                 if sub_dataframe is None or sub_dataframe.empty:
-                    raise ImportError("nothing found in sub.txt matching the filter")
+                    logger.debug("nothing found in sub.txt matching the filter")
+                    return None
 
                 with myzip.open("num.txt") as myfile:
                     return DataSetReader._process_num_text(
@@ -696,7 +698,8 @@ class DataSetCollector:
             ciks (frozenset[int]): CIK values to filter the datasets on
 
         Raises:
-            LookupError: when there are no results matching the filter
+            ImportError: when a download for a quarterly report fails
+            LookupError: when the filter returned no matches
 
         Returns:
             Results: filtered data results
@@ -717,28 +720,30 @@ class DataSetCollector:
             for report_date in report_dates:
                 status_bar.text(f"Downloading report {report_date}...")
                 reader = self.download_manager.get_quarterly_report(report_date)
-                if isinstance(reader, DataSetReader):
-                    try:
-                        status_bar.text(f"Processing report {report_date}...")
-                        data = reader.process_zip(sec_filter, ciks)
-                        if data_frame is not None:
-                            logger.debug(f"record count: {len(data_frame)}")
-                        if data is not None:
-                            logger.debug(f"new record count: {len(data)}")
-                            data_frame = DataSetReader.append(data_frame, data)
-                            record_count = len(data_frame)
-                            status_bar(record_count)  # pylint: disable=not-callable
-                            logger.info(
-                                f"There are now {record_count} filtered records"
-                            )
 
-                    except ImportError:
-                        # Note, when searching for annual reports, this will generally occur 1/4 times
-                        # if we're only searching for one stock's tags
-                        logger.debug(
-                            f"{report_date} did not have any matches for the provided filter"
-                        )
-                        logger.debug(f"{sec_filter}")
+                if reader is None:
+                    raise ImportError(f"missing quarterly report for {report_date}")
+
+                status_bar.text(f"Processing report {report_date}...")
+                data = reader.process_zip(sec_filter, ciks)
+
+                if data is None:
+                    # Note, when searching for annual reports, this will generally occur 1/4 times
+                    # if we're only searching for one stock's tags
+                    logger.debug(
+                        f"{report_date} did not have any matches for the provided filter"
+                    )
+                    logger.debug(f"{sec_filter}")
+                    continue
+
+                if data_frame is not None:
+                    logger.debug(f"record count: {len(data_frame)}")
+
+                logger.debug(f"new record count: {len(data)}")
+                data_frame = DataSetReader.append(data_frame, data)
+                record_count = len(data_frame)
+                status_bar(record_count)  # pylint: disable=not-callable
+                logger.info(f"There are now {record_count} filtered records")
 
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
         if data_frame is None:
@@ -776,9 +781,10 @@ class DataSetCollector:
         # filter.filtered_data = data_frame
 
 
-@cache.results.memoize(tag="sec")
+@beartype
+@cache.results.memoize(tag="sec", ignore=("download_manager"))
 def filter_data(
-    tickers: set[str],
+    tickers: list[str],
     sec_filter: Filter,
     download_manager: DownloadManager = DownloadManager(),
 ) -> Results:
@@ -787,7 +793,7 @@ def filter_data(
     Filtered data is stored with the filter
 
     Args:
-        tickers (set[str]): ticker symbols you want information about
+        tickers (list[str]): ticker symbols you want information about
         sec_filter (Filter): SEC specific data to scrape from the reports
         download_manager (DownloadManager): download manager to use
 
@@ -796,30 +802,29 @@ def filter_data(
     """
     logger.debug(f"tickers:\n{repr(tickers)}")
     logger.debug(f"sec_filter:\n{repr(sec_filter)}")
-    return filter_data_nocache(tickers, sec_filter, download_manager)
+    return filter_data_nocache(frozenset(tickers), sec_filter, download_manager)
 
 
 def filter_data_nocache(
-    tickers: set[str],
+    tickers: frozenset[str],
     sec_filter: Filter,
     download_manager: DownloadManager = DownloadManager(),
 ) -> Results:
     """Same as filter_data but no caching is applied.
 
     Args:
-        tickers (set[str]): ticker symbols you want information about
+        tickers (frozenset[str]): ticker symbols you want information about
         sec_filter (Filter): SEC specific data to scrape from the reports
         download_manager (DownloadManager): download manager to use
 
     Returns:
         Results: results with filtered data
     """
-    ticker_set = frozenset(tickers)
     collector = DataSetCollector(download_manager)
     ticker_reader = download_manager.ticker_reader
 
     # Returns true or throws
-    ticker_reader.contains(ticker_set)
+    ticker_reader.contains(tickers)
 
-    ciks = ticker_reader.get_ciks(tickers=ticker_set)
+    ciks = ticker_reader.get_ciks(tickers=tickers)
     return collector.get_data(sec_filter, ciks)

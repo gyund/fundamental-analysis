@@ -10,26 +10,15 @@ from stocktracer.collector.sec import ReportDate
 
 
 @beartype
-@dataclass
+@dataclass(frozen=True)
 class Options:
     """Command Line Options."""
 
-    def __init__(
-        self,
-        tickers: frozenset[str],
-        final_year: int | None,
-        final_quarter: int | None,
-    ):
-        """Options.
+    tickers: list[str]
+    final_report: ReportDate = ReportDate()
 
-        Args:
-            tickers (frozenset[str]): tickers to scrape from data sets
-            final_year (int | None): last year to consider for report collection
-            final_quarter (int | None): last quarter to consider for report collection
-        """
-        self.tickers = list(tickers)
+    def __post_init__(self):
         self.tickers.sort()
-        self.last_report = ReportDate(year=final_year, quarter=final_quarter)
 
 
 @beartype

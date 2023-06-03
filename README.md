@@ -30,7 +30,11 @@ The goal of this project is aggregate a variety of ways to consume information a
 ### Users
 
 ```sh
+# basic install
 pip install stocktracer
+
+# with tensorflow dependencies for analysis modules
+pip install stocktracer[tensorflow]
 
 # Perform analysis
 stocktracer analyze --tickers aapl,msft > report.txt
@@ -40,31 +44,7 @@ stocktracer
 
 ```
 
-### Developers
-
-Make sure you have [poetry](https://python-poetry.org/docs/) installed.
-
-```sh
-# Normal development install
-poetry install --sync
-
-# With mkdocs
-poetry install --sync --with docs
-
-# Perform analysis
-PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft
-PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps
-PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format csv
-PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format json --report-file my_results.json
-
-# Help
-PYTHONPATH=src poetry run python -m stocktracer
-
-# Run Unit Tests
-poetry run pytest
-```
-
-More information can be found in our [documentation](https://gyund.github.io/fundamental-analysis/)
+For development guides, see our [documentation](https://gyund.github.io/fundamental-analysis/getting-started)
 
 ## Disclaimer
 

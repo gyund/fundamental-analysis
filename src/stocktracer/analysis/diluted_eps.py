@@ -21,9 +21,9 @@ class Analysis(AnalysisInterface):
     def analyze(self) -> Optional[pd.DataFrame]:
         # Create the filter we'll use to scrape the results
         sec_filter = Sec.Filter(
-            tags={"EarningsPerShareDiluted"},
+            tags=["EarningsPerShareDiluted"],
             years=self.years_of_analysis,
-            last_report=self.options.last_report,
+            last_report=self.options.final_report,
             only_annual=True,  # We only want the 10-K
         )
 
