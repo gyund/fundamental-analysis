@@ -27,6 +27,8 @@ theme:
     view: material/eye
   features:
     - content.action.edit
+    - content.code.annotate
+    - content.tabs.link
     - navigation.instant
     - navigation.tracking
     - navigation.sections
