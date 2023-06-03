@@ -168,7 +168,7 @@ class TestSec:
         ticker_reader.get_ciks = mock.Mock(return_value=frozenset({320193, 789019}))
 
         results = filter_data_nocache(
-            tickers={"aapl"},
+            tickers=frozenset(("aapl")),
             sec_filter=Filter.SecFilter(years=1, last_report=ReportDate(2023, 1)),
             download_manager=download_manager,
         )

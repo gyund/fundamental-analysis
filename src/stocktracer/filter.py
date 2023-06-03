@@ -20,5 +20,5 @@ class Selectors:
     the class is needed.
     """
 
-    ticker_filter: set[str]
+    ticker_filter: list[str]
     sec_filter: SecFilter

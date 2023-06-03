@@ -15,7 +15,7 @@ def filter_aapl():
 
 def filter_aapl_years(history_in_years: int = 0) -> Filter.Selectors:
     return Filter.Selectors(
-        ticker_filter={"aapl"},
+        ticker_filter=["aapl"],
         sec_filter=Filter.SecFilter(
             tags=["EntityCommonStockSharesOutstanding"],
             years=history_in_years,  # Just want the current
