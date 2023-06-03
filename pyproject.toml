@@ -91,7 +91,7 @@ output-format = ["colorized"]
 
 [tool.poetry]
 name = "stocktracer"
-version = "0.3.1"
+version = "0.4.0"
 description = "Tools for aggregating efficient ways to consume and process publically traded equities on the US stock market. Includes support for SEC quarterly data processing."
 authors = ["Gary Yund <gyund@users.noreply.github.com>"]
 # Per https://github.com/python-poetry/poetry/issues/7786
