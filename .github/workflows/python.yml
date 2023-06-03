@@ -193,6 +193,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: smoke-results 3.10
+          path: ${{ github.workspace }}/docs/.smoke-tests
       - name: Test
         if: github.ref != 'refs/heads/main'
         run: |
