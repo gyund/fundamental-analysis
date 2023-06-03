@@ -79,6 +79,13 @@ jobs:
       #     format: python
       #   if: ${{ success() }}
 
+      - uses: actions/upload-artifact@v3
+        with:
+          retention-days: 5
+          name: smoke-results ${{ matrix.python-version }}
+          path: ${{ github.workspace }}/docs/.smoke-tests
+        if: ${{ !github.event.pull_request.draft }}
+
       # - name: Upload pytest test results
       #   uses: actions/upload-artifact@v3
       #   with:
@@ -162,3 +169,33 @@ jobs:
     #     github-token: ${{ secrets.GITHUB_TOKEN }}
     #     parallel-finished: true
     #     carryforward: "run-1,run-2,run-3"
+
+  docs:
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: ${{ !github.event.pull_request.draft }}
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install poetry
+        run: |
+          pipx install poetry
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "poetry"
+      - run: poetry install --with docs
+      - uses: actions/download-artifact@v3
+        with:
+          name: smoke-results 3.10
+      - name: Test
+        if: github.ref != 'refs/heads/main'
+        run: |
+          poetry run mkdocs build --strict
+      - name: Deploy
+        if: github.ref == 'refs/heads/main'
+        run: |
+          poetry run mkdocs gh-deploy --force
