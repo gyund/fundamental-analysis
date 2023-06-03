@@ -171,7 +171,7 @@ class Filter:
     """Filter for SEC tools to scrape relevant information when processing records."""
 
     years: int = field(hash=True)
-    tags: Optional[set[str]] = field(default=None, hash=True)
+    tags: Optional[list[str]] = field(default=None, hash=True)
     last_report: ReportDate = field(default=ReportDate(), hash=True)
     only_annual: bool = field(default=True, hash=True)
 
@@ -781,6 +781,7 @@ class DataSetCollector:
         # filter.filtered_data = data_frame
 
 
+@beartype
 @cache.results.memoize(tag="sec", ignore=("download_manager"))
 def filter_data(
     tickers: list[str],

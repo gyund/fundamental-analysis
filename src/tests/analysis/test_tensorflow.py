@@ -93,5 +93,5 @@ class TestCliTensorflow:
         pytest.importorskip("tensorflow_decision_forests")
         with pytest.raises(LookupError, match="unable to find ticker: invalid"):
             self.cli.analyze(
-                tickers="invalid", analysis_plugin="stocktracer.analysis.diluted_eps"
+                tickers="invalid", analysis_plugin="stocktracer.analysis.tensorflow"
             )

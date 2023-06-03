@@ -25,7 +25,7 @@ class Analysis(AnalysisInterface):
     def analyze(self) -> Optional[pd.DataFrame]:
         # Build a training set involving good companies
         sec_filter = SecFilter(
-            tags={
+            tags=[
                 "EarningsPerShareDiluted",
                 "CommonStockSharesIssued",
                 "AssetsCurrent",
@@ -33,7 +33,7 @@ class Analysis(AnalysisInterface):
                 "Assets",
                 "OperatingIncomeLoss",
                 "NetCashProvidedByUsedInOperatingActivities",
-            },
+            ],
             years=5,  # Over the past 5 years
             last_report=self.options.final_report,
             only_annual=True,  # We only want the 10-K
