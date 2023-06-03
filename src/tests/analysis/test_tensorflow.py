@@ -75,7 +75,7 @@ class TestCliTensorflow:
     @pytest.mark.webtest
     def test_analyze(self):
         pytest.importorskip("tensorflow_decision_forests")
-        cache.results.clear()
+        cache.results.evict(tag="sec")
         self.cli.return_results = True
         result = self.cli.analyze(
             tickers=ticker_scan,

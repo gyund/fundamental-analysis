@@ -53,7 +53,7 @@ def test_cache_key():
     return_value=Results(pd.DataFrame()),
 )
 def test_caching(monkeypatch: pytest.MonkeyPatch):
-    cache.results.clear()
+    cache.results.evict(tag="sec")
     cache.results.stats(enable=True, reset=True)
 
     filter_data(tickers=["test"], sec_filter=SecFilter(years=1))
@@ -68,7 +68,7 @@ def test_caching(monkeypatch: pytest.MonkeyPatch):
     return_value=Results(pd.DataFrame()),
 )
 def test_caching_years(monkeypatch: pytest.MonkeyPatch):
-    cache.results.clear()
+    cache.results.evict(tag="sec")
     cache.results.stats(enable=True, reset=True)
 
     filter_data(tickers=["test"], sec_filter=SecFilter(years=1))
@@ -83,7 +83,7 @@ def test_caching_years(monkeypatch: pytest.MonkeyPatch):
     return_value=Results(pd.DataFrame()),
 )
 def test_caching_tickers(monkeypatch: pytest.MonkeyPatch):
-    cache.results.clear()
+    cache.results.evict(tag="sec")
     cache.results.stats(enable=True, reset=True)
 
     filter_data(tickers=["test"], sec_filter=SecFilter(years=1))
