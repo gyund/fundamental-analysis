@@ -7,14 +7,14 @@ version: 2
 updates:
   - package-ecosystem: "pip" # See documentation for possible values
     versioning-strategy: auto
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
     assignees:
       - "gyund"
   - package-ecosystem: "github-actions"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
     directory: "/"
     schedule:
       interval: "weekly"
