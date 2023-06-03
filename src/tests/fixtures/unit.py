@@ -17,7 +17,7 @@ def filter_aapl_years(history_in_years: int = 0) -> Filter.Selectors:
     return Filter.Selectors(
         ticker_filter={"aapl"},
         sec_filter=Filter.SecFilter(
-            tags={"EntityCommonStockSharesOutstanding"},
+            tags=["EntityCommonStockSharesOutstanding"],
             years=history_in_years,  # Just want the current
             last_report=ReportDate(year=2023, quarter=1),
             only_annual=False,
@@ -93,6 +93,7 @@ def sec_fake_report(
         sub_dataframe=sub_df,
     )
     ticker_reader = mock.MagicMock(TickerReader)
+    assert num_df is not None
     assert not num_df.empty
     return filter_aapl
 
@@ -100,7 +101,7 @@ def sec_fake_report(
 @pytest.fixture
 def sec_manufactured_fake_report(
     filter_aapl: Filter.Selectors, fake_sub_txt_sample, fake_data_txt_sample
-) -> Filter.Selectors:
+) -> DataFrame:
     return sec_manufactured_fake_report_impl(
         filter_aapl, fake_sub_txt_sample, fake_data_txt_sample
     )
@@ -109,7 +110,8 @@ def sec_manufactured_fake_report(
 def sec_manufactured_fake_report_impl(
     selector: Filter.Selectors, sub_txt: str, data_txt: str
 ) -> DataFrame:
-    selector.sec_filter.tags.add("FakeAttributeTag")
+    assert selector.sec_filter.tags is not None
+    selector.sec_filter.tags.append("FakeAttributeTag")
     sub_df = DataSetReader._process_sub_text(
         filepath_or_buffer=io.StringIO(sub_txt),
         sec_filter=selector.sec_filter,

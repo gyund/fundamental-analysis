@@ -18,7 +18,7 @@ def test_Selectors_init():
     assert default_selector.sec_filter.only_annual is True
     selector = Filter.Selectors(
         ticker_filter={"aapl"},
-        sec_filter=SecFilter(years=1, tags={"EntityCommonStockSharesOutstanding"}),
+        sec_filter=SecFilter(years=1, tags=["EntityCommonStockSharesOutstanding"]),
     )
     assert "aapl" in selector.ticker_filter
     assert selector.sec_filter.tags is not None
@@ -26,7 +26,7 @@ def test_Selectors_init():
 
     selector = Filter.Selectors(
         ticker_filter={"aapl"},
-        sec_filter=SecFilter(years=1, tags={"EntityCommonStockSharesOutstanding"}),
+        sec_filter=SecFilter(years=1, tags=["EntityCommonStockSharesOutstanding"]),
     )
     assert "aapl" in selector.ticker_filter
     assert selector.sec_filter.tags is not None

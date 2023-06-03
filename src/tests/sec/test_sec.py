@@ -38,11 +38,11 @@ logger = logging.getLogger(__name__)
 def test_cache_key():
     key_1 = filter_data.__cache_key__(
         tickers=frozenset({"msft", "aapl"}),
-        sec_filter=Filter.SecFilter(years=1, tags={"Assets"}),
+        sec_filter=Filter.SecFilter(years=1, tags=["Assets"]),
     )
     key_2 = filter_data.__cache_key__(
         tickers=frozenset({"msft", "aapl"}),
-        sec_filter=Filter.SecFilter(years=1, tags={"Assets"}),
+        sec_filter=Filter.SecFilter(years=1, tags=["Assets"]),
     )
     logger.debug(key_1)
     assert key_1 == key_2
@@ -117,8 +117,8 @@ class TestSec:
 
         with pytest.raises(KeyError, match="cik"):
             filter_data_nocache(
-                tickers={"aapl", "msft"},
-                sec_filter=Filter.SecFilter(years=1, tags={"test"}),
+                tickers=frozenset(("aapl", "msft")),
+                sec_filter=Filter.SecFilter(years=1, tags=["test"]),
                 download_manager=download_manager,
             )
         ticker_reader.contains.assert_called()
