@@ -699,6 +699,7 @@ class DataSetCollector:
 
         Raises:
             ImportError: when a download for a quarterly report fails
+            LookupError: when the filter returned no matches
 
         Returns:
             Results: filtered data results

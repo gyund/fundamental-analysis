@@ -8,18 +8,17 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import stocktracer.filter as Filter
 import stocktracer.collector.sec
+import stocktracer.filter as Filter
 from stocktracer import cache
+from stocktracer.collector.sec import DataSetReader, DownloadManager
+from stocktracer.collector.sec import Filter as SecFilter
 from stocktracer.collector.sec import (
-    DataSetReader,
-    DownloadManager,
     ReportDate,
+    Results,
     TickerReader,
     filter_data,
     filter_data_nocache,
-    Results,
-    Filter as SecFilter,
 )
 from tests.fixtures.unit import (
     data_txt_sample,

@@ -3,8 +3,8 @@ import logging
 import mock
 import pytest
 
-from stocktracer.cli import Cli
 from stocktracer import cache
+from stocktracer.cli import Cli
 
 logger = logging.getLogger(__name__)
 
