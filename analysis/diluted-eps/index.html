@@ -71,7 +71,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#usage" class="md-skip">
+        <a href="#example" class="md-skip">
           Skip to content
         </a>
       
@@ -413,15 +413,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    Usage
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#sample-output" class="md-nav__link">
-    Sample Output
+  <a href="#example" class="md-nav__link">
+    Example
   </a>
   
 </li>
@@ -895,115 +888,16 @@
 <p class="admonition-title">Experimental</p>
 </div>
 <p>Calculate the diluted EPS for the past 5 years for the requested stocks.</p>
-<h2 id="usage">Usage</h2>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">base_command</span><span class="o">=</span><span class="s2">&quot;python -m stocktracer analyze </span><span class="si">${</span><span class="nv">SMOKE_OPTIONS</span><span class="si">}</span><span class="s2"> --tickers aapl,msft,tmo,goog,googl,amzn,meta,acn,wm&quot;</span><span class="w"> </span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Running diluted_eps analysis...&quot;</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nv">PYTHONPATH</span><span class="o">=</span>src<span class="w"> </span>poetry<span class="w"> </span>run<span class="w"> </span><span class="si">${</span><span class="nv">base_command</span><span class="si">}</span><span class="w"> </span>-a<span class="w"> </span>stocktracer.analysis.diluted_eps<span class="w"> </span>--report-format<span class="o">=</span>md<span class="w"> </span>--report-file<span class="o">=</span><span class="si">${</span><span class="nv">results_dir</span><span class="si">}</span>/diluted_eps.md
+<h2 id="example">Example</h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">command</label><label for="__tabbed_1_2">output</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>
 </span></code></pre></div>
-<h2 id="sample-output">Sample Output</h2>
-<table>
-<thead>
-<tr>
-<th align="left">tag</th>
-<th align="right">('AAPL', 2018.0)</th>
-<th align="right">('AAPL', 2019.0)</th>
-<th align="right">('AAPL', 2020.0)</th>
-<th align="right">('AAPL', 2021.0)</th>
-<th align="right">('AAPL', 2022.0)</th>
-<th align="right">('ACN', 2018.0)</th>
-<th align="right">('ACN', 2019.0)</th>
-<th align="right">('ACN', 2020.0)</th>
-<th align="right">('ACN', 2021.0)</th>
-<th align="right">('ACN', 2022.0)</th>
-<th align="right">('AMZN', 2018.0)</th>
-<th align="right">('AMZN', 2019.0)</th>
-<th align="right">('AMZN', 2020.0)</th>
-<th align="right">('AMZN', 2021.0)</th>
-<th align="right">('AMZN', 2022.0)</th>
-<th align="right">('GOOG', 2018.0)</th>
-<th align="right">('GOOG', 2019.0)</th>
-<th align="right">('GOOG', 2020.0)</th>
-<th align="right">('GOOG', 2021.0)</th>
-<th align="right">('GOOG', 2022.0)</th>
-<th align="right">('GOOGL', 2018.0)</th>
-<th align="right">('GOOGL', 2019.0)</th>
-<th align="right">('GOOGL', 2020.0)</th>
-<th align="right">('GOOGL', 2021.0)</th>
-<th align="right">('GOOGL', 2022.0)</th>
-<th align="right">('META', 2018.0)</th>
-<th align="right">('META', 2019.0)</th>
-<th align="right">('META', 2020.0)</th>
-<th align="right">('META', 2021.0)</th>
-<th align="right">('META', 2022.0)</th>
-<th align="right">('MSFT', 2018.0)</th>
-<th align="right">('MSFT', 2019.0)</th>
-<th align="right">('MSFT', 2020.0)</th>
-<th align="right">('MSFT', 2021.0)</th>
-<th align="right">('MSFT', 2022.0)</th>
-<th align="right">('TMO', 2018.0)</th>
-<th align="right">('TMO', 2019.0)</th>
-<th align="right">('TMO', 2020.0)</th>
-<th align="right">('TMO', 2021.0)</th>
-<th align="right">('TMO', 2022.0)</th>
-<th align="right">('WM', 2018.0)</th>
-<th align="right">('WM', 2019.0)</th>
-<th align="right">('WM', 2020.0)</th>
-<th align="right">('WM', 2021.0)</th>
-<th align="right">('WM', 2022.0)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="left">EarningsPerShareDiluted</td>
-<td align="right">0.189636</td>
-<td align="right">0.0892727</td>
-<td align="right">-0.247455</td>
-<td align="right">-1.165</td>
-<td align="right">-1.165</td>
-<td align="right">0.011</td>
-<td align="right">0.106545</td>
-<td align="right">0.114727</td>
-<td align="right">-0.00681818</td>
-<td align="right">-0.297636</td>
-<td align="right">1.08282</td>
-<td align="right">0.272818</td>
-<td align="right">1.53255</td>
-<td align="right">20.9</td>
-<td align="right">-1.18</td>
-<td align="right">7.925</td>
-<td align="right">15.58</td>
-<td align="right">7.455</td>
-<td align="right">31.52</td>
-<td align="right">0.815</td>
-<td align="right">7.925</td>
-<td align="right">15.58</td>
-<td align="right">7.455</td>
-<td align="right">31.52</td>
-<td align="right">0.815</td>
-<td align="right">2.04</td>
-<td align="right">0.52</td>
-<td align="right">1.26</td>
-<td align="right">3.67</td>
-<td align="right">0.75</td>
-<td align="right">-0.0295455</td>
-<td align="right">-0.331818</td>
-<td align="right">0.123273</td>
-<td align="right">1.495</td>
-<td align="right">1.945</td>
-<td align="right">0.143182</td>
-<td align="right">0.539182</td>
-<td align="right">-0.965</td>
-<td align="right">-1.75</td>
-<td align="right">0.915</td>
-<td align="right">0.106727</td>
-<td align="right">-0.326636</td>
-<td align="right">0.465</td>
-<td align="right">-0.19</td>
-<td align="right">-0.935</td>
-</tr>
-</tbody>
-</table>
+</div>
+<div class="tabbed-block"></div>
+</div>
+</div>
 
   <hr>
 <div class="md-source-file">

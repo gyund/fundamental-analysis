@@ -71,7 +71,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#usage" class="md-skip">
+        <a href="#example" class="md-skip">
           Skip to content
         </a>
       
@@ -399,15 +399,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
-    Usage
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#sample-output" class="md-nav__link">
-    Sample Output
+  <a href="#example" class="md-nav__link">
+    Example
   </a>
   
 </li>
@@ -895,21 +888,19 @@
 <p class="admonition-title">Experimental</p>
 </div>
 <p>This analysis module grabs the annual reports and data associated data.</p>
-<h2 id="usage">Usage</h2>
-<div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">base_command</span><span class="o">=</span><span class="s2">&quot;python -m stocktracer analyze </span><span class="si">${</span><span class="nv">SMOKE_OPTIONS</span><span class="si">}</span><span class="s2"> --tickers aapl,msft,tmo,goog,googl,amzn,meta,acn,wm&quot;</span><span class="w"> </span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Running default analysis...&quot;</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nv">PYTHONPATH</span><span class="o">=</span>src<span class="w"> </span>poetry<span class="w"> </span>run<span class="w"> </span><span class="si">${</span><span class="nv">base_command</span><span class="si">}</span><span class="w"> </span>--report-format<span class="o">=</span>csv<span class="w">  </span>&gt;<span class="w"> </span><span class="si">${</span><span class="nv">results_dir</span><span class="si">}</span>/default.csv
+<h2 id="example">Example</h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">command</label><label for="__tabbed_1_2">output</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>
 </span></code></pre></div>
-<h2 id="sample-output">Sample Output</h2>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>ticker,AAPL,ACN,AMZN,GOOG,GOOGL,META,MSFT,TMO,WM
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>fy,2022.0,2022.0,2022.0,2022.0,2022.0,2022.0,2022.0,2022.0,2022.0
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>tag,,,,,,,,,
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>AccountsPayableCurrent,59439000000.0,2416771000.0,79132000000.0,5582500000.0,5582500000.0,,17081500000.0,3124000000.0,1570500000.0
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>AccountsPayableOtherCurrent,,,,,,1084500000.0,,,
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>AccountsPayableTradeCurrent,,,,,,4536500000.0,,,
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>AccountsReceivableAllowanceForCreditLossOther,,,,,,,,,-6000000.0
+</div>
+<div class="tabbed-block">
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>
 </span></code></pre></div>
+</div>
+</div>
+</div>
 
   <hr>
 <div class="md-source-file">
