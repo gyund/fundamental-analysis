@@ -80,6 +80,47 @@ class TestResults:
         data = df.set_index(["ticker", "fy"])
         return SecResults.Table(data)
 
+    def test_tags(self):
+        data = pd.DataFrame(
+            data={
+                "ticker": ["AAPL", "MSFT"],
+                "fy": [2021, 2022],
+                "OperatingIncomeLoss": [10, 20],
+                "Stuff": [3, 4],
+            },
+        )
+        result = self._prepare_table(data)
+        assert "OperatingIncomeLoss" in result.tags
+
+    def test_get_value(self):
+        data = pd.DataFrame(
+            data={
+                "ticker": ["AAPL", "MSFT"],
+                "fy": [2021, 2022],
+                "OperatingIncomeLoss": [10, 20],
+                "Stuff": [3, 4],
+            },
+        )
+        result = self._prepare_table(data)
+        logger.debug(result)
+        assert (
+            result.get_value(ticker="AAPL", tag="OperatingIncomeLoss", year=2021) == 10
+        )
+
+    def test_normalize(self):
+        data = pd.DataFrame(
+            data={
+                "ticker": ["AAPL", "MSFT"],
+                "fy": [2021, 2022],
+                "OperatingIncomeLoss": [10, 20],
+                "Stuff": [np.nan, 4],
+            },
+        )
+        result = self._prepare_table(data)
+        assert "Stuff" in result.tags
+        result.normalize()
+        assert "Stuff" not in result.tags
+
     def test_slice(self):
         data = pd.DataFrame(
             data={

@@ -282,7 +282,7 @@ class Results:
             """
             return self.data.columns.values
 
-        def get_value(self, ticker: str, tag: str, year: int) -> int | float:
+        def get_value(self, ticker: str, tag: str, year: int) -> int | float | np.int64:
             """Retrieve the exact value of a table cell.
 
             Args:
@@ -291,7 +291,7 @@ class Results:
                 year (int): The year this data applies to.
 
             Returns:
-                int | float: value of result
+                int | float | np.int64: value of result
             """
             # Lookup convert ticker to cik
             ticker = ticker.upper()
