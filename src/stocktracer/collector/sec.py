@@ -19,7 +19,7 @@ from stocktracer import cache
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_CHUNK_SIZE = 1000000
+DEFAULT_CHUNK_SIZE = 500000
 pd.set_option("mode.chained_assignment", "raise")
 
 
@@ -512,8 +512,8 @@ class DataSetReader:
             chunksize=DEFAULT_CHUNK_SIZE,
             parse_dates=["ddate"],
         )
-        # filtered_data = cls.process_num_parallel(sec_filter, sub_dataframe, reader)
-        filtered_data = cls.process_num_serial(sec_filter, sub_dataframe, reader)
+        filtered_data = cls.process_num_parallel(sec_filter, sub_dataframe, reader)
+        # filtered_data = cls.process_num_serial(sec_filter, sub_dataframe, reader)
 
         # if filtered_data is not None:  # pragma: no cover
         #     logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
