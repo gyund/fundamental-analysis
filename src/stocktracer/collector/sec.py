@@ -1,8 +1,8 @@
 """This data source grabs information from quarterly SEC data archives."""
 import copy
 import logging
-import sys
 import multiprocessing as mp
+import sys
 from dataclasses import dataclass, field
 from datetime import date
 from io import BytesIO
