@@ -1,7 +1,7 @@
 """This data source grabs information from quarterly SEC data archives."""
 import copy
 import logging
-from concurrent.futures import ThreadPoolExecutor, Future
+from concurrent.futures import ThreadPoolExecutor, Future, ProcessPoolExecutor
 import sys
 from dataclasses import dataclass, field
 from datetime import date
@@ -541,7 +541,7 @@ class DataSetReader:
         chunk: pd.DataFrame
         funclist: list[Future] = []
 
-        with ThreadPoolExecutor(max_workers=None) as executor:
+        with ProcessPoolExecutor(max_workers=None) as executor:
             for chunk in reader:
                 future = executor.submit(
                     cls.process_num_chunk, sec_filter, sub_dataframe, chunk
