@@ -243,6 +243,12 @@ class Results:
 
     _cik_list: Optional[set[np.int64]] = None
 
+    def __post_init__(self):
+        if not self.filtered_data.empty:
+            self.filtered_data = self.filtered_data.set_index(
+                ["ticker", "tag", "fy", "fp"]
+            )
+
     @beartype
     @dataclass
     class Table:
@@ -781,11 +787,7 @@ class DataSetCollector:
         # 1,0000097745-23-000008,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC.
         # 2,0000097745-23-000008,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC..
 
-        return Results(
-            data_frame.drop(columns=["cik_str", "adsh", "cik"]).set_index(
-                ["ticker", "tag", "fy", "fp"]
-            )
-        )
+        return Results(data_frame.drop(columns=["cik_str", "adsh", "cik"]))
 
 
 def _process_report_task(

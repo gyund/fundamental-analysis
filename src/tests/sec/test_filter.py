@@ -9,6 +9,7 @@ import stocktracer.filter as Filter
 from stocktracer.collector.sec import Filter as SecFilter
 from stocktracer.collector.sec import ReportDate
 from stocktracer.collector.sec import Results as SecResults
+from io import StringIO
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +121,21 @@ class TestResults:
         assert "Stuff" in result.tags
         result.normalize()
         assert "Stuff" not in result.tags
+
+    def test_select(self):
+        csv_data = """ticker,tag,fy,fp,ddate,uom,value,period,title
+AAPL,EntityCommonStockSharesOutstanding,2022,Q1,2023-01-31,shares,2000.0,2022-12-31,Apple Inc.
+AAPL,FakeAttributeTag,2022,Q1,2023-01-31,shares,200.0,2022-12-31,Apple Inc."""
+        df = pd.read_csv(StringIO(csv_data))
+        assert not df.empty
+        results = SecResults(df)
+        logger.debug(f"\n{results}")
+        select_results = results.select()
+        logger.debug(f"\n{select_results}")
+        assert (
+            select_results.get_value("aapl", "EntityCommonStockSharesOutstanding", 2022)
+            == 2000
+        )
 
     def test_slice(self):
         data = pd.DataFrame(
