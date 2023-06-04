@@ -512,20 +512,21 @@ class DataSetReader:
             chunksize=DEFAULT_CHUNK_SIZE,
             parse_dates=["ddate"],
         )
-        # filtered_data = cls.process_num_parallel(sec_filter, sub_dataframe, reader)
-        filtered_data = cls.process_num_serial(sec_filter, sub_dataframe, reader)
+
+        filtered_data = cls._process_num_serial(sec_filter, sub_dataframe, reader)
 
         # if filtered_data is not None:  # pragma: no cover
         #     logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
         return filtered_data
 
     @classmethod
-    def process_num_serial(cls, sec_filter, sub_dataframe, reader):
+    def _process_num_serial(cls, sec_filter, sub_dataframe, reader):
+        """Process num.txt in a single thread (serial fashion)."""
         filtered_data: Optional[pd.DataFrame] = None
         chunk: pd.DataFrame
 
         for chunk in reader:
-            data = cls.process_num_chunk(sec_filter, sub_dataframe, chunk)
+            data = cls._process_num_chunk(sec_filter, sub_dataframe, chunk)
             if data.empty:  # pragma: no cover
                 # logger.debug(f"chunk:\n{chunk}")
                 # logger.debug(f"sub_dataframe:\n{sub_dataframe}")
@@ -534,31 +535,7 @@ class DataSetReader:
         return filtered_data
 
     @classmethod
-    def process_num_parallel(cls, sec_filter, sub_dataframe, reader):
-        # processes = mp.cpu_count()
-        # processes = 1
-        filtered_data: Optional[pd.DataFrame] = None
-        chunk: pd.DataFrame
-        funclist: list[Future] = []
-
-        with ProcessPoolExecutor(max_workers=None) as executor:
-            for chunk in reader:
-                future = executor.submit(
-                    cls.process_num_chunk, sec_filter, sub_dataframe, chunk
-                )
-                funclist.append(future)
-
-            for f in funclist:
-                data = f.result(timeout=10)  # timeout in 10 seconds
-                if data.empty:  # pragma: no cover
-                    # logger.debug(f"chunk:\n{chunk}")
-                    # logger.debug(f"sub_dataframe:\n{sub_dataframe}")
-                    continue
-                filtered_data = cls.append(filtered_data, data)
-        return filtered_data
-
-    @classmethod
-    def process_num_chunk(cls, sec_filter, sub_dataframe, chunk):
+    def _process_num_chunk(cls, sec_filter, sub_dataframe, chunk):
         # We want only the tables in left if they join on the key, so inner it is
         data = chunk.join(sub_dataframe, how="inner")
 
