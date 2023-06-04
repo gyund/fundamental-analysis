@@ -458,11 +458,11 @@ class Results:
 
 
 @beartype
+@dataclass(frozen=True)
 class DataSetReader:
     """Reads the data from a zip file retrieved from the SEC website."""
 
-    def __init__(self, zip_data: bytes) -> None:
-        self.zip_data = BytesIO(zip_data)
+    request_uri: str
 
     def process_zip(
         self, sec_filter: Filter, ciks: frozenset[int]
@@ -476,7 +476,11 @@ class DataSetReader:
         Returns:
             Optional[pd.DataFrame]: filtered data
         """
-        with ZipFile(self.zip_data) as myzip:
+        zip_data = cache.sec_data.get(self.request_uri, only_if_cached=True)
+        if zip_data is None:
+            raise LookupError(f"missing cache entry for request: {self.request_uri}")
+
+        with ZipFile(BytesIO(zip_data.content)) as myzip:
             # Process the mapping first
             logger.debug("opening sub.txt")
             with myzip.open("sub.txt") as myfile:
@@ -690,7 +694,7 @@ class DownloadManager:
             logger.info(f"Retrieved {request} from cache")
 
         if response.status_code == 200:
-            return DataSetReader(response.content)
+            return DataSetReader(request)
         return None  # pragma: no cover
 
 
@@ -731,8 +735,13 @@ class DataSetCollector:
 
             with ProcessPoolExecutor() as executor:
                 for report_date in report_dates:
+                    reader = self.download_manager.get_quarterly_report(report_date)
+
+                    if reader is None:
+                        raise ImportError(f"missing quarterly report for {report_date}")
+
                     future = executor.submit(
-                        self._process_report_task, sec_filter, ciks, report_date
+                        _process_report_task, sec_filter, ciks, reader
                     )
                     funclist.append(future)
 
@@ -778,39 +787,23 @@ class DataSetCollector:
             )
         )
 
-    def _process_report_task(
-        self, sec_filter, ciks, report_date
-    ) -> Optional[pd.DataFrame]:
-        """Task function for processing a single report
 
-        Args:
-            sec_filter (_type_): _description_
-            ciks (_type_): _description_
-            report_date (_type_): _description_
+def _process_report_task(
+    sec_filter: Filter, ciks: frozenset[int], reader: DataSetReader
+) -> Optional[pd.DataFrame]:
+    """Task function for processing a single report."""
 
-        Raises:
-            ImportError: _description_
+    return reader.process_zip(sec_filter, ciks)
 
-        Returns:
-            Optional[pd.DataFrame]: _description_
-        """
-        reader = self.download_manager.get_quarterly_report(report_date)
+    # # Convert fp to number so we can sort easily
+    # data_frame['fp'].mask(data_frame['fp'] == "Q1", 1, inplace=True)
+    # data_frame['fp'].mask(data_frame['fp'] == "Q2", 2, inplace=True)
+    # data_frame['fp'].mask(data_frame['fp'] == "Q3", 3, inplace=True)
+    # data_frame['fp'].mask(data_frame['fp'] == "Q4", 4, inplace=True)
+    # data_frame = data_frame.set_index("fp", append=True)
 
-        if reader is None:
-            raise ImportError(f"missing quarterly report for {report_date}")
-
-        data = reader.process_zip(sec_filter, ciks)
-        return data
-
-        # # Convert fp to number so we can sort easily
-        # data_frame['fp'].mask(data_frame['fp'] == "Q1", 1, inplace=True)
-        # data_frame['fp'].mask(data_frame['fp'] == "Q2", 2, inplace=True)
-        # data_frame['fp'].mask(data_frame['fp'] == "Q3", 3, inplace=True)
-        # data_frame['fp'].mask(data_frame['fp'] == "Q4", 4, inplace=True)
-        # data_frame = data_frame.set_index("fp", append=True)
-
-        # logger.debug(f"filtered_df:\n{data_frame}")
-        # filter.filtered_data = data_frame
+    # logger.debug(f"filtered_df:\n{data_frame}")
+    # filter.filtered_data = data_frame
 
 
 @beartype
