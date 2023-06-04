@@ -709,7 +709,6 @@ class DataSetCollector:
             ciks (frozenset[int]): CIK values to filter the datasets on
 
         Raises:
-            ImportError: when a download for a quarterly report fails
             LookupError: when the filter returned no matches
 
         Returns:
@@ -733,7 +732,7 @@ class DataSetCollector:
             with ProcessPoolExecutor() as executor:
                 for report_date in report_dates:
                     future = executor.submit(
-                        self.process_report_task, sec_filter, ciks, report_date
+                        self._process_report_task, sec_filter, ciks, report_date
                     )
                     funclist.append(future)
 
@@ -779,7 +778,22 @@ class DataSetCollector:
             )
         )
 
-    def process_report_task(self, sec_filter, ciks, report_date):
+    def _process_report_task(
+        self, sec_filter, ciks, report_date
+    ) -> Optional[pd.DataFrame]:
+        """Task function for processing a single report
+
+        Args:
+            sec_filter (_type_): _description_
+            ciks (_type_): _description_
+            report_date (_type_): _description_
+
+        Raises:
+            ImportError: _description_
+
+        Returns:
+            Optional[pd.DataFrame]: _description_
+        """
         reader = self.download_manager.get_quarterly_report(report_date)
 
         if reader is None:
