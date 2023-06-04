@@ -2,6 +2,7 @@
 import copy
 import logging
 import sys
+import multiprocessing as mp
 from dataclasses import dataclass, field
 from datetime import date
 from io import BytesIO
@@ -512,27 +513,39 @@ class DataSetReader:
             parse_dates=["ddate"],
         )
 
+        pool = mp.Pool(mp.cpu_count())  # use 4 processes
         filtered_data: Optional[pd.DataFrame] = None
         chunk: pd.DataFrame
+        funclist = []
+
         for chunk in reader:
-            # We want only the tables in left if they join on the key, so inner it is
-            data = chunk.join(sub_dataframe, how="inner")
+            f = pool.apply_async(
+                cls.process_num_chunk, [sec_filter, sub_dataframe, chunk]
+            )
+            funclist.append(f)
 
-            # Additional Filtering if needed
-            if sec_filter.tags is not None:
-                tag_list = sec_filter.tags  # pylint: disable=unused-variable
-                data = data.query("tag in @tag_list")
-
+        for f in funclist:
+            data = f.get(timeout=10)  # timeout in 10 seconds
             if data.empty:  # pragma: no cover
                 # logger.debug(f"chunk:\n{chunk}")
                 # logger.debug(f"sub_dataframe:\n{sub_dataframe}")
                 continue
-
             filtered_data = cls.append(filtered_data, data)
 
         # if filtered_data is not None:  # pragma: no cover
         #     logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
         return filtered_data
+
+    @classmethod
+    def process_num_chunk(cls, sec_filter, sub_dataframe, chunk):
+        # We want only the tables in left if they join on the key, so inner it is
+        data = chunk.join(sub_dataframe, how="inner")
+
+        # Additional Filtering if needed
+        if sec_filter.tags is not None:
+            tag_list = sec_filter.tags  # pylint: disable=unused-variable
+            data = data.query("tag in @tag_list")
+        return data
 
     @classmethod
     def append(
