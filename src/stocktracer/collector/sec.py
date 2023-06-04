@@ -1,7 +1,7 @@
 """This data source grabs information from quarterly SEC data archives."""
 import copy
 import logging
-import multiprocessing as mp
+from concurrent.futures import ThreadPoolExecutor, Future
 import sys
 from dataclasses import dataclass, field
 from datetime import date
@@ -19,7 +19,7 @@ from stocktracer import cache
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_CHUNK_SIZE = 500000
+DEFAULT_CHUNK_SIZE = 200000
 pd.set_option("mode.chained_assignment", "raise")
 
 
@@ -535,26 +535,26 @@ class DataSetReader:
 
     @classmethod
     def process_num_parallel(cls, sec_filter, sub_dataframe, reader):
-        processes = mp.cpu_count()
+        # processes = mp.cpu_count()
         # processes = 1
-        pool = mp.Pool(processes)  # use 4 processes
         filtered_data: Optional[pd.DataFrame] = None
         chunk: pd.DataFrame
-        funclist = []
+        funclist: list[Future] = []
 
-        for chunk in reader:
-            f = pool.apply_async(
-                cls.process_num_chunk, [sec_filter, sub_dataframe, chunk]
-            )
-            funclist.append(f)
+        with ThreadPoolExecutor(max_workers=None) as executor:
+            for chunk in reader:
+                future = executor.submit(
+                    cls.process_num_chunk, sec_filter, sub_dataframe, chunk
+                )
+                funclist.append(future)
 
-        for f in funclist:
-            data = f.get(timeout=10)  # timeout in 10 seconds
-            if data.empty:  # pragma: no cover
-                # logger.debug(f"chunk:\n{chunk}")
-                # logger.debug(f"sub_dataframe:\n{sub_dataframe}")
-                continue
-            filtered_data = cls.append(filtered_data, data)
+            for f in funclist:
+                data = f.result(timeout=10)  # timeout in 10 seconds
+                if data.empty:  # pragma: no cover
+                    # logger.debug(f"chunk:\n{chunk}")
+                    # logger.debug(f"sub_dataframe:\n{sub_dataframe}")
+                    continue
+                filtered_data = cls.append(filtered_data, data)
         return filtered_data
 
     @classmethod
