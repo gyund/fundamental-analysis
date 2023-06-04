@@ -1,7 +1,7 @@
 """This data source grabs information from quarterly SEC data archives."""
 import copy
 import logging
-from concurrent.futures import ThreadPoolExecutor, Future, ProcessPoolExecutor
+from concurrent.futures import Future, ProcessPoolExecutor
 import sys
 from dataclasses import dataclass, field
 from datetime import date
