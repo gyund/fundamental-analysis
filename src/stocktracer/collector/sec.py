@@ -512,8 +512,32 @@ class DataSetReader:
             chunksize=DEFAULT_CHUNK_SIZE,
             parse_dates=["ddate"],
         )
+        # filtered_data = cls.process_num_parallel(sec_filter, sub_dataframe, reader)
+        filtered_data = cls.process_num_serial(sec_filter, sub_dataframe, reader)
 
-        pool = mp.Pool(mp.cpu_count())  # use 4 processes
+        # if filtered_data is not None:  # pragma: no cover
+        #     logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
+        return filtered_data
+
+    @classmethod
+    def process_num_serial(cls, sec_filter, sub_dataframe, reader):
+        filtered_data: Optional[pd.DataFrame] = None
+        chunk: pd.DataFrame
+
+        for chunk in reader:
+            data = cls.process_num_chunk(sec_filter, sub_dataframe, chunk)
+            if data.empty:  # pragma: no cover
+                # logger.debug(f"chunk:\n{chunk}")
+                # logger.debug(f"sub_dataframe:\n{sub_dataframe}")
+                continue
+            filtered_data = cls.append(filtered_data, data)
+        return filtered_data
+
+    @classmethod
+    def process_num_parallel(cls, sec_filter, sub_dataframe, reader):
+        processes = mp.cpu_count()
+        # processes = 1
+        pool = mp.Pool(processes)  # use 4 processes
         filtered_data: Optional[pd.DataFrame] = None
         chunk: pd.DataFrame
         funclist = []
@@ -531,9 +555,6 @@ class DataSetReader:
                 # logger.debug(f"sub_dataframe:\n{sub_dataframe}")
                 continue
             filtered_data = cls.append(filtered_data, data)
-
-        # if filtered_data is not None:  # pragma: no cover
-        #     logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
         return filtered_data
 
     @classmethod
