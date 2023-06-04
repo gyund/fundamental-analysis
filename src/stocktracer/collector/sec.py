@@ -512,8 +512,8 @@ class DataSetReader:
             chunksize=DEFAULT_CHUNK_SIZE,
             parse_dates=["ddate"],
         )
-        filtered_data = cls.process_num_parallel(sec_filter, sub_dataframe, reader)
-        # filtered_data = cls.process_num_serial(sec_filter, sub_dataframe, reader)
+        # filtered_data = cls.process_num_parallel(sec_filter, sub_dataframe, reader)
+        filtered_data = cls.process_num_serial(sec_filter, sub_dataframe, reader)
 
         # if filtered_data is not None:  # pragma: no cover
         #     logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
@@ -751,33 +751,31 @@ class DataSetCollector:
             calibrate=5_000,
             dual_line=True,
         ) as status_bar:
-            for report_date in report_dates:
-                status_bar.text(f"Downloading report {report_date}...")
-                reader = self.download_manager.get_quarterly_report(report_date)
+            funclist: list[Future] = []
 
-                if reader is None:
-                    raise ImportError(f"missing quarterly report for {report_date}")
-
-                status_bar.text(f"Processing report {report_date}...")
-                data = reader.process_zip(sec_filter, ciks)
-
-                if data is None:
-                    # Note, when searching for annual reports, this will generally occur 1/4 times
-                    # if we're only searching for one stock's tags
-                    logger.debug(
-                        f"{report_date} did not have any matches for the provided filter"
+            with ProcessPoolExecutor() as executor:
+                for report_date in report_dates:
+                    future = executor.submit(
+                        self.process_report_task, sec_filter, ciks, report_date
                     )
-                    logger.debug(f"{sec_filter}")
-                    continue
+                    funclist.append(future)
 
-                if data_frame is not None:
-                    logger.debug(f"record count: {len(data_frame)}")
+                for f in funclist:
+                    data = f.result(timeout=60)  # timeout in 60 seconds
 
-                logger.debug(f"new record count: {len(data)}")
-                data_frame = DataSetReader.append(data_frame, data)
-                record_count = len(data_frame)
-                status_bar(record_count)  # pylint: disable=not-callable
-                logger.info(f"There are now {record_count} filtered records")
+                    if data is None:
+                        # Note, when searching for annual reports, this will generally occur 1/4 times
+                        # if we're only searching for one stock's tags
+                        continue
+
+                    if data_frame is not None:
+                        logger.debug(f"record count: {len(data_frame)}")
+
+                    logger.debug(f"new record count: {len(data)}")
+                    data_frame = DataSetReader.append(data_frame, data)
+                    record_count = len(data_frame)
+                    status_bar(record_count)  # pylint: disable=not-callable
+                    logger.info(f"There are now {record_count} filtered records")
 
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
         if data_frame is None:
@@ -803,6 +801,15 @@ class DataSetCollector:
                 ["ticker", "tag", "fy", "fp"]
             )
         )
+
+    def process_report_task(self, sec_filter, ciks, report_date):
+        reader = self.download_manager.get_quarterly_report(report_date)
+
+        if reader is None:
+            raise ImportError(f"missing quarterly report for {report_date}")
+
+        data = reader.process_zip(sec_filter, ciks)
+        return data
 
         # # Convert fp to number so we can sort easily
         # data_frame['fp'].mask(data_frame['fp'] == "Q1", 1, inplace=True)
