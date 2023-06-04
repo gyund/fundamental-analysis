@@ -698,12 +698,12 @@ class DownloadManager:
         return None  # pragma: no cover
 
 
+download_manager = DownloadManager()
+
+
 @beartype
 class DataSetCollector:
     """Take care of downloading all the data sets and aggregate them into a single structure."""
-
-    def __init__(self, download_manager: DownloadManager):
-        self.download_manager = download_manager
 
     def get_data(self, sec_filter: Filter, ciks: frozenset[int]) -> Results:
         """Collect data based on the provided filter.
@@ -735,7 +735,7 @@ class DataSetCollector:
 
             with ProcessPoolExecutor() as executor:
                 for report_date in report_dates:
-                    reader = self.download_manager.get_quarterly_report(report_date)
+                    reader = download_manager.get_quarterly_report(report_date)
 
                     if reader is None:
                         raise ImportError(f"missing quarterly report for {report_date}")
@@ -769,7 +769,7 @@ class DataSetCollector:
         # Now add an index for ticker values to pair with the cik
         # logger.debug(f"filtered_df_before_merge:\n{data_frame.to_csv()}")
         data_frame = data_frame.reset_index().merge(
-            right=self.download_manager.ticker_reader.map_of_cik_to_ticker,
+            right=download_manager.ticker_reader.map_of_cik_to_ticker,
             how="inner",
             left_on="cik",
             right_on=["cik_str"],
@@ -807,11 +807,10 @@ def _process_report_task(
 
 
 @beartype
-@cache.results.memoize(tag="sec", ignore=("download_manager"))
+@cache.results.memoize(tag="sec")
 def filter_data(
     tickers: list[str],
     sec_filter: Filter,
-    download_manager: DownloadManager = DownloadManager(),
 ) -> Results:
     """Initiate the retrieval of ticker information based on the provided filters.
 
@@ -820,32 +819,26 @@ def filter_data(
     Args:
         tickers (list[str]): ticker symbols you want information about
         sec_filter (Filter): SEC specific data to scrape from the reports
-        download_manager (DownloadManager): download manager to use
 
     Returns:
         Results: results with filtered data
     """
     logger.debug(f"tickers:\n{repr(tickers)}")
     logger.debug(f"sec_filter:\n{repr(sec_filter)}")
-    return filter_data_nocache(frozenset(tickers), sec_filter, download_manager)
+    return filter_data_nocache(frozenset(tickers), sec_filter)
 
 
-def filter_data_nocache(
-    tickers: frozenset[str],
-    sec_filter: Filter,
-    download_manager: DownloadManager = DownloadManager(),
-) -> Results:
+def filter_data_nocache(tickers: frozenset[str], sec_filter: Filter) -> Results:
     """Same as filter_data but no caching is applied.
 
     Args:
         tickers (frozenset[str]): ticker symbols you want information about
         sec_filter (Filter): SEC specific data to scrape from the reports
-        download_manager (DownloadManager): download manager to use
 
     Returns:
         Results: results with filtered data
     """
-    collector = DataSetCollector(download_manager)
+    collector = DataSetCollector()
     ticker_reader = download_manager.ticker_reader
 
     # Returns true or throws
