@@ -1,8 +1,8 @@
 """This data source grabs information from quarterly SEC data archives."""
 import copy
 import logging
-from concurrent.futures import Future, ProcessPoolExecutor
 import sys
+from concurrent.futures import Future, ProcessPoolExecutor
 from dataclasses import dataclass, field
 from datetime import date
 from io import BytesIO
