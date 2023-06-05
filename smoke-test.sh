@@ -4,7 +4,7 @@ SMOKE_OPTIONS=${SMOKE_OPTIONS:="--final-year=2023 --final-quarter=1"}
 
 dir=`dirname $0`
 results_dir='docs/.smoke-tests'
-COVERAGE_COMMAND=${COVERAGE_COMMAND:="coverage run -a"}
+COVERAGE_COMMAND=${COVERAGE_COMMAND:="coverage run --concurrency=multiprocessing -a"}
 set -e
 
 pushd ${dir} > /dev/null
