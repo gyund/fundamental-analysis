@@ -1,5 +1,4 @@
 """This module takes care of managing caching configuration."""
-import atexit
 import hashlib
 import os
 from datetime import timedelta
@@ -62,11 +61,5 @@ if SEC_FILE_HASH != results.get("sec_file_hash"):
     results.evict(tag="sec")
     results.evict(tag="results")
 
-
-def update_modified_file_cache() -> None:
-    """Update the cache that keeps track of when files are modified."""
-    results.set("sec_file_hash", SEC_FILE_HASH)
-    results.close()
-
-
-atexit.register(update_modified_file_cache)
+# Update the cache that keeps track of when files are modified.
+results.set("sec_file_hash", SEC_FILE_HASH)
