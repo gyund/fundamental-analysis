@@ -802,16 +802,6 @@ def _process_report_task(
 
     return reader.process_zip(sec_filter, ciks)
 
-    # # Convert fp to number so we can sort easily
-    # data_frame['fp'].mask(data_frame['fp'] == "Q1", 1, inplace=True)
-    # data_frame['fp'].mask(data_frame['fp'] == "Q2", 2, inplace=True)
-    # data_frame['fp'].mask(data_frame['fp'] == "Q3", 3, inplace=True)
-    # data_frame['fp'].mask(data_frame['fp'] == "Q4", 4, inplace=True)
-    # data_frame = data_frame.set_index("fp", append=True)
-
-    # logger.debug(f"filtered_df:\n{data_frame}")
-    # filter.filtered_data = data_frame
-
 
 @beartype
 @cache.results.memoize(tag="sec")
