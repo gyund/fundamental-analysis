@@ -56,12 +56,11 @@ jobs:
         if: ${{ !github.event.pull_request.draft }}
       - name: Run - unit-tests
         run: |
-          poetry run coverage run -m pytest --doctest-modules
-          poetry run coverage report
+          poetry run coverage run --concurrency=multiprocessing -m pytest --doctest-modules
       # Just to cut down on network testing while initially iterating
       - name: Run - network-tests
         run: |
-          poetry run coverage run -a -m pytest -m webtest --run-webtest
+          poetry run coverage run --concurrency=multiprocessing -a -m pytest -m webtest --run-webtest
         if: ${{ !github.event.pull_request.draft }}
       - name: Run - smoke-tests
         run: |
@@ -69,6 +68,7 @@ jobs:
         if: ${{ !github.event.pull_request.draft && matrix.python-version == '3.10' }}
       - name: Coveralls
         run: |
+          poetry run coverage combine
           poetry run coveralls --service=github
       # - name: Coveralls
       #   uses: coverallsapp/github-action@v2

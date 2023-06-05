@@ -2,6 +2,7 @@ import logging
 
 import pytest
 
+from stocktracer import cache
 from stocktracer.analysis.annual_reports import Analysis
 from stocktracer.cli import Cli
 from stocktracer.interface import Options as CliOptions
@@ -20,6 +21,8 @@ class TestCliAnnualReports:
     @pytest.mark.webtest
     def test_analyze_direct(self):
         """Test direct calls so we can ensure caching occurs as well."""
+        # Ensure at least one test parses through the CSV files
+        # cache.results.evict(tag="sec")
         options = CliOptions(
             tickers=tickers,
             final_report=ReportDate(final_year, final_quarter),

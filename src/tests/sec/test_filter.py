@@ -1,5 +1,6 @@
 import logging
 from datetime import date
+from io import StringIO
 
 import numpy as np
 import pandas as pd
@@ -75,6 +76,67 @@ def test_reportDate():
 
 
 class TestResults:
+    @classmethod
+    def _prepare_table(cls, df: pd.DataFrame) -> SecResults.Table:
+        data = df.set_index(["ticker", "fy"])
+        return SecResults.Table(data)
+
+    def test_tags(self):
+        data = pd.DataFrame(
+            data={
+                "ticker": ["AAPL", "MSFT"],
+                "fy": [2021, 2022],
+                "OperatingIncomeLoss": [10, 20],
+                "Stuff": [3, 4],
+            },
+        )
+        result = self._prepare_table(data)
+        assert "OperatingIncomeLoss" in result.tags
+
+    def test_get_value(self):
+        data = pd.DataFrame(
+            data={
+                "ticker": ["AAPL", "MSFT"],
+                "fy": [2021, 2022],
+                "OperatingIncomeLoss": [10, 20],
+                "Stuff": [3, 4],
+            },
+        )
+        result = self._prepare_table(data)
+        logger.debug(result)
+        assert (
+            result.get_value(ticker="AAPL", tag="OperatingIncomeLoss", year=2021) == 10
+        )
+
+    def test_normalize(self):
+        data = pd.DataFrame(
+            data={
+                "ticker": ["AAPL", "MSFT"],
+                "fy": [2021, 2022],
+                "OperatingIncomeLoss": [10, 20],
+                "Stuff": [np.nan, 4],
+            },
+        )
+        result = self._prepare_table(data)
+        assert "Stuff" in result.tags
+        result.normalize()
+        assert "Stuff" not in result.tags
+
+    def test_select(self):
+        csv_data = """ticker,tag,fy,fp,ddate,uom,value,period,title
+AAPL,EntityCommonStockSharesOutstanding,2022,Q1,2023-01-31,shares,2000.0,2022-12-31,Apple Inc.
+AAPL,FakeAttributeTag,2022,Q1,2023-01-31,shares,200.0,2022-12-31,Apple Inc."""
+        df = pd.read_csv(StringIO(csv_data))
+        assert not df.empty
+        results = SecResults(df)
+        logger.debug(f"\n{results}")
+        select_results = results.select()
+        logger.debug(f"\n{select_results}")
+        assert (
+            select_results.get_value("aapl", "EntityCommonStockSharesOutstanding", 2022)
+            == 2000
+        )
+
     def test_slice(self):
         data = pd.DataFrame(
             data={
@@ -84,8 +146,7 @@ class TestResults:
                 "Stuff": [3, 4],
             },
         )
-        data = data.set_index(["ticker", "fy"])
-        result = SecResults.Table(data)
+        result = self._prepare_table(data)
         logger.debug(result)
 
         # Slice on Ticker, make sure we get the right results
@@ -133,8 +194,7 @@ class TestResults:
                 "OperatingIncomeLoss": [10, 20],
             },
         )
-        data = data.set_index(["ticker", "fy"])
-        result = SecResults.Table(data)
+        result = self._prepare_table(data)
         result.calculate_net_income("net-income")
         logger.debug(f"\n{data}")
         assert result.data["net-income"].sum() == 30
@@ -149,8 +209,7 @@ class TestResults:
                 "Assets": [20, 80],
             },
         )
-        data = data.set_index(["ticker", "fy"])
-        result = SecResults.Table(data)
+        result = self._prepare_table(data)
         result.calculate_return_on_assets("ROA")
         logger.debug(f"\n{data}")
         assert result.data.loc["AAPL"].loc[2021]["ROA"] == 0.50
@@ -165,8 +224,7 @@ class TestResults:
                 "Assets": [20, 80],
             },
         )
-        data = data.set_index(["ticker", "fy"])
-        result = SecResults.Table(data)
+        result = self._prepare_table(data)
         result.calculate_delta("delta", "OperatingIncomeLoss")
         logger.debug(f"\n{data}")
         assert np.isnan(result.data.loc["AAPL"].loc[2021]["delta"])
@@ -181,8 +239,7 @@ class TestResults:
                 "LiabilitiesCurrent": [20, 80],
             },
         )
-        data = data.set_index(["ticker", "fy"])
-        result = SecResults.Table(data)
+        result = self._prepare_table(data)
         result.calculate_current_ratio("CR")
         assert result.data.loc["AAPL"].loc[2021]["CR"] == 0.5
         assert result.data.loc["AAPL"].loc[2022]["CR"] == 0.25
@@ -196,8 +253,7 @@ class TestResults:
                 "LiabilitiesCurrent": [20, 80],
             },
         )
-        data = data.set_index(["ticker", "fy"])
-        result = SecResults.Table(data)
+        result = self._prepare_table(data)
         result.calculate_debt_to_assets("CR")
         assert result.data.loc["AAPL"].loc[2021]["CR"] == 2
         assert result.data.loc["AAPL"].loc[2022]["CR"] == 4

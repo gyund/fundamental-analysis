@@ -2,6 +2,7 @@
 import copy
 import logging
 import sys
+from concurrent.futures import Future, ProcessPoolExecutor
 from dataclasses import dataclass, field
 from datetime import date
 from io import BytesIO
@@ -18,7 +19,7 @@ from stocktracer import cache
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_CHUNK_SIZE = 1000000
+DEFAULT_CHUNK_SIZE = 200000
 pd.set_option("mode.chained_assignment", "raise")
 
 
@@ -242,6 +243,12 @@ class Results:
 
     _cik_list: Optional[set[np.int64]] = None
 
+    def __post_init__(self):
+        if not self.filtered_data.empty:
+            self.filtered_data = self.filtered_data.set_index(
+                ["ticker", "tag", "fy", "fp"]
+            )
+
     @beartype
     @dataclass
     class Table:
@@ -281,7 +288,7 @@ class Results:
             """
             return self.data.columns.values
 
-        def get_value(self, ticker: str, tag: str, year: int) -> int | float:
+        def get_value(self, ticker: str, tag: str, year: int) -> int | float | np.int64:
             """Retrieve the exact value of a table cell.
 
             Args:
@@ -290,7 +297,7 @@ class Results:
                 year (int): The year this data applies to.
 
             Returns:
-                int | float: value of result
+                int | float | np.int64: value of result
             """
             # Lookup convert ticker to cik
             ticker = ticker.upper()
@@ -457,11 +464,11 @@ class Results:
 
 
 @beartype
+@dataclass(frozen=True)
 class DataSetReader:
     """Reads the data from a zip file retrieved from the SEC website."""
 
-    def __init__(self, zip_data: bytes) -> None:
-        self.zip_data = BytesIO(zip_data)
+    request_uri: str
 
     def process_zip(
         self, sec_filter: Filter, ciks: frozenset[int]
@@ -472,10 +479,18 @@ class DataSetReader:
             sec_filter (Filter): results to filter out of the zip archive
             ciks (frozenset[int]): CIKs to filter data on
 
+        Raises:
+            LookupError: if the cache is missing the binary zip file
+
         Returns:
             Optional[pd.DataFrame]: filtered data
         """
-        with ZipFile(self.zip_data) as myzip:
+
+        zip_data = cache.sec_data.get(self.request_uri, only_if_cached=True)
+        if zip_data is None:
+            raise LookupError(f"missing cache entry for request: {self.request_uri}")
+
+        with ZipFile(BytesIO(zip_data.content)) as myzip:
             # Process the mapping first
             logger.debug("opening sub.txt")
             with myzip.open("sub.txt") as myfile:
@@ -512,27 +527,37 @@ class DataSetReader:
             parse_dates=["ddate"],
         )
 
-        filtered_data: Optional[pd.DataFrame] = None
-        chunk: pd.DataFrame
-        for chunk in reader:
-            # We want only the tables in left if they join on the key, so inner it is
-            data = chunk.join(sub_dataframe, how="inner")
-
-            # Additional Filtering if needed
-            if sec_filter.tags is not None:
-                tag_list = sec_filter.tags  # pylint: disable=unused-variable
-                data = data.query("tag in @tag_list")
-
-            if data.empty:  # pragma: no cover
-                # logger.debug(f"chunk:\n{chunk}")
-                # logger.debug(f"sub_dataframe:\n{sub_dataframe}")
-                continue
-
-            filtered_data = cls.append(filtered_data, data)
+        filtered_data = cls._process_num_serial(sec_filter, sub_dataframe, reader)
 
         # if filtered_data is not None:  # pragma: no cover
         #     logger.debug(f"Filtered Records (head+5): {filtered_data.head()}")
         return filtered_data
+
+    @classmethod
+    def _process_num_serial(cls, sec_filter, sub_dataframe, reader):
+        """Process num.txt in a single thread (serial fashion)."""
+        filtered_data: Optional[pd.DataFrame] = None
+        chunk: pd.DataFrame
+
+        for chunk in reader:
+            data = cls._process_num_chunk(sec_filter, sub_dataframe, chunk)
+            if data.empty:  # pragma: no cover
+                # logger.debug(f"chunk:\n{chunk}")
+                # logger.debug(f"sub_dataframe:\n{sub_dataframe}")
+                continue
+            filtered_data = cls.append(filtered_data, data)
+        return filtered_data
+
+    @classmethod
+    def _process_num_chunk(cls, sec_filter, sub_dataframe, chunk):
+        # We want only the tables in left if they join on the key, so inner it is
+        data = chunk.join(sub_dataframe, how="inner")
+
+        # Additional Filtering if needed
+        if sec_filter.tags is not None:
+            tag_list = sec_filter.tags  # pylint: disable=unused-variable
+            data = data.query("tag in @tag_list")
+        return data
 
     @classmethod
     def append(
@@ -679,16 +704,16 @@ class DownloadManager:
             logger.info(f"Retrieved {request} from cache")
 
         if response.status_code == 200:
-            return DataSetReader(response.content)
+            return DataSetReader(request)
         return None  # pragma: no cover
+
+
+download_manager = DownloadManager()
 
 
 @beartype
 class DataSetCollector:
     """Take care of downloading all the data sets and aggregate them into a single structure."""
-
-    def __init__(self, download_manager: DownloadManager):
-        self.download_manager = download_manager
 
     def get_data(self, sec_filter: Filter, ciks: frozenset[int]) -> Results:
         """Collect data based on the provided filter.
@@ -698,7 +723,7 @@ class DataSetCollector:
             ciks (frozenset[int]): CIK values to filter the datasets on
 
         Raises:
-            ImportError: when a download for a quarterly report fails
+            ImportError: when the quarterly report is missing
             LookupError: when the filter returned no matches
 
         Returns:
@@ -717,33 +742,36 @@ class DataSetCollector:
             calibrate=5_000,
             dual_line=True,
         ) as status_bar:
-            for report_date in report_dates:
-                status_bar.text(f"Downloading report {report_date}...")
-                reader = self.download_manager.get_quarterly_report(report_date)
+            funclist: list[Future] = []
 
-                if reader is None:
-                    raise ImportError(f"missing quarterly report for {report_date}")
+            with ProcessPoolExecutor() as executor:
+                for report_date in report_dates:
+                    reader = download_manager.get_quarterly_report(report_date)
 
-                status_bar.text(f"Processing report {report_date}...")
-                data = reader.process_zip(sec_filter, ciks)
+                    if reader is None:
+                        raise ImportError(f"missing quarterly report for {report_date}")
 
-                if data is None:
-                    # Note, when searching for annual reports, this will generally occur 1/4 times
-                    # if we're only searching for one stock's tags
-                    logger.debug(
-                        f"{report_date} did not have any matches for the provided filter"
+                    future = executor.submit(
+                        _process_report_task, sec_filter, ciks, reader
                     )
-                    logger.debug(f"{sec_filter}")
-                    continue
+                    funclist.append(future)
 
-                if data_frame is not None:
-                    logger.debug(f"record count: {len(data_frame)}")
+                for f in funclist:
+                    data = f.result(timeout=60)  # timeout in 60 seconds
 
-                logger.debug(f"new record count: {len(data)}")
-                data_frame = DataSetReader.append(data_frame, data)
-                record_count = len(data_frame)
-                status_bar(record_count)  # pylint: disable=not-callable
-                logger.info(f"There are now {record_count} filtered records")
+                    if data is None:
+                        # Note, when searching for annual reports, this will generally occur 1/4 times
+                        # if we're only searching for one stock's tags
+                        continue
+
+                    if data_frame is not None:
+                        logger.debug(f"record count: {len(data_frame)}")
+
+                    logger.debug(f"new record count: {len(data)}")
+                    data_frame = DataSetReader.append(data_frame, data)
+                    record_count = len(data_frame)
+                    status_bar(record_count)  # pylint: disable=not-callable
+                    logger.info(f"There are now {record_count} filtered records")
 
         logger.info(f"Created Unified Data record for these reports: {report_dates}")
         if data_frame is None:
@@ -752,7 +780,7 @@ class DataSetCollector:
         # Now add an index for ticker values to pair with the cik
         # logger.debug(f"filtered_df_before_merge:\n{data_frame.to_csv()}")
         data_frame = data_frame.reset_index().merge(
-            right=self.download_manager.ticker_reader.map_of_cik_to_ticker,
+            right=download_manager.ticker_reader.map_of_cik_to_ticker,
             how="inner",
             left_on="cik",
             right_on=["cik_str"],
@@ -764,29 +792,22 @@ class DataSetCollector:
         # 1,0000097745-23-000008,EarningsPerShareDiluted,97745,2020-12-31,USD,15.96,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC.
         # 2,0000097745-23-000008,EarningsPerShareDiluted,97745,2021-12-31,USD,19.46,2022-12-31,2022.0,FY,97745,TMO,THERMO FISHER SCIENTIFIC INC..
 
-        return Results(
-            data_frame.drop(columns=["cik_str", "adsh", "cik"]).set_index(
-                ["ticker", "tag", "fy", "fp"]
-            )
-        )
+        return Results(data_frame.drop(columns=["cik_str", "adsh", "cik"]))
 
-        # # Convert fp to number so we can sort easily
-        # data_frame['fp'].mask(data_frame['fp'] == "Q1", 1, inplace=True)
-        # data_frame['fp'].mask(data_frame['fp'] == "Q2", 2, inplace=True)
-        # data_frame['fp'].mask(data_frame['fp'] == "Q3", 3, inplace=True)
-        # data_frame['fp'].mask(data_frame['fp'] == "Q4", 4, inplace=True)
-        # data_frame = data_frame.set_index("fp", append=True)
 
-        # logger.debug(f"filtered_df:\n{data_frame}")
-        # filter.filtered_data = data_frame
+def _process_report_task(
+    sec_filter: Filter, ciks: frozenset[int], reader: DataSetReader
+) -> Optional[pd.DataFrame]:
+    """Task function for processing a single report."""
+
+    return reader.process_zip(sec_filter, ciks)
 
 
 @beartype
-@cache.results.memoize(tag="sec", ignore=("download_manager"))
+@cache.results.memoize(tag="sec")
 def filter_data(
     tickers: list[str],
     sec_filter: Filter,
-    download_manager: DownloadManager = DownloadManager(),
 ) -> Results:
     """Initiate the retrieval of ticker information based on the provided filters.
 
@@ -795,32 +816,26 @@ def filter_data(
     Args:
         tickers (list[str]): ticker symbols you want information about
         sec_filter (Filter): SEC specific data to scrape from the reports
-        download_manager (DownloadManager): download manager to use
 
     Returns:
         Results: results with filtered data
     """
     logger.debug(f"tickers:\n{repr(tickers)}")
     logger.debug(f"sec_filter:\n{repr(sec_filter)}")
-    return filter_data_nocache(frozenset(tickers), sec_filter, download_manager)
+    return filter_data_nocache(frozenset(tickers), sec_filter)
 
 
-def filter_data_nocache(
-    tickers: frozenset[str],
-    sec_filter: Filter,
-    download_manager: DownloadManager = DownloadManager(),
-) -> Results:
+def filter_data_nocache(tickers: frozenset[str], sec_filter: Filter) -> Results:
     """Same as filter_data but no caching is applied.
 
     Args:
         tickers (frozenset[str]): ticker symbols you want information about
         sec_filter (Filter): SEC specific data to scrape from the reports
-        download_manager (DownloadManager): download manager to use
 
     Returns:
         Results: results with filtered data
     """
-    collector = DataSetCollector(download_manager)
+    collector = DataSetCollector()
     ticker_reader = download_manager.ticker_reader
 
     # Returns true or throws
