@@ -479,9 +479,13 @@ class DataSetReader:
             sec_filter (Filter): results to filter out of the zip archive
             ciks (frozenset[int]): CIKs to filter data on
 
+        Raises:
+            LookupError: if the cache is missing the binary zip file
+
         Returns:
             Optional[pd.DataFrame]: filtered data
         """
+
         zip_data = cache.sec_data.get(self.request_uri, only_if_cached=True)
         if zip_data is None:
             raise LookupError(f"missing cache entry for request: {self.request_uri}")
@@ -719,6 +723,7 @@ class DataSetCollector:
             ciks (frozenset[int]): CIK values to filter the datasets on
 
         Raises:
+            ImportError: when the quarterly report is missing
             LookupError: when the filter returned no matches
 
         Returns:
