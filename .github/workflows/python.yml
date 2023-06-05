@@ -57,8 +57,6 @@ jobs:
       - name: Run - unit-tests
         run: |
           poetry run coverage run --concurrency=multiprocessing -m pytest --doctest-modules
-          poetry run coverage combine
-          poetry run coverage report
       # Just to cut down on network testing while initially iterating
       - name: Run - network-tests
         run: |
