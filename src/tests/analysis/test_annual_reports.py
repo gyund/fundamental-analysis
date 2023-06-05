@@ -2,11 +2,11 @@ import logging
 
 import pytest
 
+from stocktracer import cache
 from stocktracer.analysis.annual_reports import Analysis
 from stocktracer.cli import Cli
 from stocktracer.interface import Options as CliOptions
 from stocktracer.interface import ReportDate
-from stocktracer import cache
 
 logger = logging.getLogger(__name__)
 

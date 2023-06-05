@@ -1,5 +1,6 @@
 import logging
 from datetime import date
+from io import StringIO
 
 import numpy as np
 import pandas as pd
@@ -9,7 +10,6 @@ import stocktracer.filter as Filter
 from stocktracer.collector.sec import Filter as SecFilter
 from stocktracer.collector.sec import ReportDate
 from stocktracer.collector.sec import Results as SecResults
-from io import StringIO
 
 logger = logging.getLogger(__name__)
 
