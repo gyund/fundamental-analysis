@@ -1416,7 +1416,11 @@
           <td>
                 <code><a class="autorefs autorefs-internal" title="src.stocktracer.collector.sec.Filter" href="#src.stocktracer.collector.sec.Filter">Filter</a></code>
           </td>
-          <td><p>SEC specific filter of how to filter the results</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>SEC specific filter of how to filter the results</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1426,7 +1430,11 @@
           <td>
                 <code>frozenset[int]</code>
           </td>
-          <td><p>CIK values to filter the datasets on</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>CIK values to filter the datasets on</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -1447,13 +1455,21 @@
           <td>
                 <code>ImportError</code>
           </td>
-          <td><p>when the quarterly report is missing</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>when the quarterly report is missing</p>
+            </div>
+          </td>
         </tr>
         <tr>
           <td>
                 <code>LookupError</code>
           </td>
-          <td><p>when the filter returned no matches</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>when the filter returned no matches</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -1471,7 +1487,11 @@
 <td><code>Results</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="src.stocktracer.collector.sec.Results" href="#src.stocktracer.collector.sec.Results">Results</a></code>
           </td>
-          <td><p>filtered data results</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>filtered data results</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -2114,7 +2134,11 @@ DataSetReader.append(df1, df1)
           <td>
                 <code><span title="typing.Optional">Optional</span>[<span title="pandas">pd</span>.<span title="pandas.DataFrame">DataFrame</span>]</code>
           </td>
-          <td><p>Existing Data</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Existing Data</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2124,7 +2148,11 @@ DataSetReader.append(df1, df1)
           <td>
                 <code><span title="pandas">pd</span>.<span title="pandas.DataFrame">DataFrame</span></code>
           </td>
-          <td><p>New data</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>New data</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2145,7 +2173,11 @@ DataSetReader.append(df1, df1)
           <td>
                 <code><span title="pandas">pd</span>.<span title="pandas.DataFrame">DataFrame</span></code>
           </td>
-          <td><p>pd.DataFrame: Filtered Data</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>pd.DataFrame: Filtered Data</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -2281,7 +2313,11 @@ DataSetReader.append(df1, df1)
           <td>
                 <code><a class="autorefs autorefs-internal" title="src.stocktracer.collector.sec.Filter" href="#src.stocktracer.collector.sec.Filter">Filter</a></code>
           </td>
-          <td><p>results to filter out of the zip archive</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>results to filter out of the zip archive</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2291,7 +2327,11 @@ DataSetReader.append(df1, df1)
           <td>
                 <code>frozenset[int]</code>
           </td>
-          <td><p>CIKs to filter data on</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>CIKs to filter data on</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2312,7 +2352,11 @@ DataSetReader.append(df1, df1)
           <td>
                 <code>LookupError</code>
           </td>
-          <td><p>if the cache is missing the binary zip file</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>if the cache is missing the binary zip file</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -2330,7 +2374,11 @@ DataSetReader.append(df1, df1)
           <td>
                 <code><span title="typing.Optional">Optional</span>[<span title="pandas">pd</span>.<span title="pandas.DataFrame">DataFrame</span>]</code>
           </td>
-          <td><p>Optional[pd.DataFrame]: filtered data</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Optional[pd.DataFrame]: filtered data</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -2614,7 +2662,11 @@ ignore cik values that are not in this list.</p>
 <td><code>TickerReader</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="src.stocktracer.collector.sec.TickerReader" href="#src.stocktracer.collector.sec.TickerReader">TickerReader</a></code>
           </td>
-          <td><p>maps cik to stock ticker</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>maps cik to stock ticker</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -2656,7 +2708,11 @@ us to prefetch information we need if we like.</p>
           <td>
                 <code><a class="autorefs autorefs-internal" title="src.stocktracer.collector.sec.ReportDate" href="#src.stocktracer.collector.sec.ReportDate">ReportDate</a></code>
           </td>
-          <td><p>information specifying the quarterly dump to retrieve</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>information specifying the quarterly dump to retrieve</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -2677,7 +2733,11 @@ us to prefetch information we need if we like.</p>
           <td>
                 <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="src.stocktracer.collector.sec.DataSetReader" href="#src.stocktracer.collector.sec.DataSetReader">DataSetReader</a>]</code>
           </td>
-          <td><p>Optional[DataSetReader]: this object helps process the data received more granularly</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Optional[DataSetReader]: this object helps process the data received more granularly</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -2920,7 +2980,11 @@ for the annual reports.</p>
           <td>
                 <code>frozenset[str]</code>
           </td>
-          <td><p>frozenset[str]: list of focus periods to use for the filter</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>frozenset[str]: list of focus periods to use for the filter</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -2964,7 +3028,11 @@ report just to see if their annual report is in there.</p>
           <td>
                 <code>list[<a class="autorefs autorefs-internal" title="src.stocktracer.collector.sec.ReportDate" href="#src.stocktracer.collector.sec.ReportDate">ReportDate</a>]</code>
           </td>
-          <td><p>list[ReportDate]: list of report dates to retrieve</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>list[ReportDate]: list of report dates to retrieve</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -3615,7 +3683,11 @@ provided without having to involve heavier utilities or network access.</p>
           <td>
                 <code>LookupError</code>
           </td>
-          <td><p><em>description</em></p></td>
+          <td>
+            <div class="doc-md-description">
+              <p><em>description</em></p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -3633,7 +3705,11 @@ provided without having to involve heavier utilities or network access.</p>
           <td>
                 <code>set[<span title="numpy">np</span>.<span title="numpy.int64">int64</span>]</code>
           </td>
-          <td><p>set[int]: Set containing all the CIKs that are being filtered out</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>set[int]: Set containing all the CIKs that are being filtered out</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -4019,7 +4095,11 @@ provided without having to involve heavier utilities or network access.</p>
           <td>
                 <code><span title="numpy">np</span>.<span title="numpy.ndarray">ndarray</span></code>
           </td>
-          <td><p>np.ndarray: array with results</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>np.ndarray: array with results</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -4061,7 +4141,11 @@ ability to pay short-term obligations or those due within one year.</p>
           <td>
                 <code>str</code>
           </td>
-          <td><p><em>description</em></p></td>
+          <td>
+            <div class="doc-md-description">
+              <p><em>description</em></p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4132,7 +4216,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code>str</code>
           </td>
-          <td><p>name to assign to the column</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>name to assign to the column</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4201,7 +4289,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code>str</code>
           </td>
-          <td><p>name to give the calculated column</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>name to give the calculated column</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4211,7 +4303,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code>str</code>
           </td>
-          <td><p>column name to calculate the delta of, such as ROI</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>column name to calculate the delta of, such as ROI</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4277,7 +4373,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code>str</code>
           </td>
-          <td><p>name to assign to the column</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>name to assign to the column</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4351,7 +4451,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code>str</code>
           </td>
-          <td><p>name to assign to the column</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>name to assign to the column</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4422,7 +4526,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code>str</code>
           </td>
-          <td><p>ticker identifying the equity of interest.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>ticker identifying the equity of interest.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4432,7 +4540,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code>str</code>
           </td>
-          <td><p>attribute indicating the type of data to look at.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>attribute indicating the type of data to look at.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4442,7 +4554,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>The year this data applies to.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>The year this data applies to.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -4463,7 +4579,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code>int | float | <span title="numpy">np</span>.<span title="numpy.int64">int64</span></code>
           </td>
-          <td><p>int | float | np.int64: value of result</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>int | float | np.int64: value of result</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -4560,7 +4680,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code><span title="typing.Optional">Optional</span>[str | list[str]]</code>
           </td>
-          <td><p><em>description</em>. Defaults to None.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p><em>description</em>. Defaults to None.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -4570,7 +4694,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code><span title="typing.Optional">Optional</span>[str]</code>
           </td>
-          <td><p><em>description</em>. Defaults to None.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p><em>description</em>. Defaults to None.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -4580,7 +4708,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code><span title="typing.Optional">Optional</span>[int]</code>
           </td>
-          <td><p><em>description</em>. Defaults to None.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p><em>description</em>. Defaults to None.</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -4601,7 +4733,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code><span title="pandas">pd</span>.<span title="pandas.DataFrame">DataFrame</span></code>
           </td>
-          <td><p>pd.DataFrame: <em>description</em></p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>pd.DataFrame: <em>description</em></p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -4708,7 +4844,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code><span title="typing.Optional">Optional</span>[<span title="beartype.typing.Callable">Callable</span> | <span title="typing.Literal">Literal</span>[&#39;mean&#39;, &#39;std&#39;, &#39;var&#39;, &#39;sum&#39;, &#39;min&#39;, &#39;max&#39;, &#39;slope&#39;]]</code>
           </td>
-          <td><p>Numpy function to use for aggregating the results. This should be a function like <code>numpy.average</code> or <code>numpy.sum</code>.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Numpy function to use for aggregating the results. This should be a function like <code>numpy.average</code> or <code>numpy.sum</code>.</p>
+            </div>
+          </td>
           <td>
                 <code>&#39;mean&#39;</code>
           </td>
@@ -4718,7 +4858,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code><span title="typing.Optional">Optional</span>[<span title="beartype.typing.Sequence">Sequence</span>[str]]</code>
           </td>
-          <td><p>ticker symbol for the company</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>ticker symbol for the company</p>
+            </div>
+          </td>
           <td>
                 <code>None</code>
           </td>
@@ -4739,7 +4883,11 @@ a potential for bankruptcy.</p>
           <td>
                 <code><a class="autorefs autorefs-internal" title="src.stocktracer.collector.sec.Results.Table" href="#src.stocktracer.collector.sec.Results.Table">Table</a></code>
           </td>
-          <td><p>Results.Table: Object that represents a pivot table with the data requested</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Results.Table: Object that represents a pivot table with the data requested</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -5084,7 +5232,11 @@ this object is the most expensive part.</p>
           <td>
                 <code><span title="pandas">pd</span>.<span title="pandas.DataFrame">DataFrame</span></code>
           </td>
-          <td><p>pd.DataFrame: Dataframe with mapping information</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>pd.DataFrame: Dataframe with mapping information</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -5124,7 +5276,11 @@ this object is the most expensive part.</p>
           <td>
                 <code>frozenset</code>
           </td>
-          <td><p>tickers to check</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>tickers to check</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -5145,7 +5301,11 @@ this object is the most expensive part.</p>
 <td><code>bool</code></td>          <td>
                 <code>bool</code>
           </td>
-          <td><p>if all the tickers are found</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>if all the tickers are found</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -5213,7 +5373,11 @@ this object is the most expensive part.</p>
           <td>
                 <code>str</code>
           </td>
-          <td><p>stock ticker. The case does not matter.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>stock ticker. The case does not matter.</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -5234,7 +5398,11 @@ this object is the most expensive part.</p>
           <td>
                 <code>LookupError</code>
           </td>
-          <td><p>If ticker is not found</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>If ticker is not found</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -5252,7 +5420,11 @@ this object is the most expensive part.</p>
           <td>
                 <code><span title="numpy">np</span>.<span title="numpy.int64">int64</span></code>
           </td>
-          <td><p>np.int64: cik</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>np.int64: cik</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -5330,7 +5502,11 @@ this object is the most expensive part.</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p>Cik number for the stock</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Cik number for the stock</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -5351,7 +5527,11 @@ this object is the most expensive part.</p>
 <td><code>str</code></td>          <td>
                 <code>str</code>
           </td>
-          <td><p>stock ticker</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>stock ticker</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -5418,7 +5598,11 @@ report is the CIK values to find the corresponding stocks.</p>
           <td>
                 <code>frozenset[str]</code>
           </td>
-          <td><p>ticker symbols to search for</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>ticker symbols to search for</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -5439,7 +5623,11 @@ report is the CIK values to find the corresponding stocks.</p>
           <td>
                 <code>frozenset[int]</code>
           </td>
-          <td><p>frozenset[int]: CIKs values translated from the tickers specified</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>frozenset[int]: CIKs values translated from the tickers specified</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -5527,7 +5715,11 @@ report is the CIK values to find the corresponding stocks.</p>
           <td>
                 <code>list[str]</code>
           </td>
-          <td><p>ticker symbols you want information about</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>ticker symbols you want information about</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -5537,7 +5729,11 @@ report is the CIK values to find the corresponding stocks.</p>
           <td>
                 <code><a class="autorefs autorefs-internal" title="src.stocktracer.collector.sec.Filter" href="#src.stocktracer.collector.sec.Filter">Filter</a></code>
           </td>
-          <td><p>SEC specific data to scrape from the reports</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>SEC specific data to scrape from the reports</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -5558,7 +5754,11 @@ report is the CIK values to find the corresponding stocks.</p>
 <td><code>Results</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="src.stocktracer.collector.sec.Results" href="#src.stocktracer.collector.sec.Results">Results</a></code>
           </td>
-          <td><p>results with filtered data</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>results with filtered data</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -5640,7 +5840,11 @@ report is the CIK values to find the corresponding stocks.</p>
           <td>
                 <code>frozenset[str]</code>
           </td>
-          <td><p>ticker symbols you want information about</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>ticker symbols you want information about</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -5650,7 +5854,11 @@ report is the CIK values to find the corresponding stocks.</p>
           <td>
                 <code><a class="autorefs autorefs-internal" title="src.stocktracer.collector.sec.Filter" href="#src.stocktracer.collector.sec.Filter">Filter</a></code>
           </td>
-          <td><p>SEC specific data to scrape from the reports</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>SEC specific data to scrape from the reports</p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -5671,7 +5879,11 @@ report is the CIK values to find the corresponding stocks.</p>
 <td><code>Results</code></td>          <td>
                 <code><a class="autorefs autorefs-internal" title="src.stocktracer.collector.sec.Results" href="#src.stocktracer.collector.sec.Results">Results</a></code>
           </td>
-          <td><p>results with filtered data</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>results with filtered data</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
@@ -5760,7 +5972,11 @@ True</p>
           <td>
                 <code><span title="pandas">pd</span>.<span title="pandas.Series">Series</span></code>
           </td>
-          <td><p><em>description</em></p></td>
+          <td>
+            <div class="doc-md-description">
+              <p><em>description</em></p>
+            </div>
+          </td>
           <td>
               <em>required</em>
           </td>
@@ -5770,7 +5986,11 @@ True</p>
           <td>
                 <code>int</code>
           </td>
-          <td><p><em>description</em>. Defaults to 1.</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p><em>description</em>. Defaults to 1.</p>
+            </div>
+          </td>
           <td>
                 <code>1</code>
           </td>
@@ -5791,7 +6011,11 @@ True</p>
 <td><code>float</code></td>          <td>
                 <code>float</code>
           </td>
-          <td><p>slope of the trend line</p></td>
+          <td>
+            <div class="doc-md-description">
+              <p>slope of the trend line</p>
+            </div>
+          </td>
         </tr>
     </tbody>
   </table>
