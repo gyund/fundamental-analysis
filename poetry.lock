@@ -632,13 +632,13 @@ test = ["pytest", "sphinx", "sphinx-autobuild", "twine", "wheel"]
 
 [[package]]
 name = "griffe"
-version = "0.29.0"
+version = "0.32.3"
 description = "Signatures for entire Python programs. Extract the structure, the frame, the skeleton of your project, to generate API documentation or find breaking changes in your API."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "griffe-0.29.0-py3-none-any.whl", hash = "sha256:e62ff34b04630c2382e2e277301cb2c29221fb09c04028e62ef35afccc64344b"},
-    {file = "griffe-0.29.0.tar.gz", hash = "sha256:6fc892aaa251b3761e3a8d2f5893758e1850ec5d81d4605c4557be0666202a0b"},
+    {file = "griffe-0.32.3-py3-none-any.whl", hash = "sha256:d9471934225818bf8f309822f70451cc6abb4b24e59e0bb27402a45f9412510f"},
+    {file = "griffe-0.32.3.tar.gz", hash = "sha256:14983896ad581f59d5ad7b6c9261ff12bdaa905acccc1129341d13e545da8521"},
 ]
 
 [package.dependencies]
@@ -1151,17 +1151,17 @@ python-legacy = ["mkdocstrings-python-legacy (>=0.2.1)"]
 
 [[package]]
 name = "mkdocstrings-python"
-version = "1.1.2"
+version = "1.3.0"
 description = "A Python handler for mkdocstrings."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "mkdocstrings_python-1.1.2-py3-none-any.whl", hash = "sha256:c2b652a850fec8e85034a9cdb3b45f8ad1a558686edc20ed1f40b4e17e62070f"},
-    {file = "mkdocstrings_python-1.1.2.tar.gz", hash = "sha256:f28bdcacb9bcdb44b6942a5642c1ea8b36870614d33e29e3c923e204a8d8ed61"},
+    {file = "mkdocstrings_python-1.3.0-py3-none-any.whl", hash = "sha256:36c224c86ab77e90e0edfc9fea3307f7d0d245dd7c28f48bbb2203cf6e125530"},
+    {file = "mkdocstrings_python-1.3.0.tar.gz", hash = "sha256:f967f84bab530fcc13cc9c02eccf0c18bdb2c3bab5c55fa2045938681eec4fc4"},
 ]
 
 [package.dependencies]
-griffe = ">=0.24"
+griffe = ">=0.30,<0.33"
 mkdocstrings = ">=0.20"
 
 [[package]]
@@ -2429,4 +2429,4 @@ tensorflow = ["tensorflow-decision-forests"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10, <3.12"
-content-hash = "c0c097173f3adb1c3d8be26970368f84d6a8d48d88fa29ad0d141cdc5f0f8385"
+content-hash = "ede283fd54582961c4e922fb61bc2b7561d0fddd3e29406f7d42f16f7882d98f"
