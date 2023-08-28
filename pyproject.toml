@@ -160,7 +160,7 @@ optional = true
 mkdocs-gen-files = "~0.5.0"
 mkdocs-git-revision-date-localized-plugin = "~1.2.0"
 mkdocs-literate-nav = "~0.6.0"
-mkdocs-material = "~9.1.14"
+mkdocs-material = ">=9.1.14,<9.3.0"
 mkdocs-material-extensions = "~1.1.1"
 mkdocs-section-index = "~0.3.5"
 mkdocstrings-python = "~1.1.0"
