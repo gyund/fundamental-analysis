@@ -190,7 +190,7 @@ jobs:
           python-version: "3.11"
           cache: "poetry"
       - run: poetry install --with docs
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: smoke-results 3.10
           path: ${{ github.workspace }}/docs/.smoke-tests
