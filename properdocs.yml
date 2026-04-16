@@ -15,6 +15,7 @@ nav:
       - Caching: design/caching.md
       - Reference: design/reference.md
   - Code Reference: reference/
+  - Jupyter Notebook: notebooks/research.ipynb
 
 theme:
   name: material
@@ -56,6 +57,7 @@ plugins:
   - section-index
   - git-revision-date-localized:
       enable_creation_date: false
+  - mkdocs-jupyter
 markdown_extensions:
   - tables
   - admonition
