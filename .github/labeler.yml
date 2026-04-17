@@ -11,4 +11,4 @@ workflow:
   - .github/workflows/**/*
 
 dependencies:
-  - poetry.lock
+  - pyproject.toml

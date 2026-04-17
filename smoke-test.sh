@@ -14,22 +14,22 @@ base_command="${COVERAGE_COMMAND} -m stocktracer analyze ${SMOKE_OPTIONS} --tick
 PYTHONPATH=src
 
 echo "Running default analysis..."
-cmd="poetry run ${base_command} --report-format=csv"
+cmd="hatch run ${base_command} --report-format=csv"
 echo "PYTHONPATH=src ${cmd} > ${results_dir}/default.csv" | sed "s,${COVERAGE_COMMAND},python,g" > ${results_dir}/default.cmd
 ${cmd} > ${results_dir}/default.csv
 
 echo "Running f-score analysis..."
-cmd="poetry run ${base_command} --report-format=csv -a stocktracer.analysis.f_score"
+cmd="hatch run ${base_command} --report-format=csv -a stocktracer.analysis.f_score"
 echo "PYTHONPATH=src ${cmd} > ${results_dir}/fscore.csv" | sed "s,${COVERAGE_COMMAND},python,g" > ${results_dir}/fscore.cmd
 ${cmd} > ${results_dir}/fscore.csv
 
 echo "Running diluted_eps analysis..."
-cmd="poetry run ${base_command} -a stocktracer.analysis.diluted_eps --report-format=md --report-file=${results_dir}/diluted_eps.md"
+cmd="hatch run ${base_command} -a stocktracer.analysis.diluted_eps --report-format=md --report-file=${results_dir}/diluted_eps.md"
 echo "PYTHONPATH=src ${cmd}" | sed "s,${COVERAGE_COMMAND},python,g" > ${results_dir}/diluted_eps.cmd
 ${cmd}
 
 echo "Running tensorflow analysis..."
-cmd="poetry run ${base_command} -a stocktracer.analysis.tensorflow"
+cmd="hatch run ${base_command} -a stocktracer.analysis.tensorflow"
 echo "PYTHONPATH=src ${cmd} > ${results_dir}/tensorflow.txt" | sed "s,${COVERAGE_COMMAND},python,g" > ${results_dir}/tensorflow.cmd
 ${cmd} > ${results_dir}/tensorflow.txt
 

@@ -1,6 +1,6 @@
 # Getting Started
 
-**Requirements:** python 3.10+
+**Requirements:** python 3.11+
 
 ## Install
 
@@ -26,29 +26,32 @@
     git clone https://github.com/gyund/fundamental-analysis.git
     cd fundamental-analysis.git
 
+    # Install Hatch and Hatch UV
+    pip install hatch hatch-uv
+
     # Normal development install
-    poetry install --sync # (1)!
+    hatch env create
 
     # With mkdocs
-    poetry install --sync --with docs
+    hatch env create --extras docs
     
     # with mkdocs and tensorflow dependency support
-    poetry install --sync --extras "tensorflow"  --with docs
+    hatch env create --extras docs --extras tensorflow
 
     # Perform analysis
-    PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft
-    PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps
-    PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format csv
-    PYTHONPATH=src poetry run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format json --report-file my_results.json
+    PYTHONPATH=src hatch run python -m stocktracer analyze --tickers aapl,msft
+    PYTHONPATH=src hatch run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps
+    PYTHONPATH=src hatch run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format csv
+    PYTHONPATH=src hatch run python -m stocktracer analyze --tickers aapl,msft -a stocktracer.analysis.diluted_eps --report-format json --report-file my_results.json
 
     # Help
-    PYTHONPATH=src poetry run python -m stocktracer
+    PYTHONPATH=src hatch run python -m stocktracer
 
     # Run Unit Tests
-    poetry run pytest
+    hatch run pytest
     ```
     
-    1. Make sure you have [poetry](https://python-poetry.org/docs/) installed.
+    1. Make sure you have [Hatch](https://hatch.pypa.io/) installed.
 
 ## Generating a Basic Report
 

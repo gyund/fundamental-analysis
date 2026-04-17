@@ -21,16 +21,16 @@ jobs:
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
       - uses: actions/checkout@v3
-      - name: Install poetry
+      - name: Install Hatch
         run: |
-          pipx install poetry
+          pip install hatch hatch-uv
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-          cache: "poetry"
+          cache: "pip"
       - name: Build package
-        run: poetry build
+        run: hatch build
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@a56da0b891b3dc519c7ee3284aff1fad93cc8598
         with:

@@ -34,17 +34,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Install poetry
+      - name: Install Hatch
         run: |
-          pipx install poetry
+          pip install hatch hatch-uv
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "poetry"
-      - run: poetry install --extras "tensorflow"
+          cache: "pip"
+      - run: hatch env create --extras tensorflow
         if: ${{ matrix.python-version == '3.10' }}
-      - run: poetry install
+      - run: hatch env create
         if: ${{ matrix.python-version != '3.10' }}
       - name: Cache Network Requests
         uses: actions/cache@v3
@@ -56,11 +56,11 @@ jobs:
         if: ${{ !github.event.pull_request.draft }}
       - name: Run - unit-tests
         run: |
-          poetry run coverage run --concurrency=multiprocessing -m pytest --doctest-modules
+          hatch run coverage run --concurrency=multiprocessing -m pytest --doctest-modules
       # Just to cut down on network testing while initially iterating
       - name: Run - network-tests
         run: |
-          poetry run coverage run --concurrency=multiprocessing -a -m pytest -m webtest --run-webtest
+          hatch run coverage run --concurrency=multiprocessing -a -m pytest -m webtest --run-webtest
         if: ${{ !github.event.pull_request.draft }}
       - name: Run - smoke-tests
         run: |
@@ -68,8 +68,8 @@ jobs:
         if: ${{ !github.event.pull_request.draft && matrix.python-version == '3.10' }}
       - name: Coveralls
         run: |
-          poetry run coverage combine
-          poetry run coveralls --service=github
+          hatch run coverage combine
+          hatch run coveralls --service=github
       # - name: Coveralls
       #   uses: coverallsapp/github-action@v2
       #   with:
@@ -98,48 +98,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install poetry
+      - name: Install Hatch
         run: |
-          pipx install poetry
+          pip install hatch hatch-uv
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10" # pylint wrapt not supported on 3.11 yet
-          cache: "poetry"
-      - run: poetry install --extras "tensorflow"
+          cache: "pip"
+      - run: hatch env create --extras tensorflow
       - name: Lint - Ruff
-        run: poetry run ruff src
+        run: hatch run ruff src
         if: ${{ always() }}
       - name: Lint - Black
-        run: poetry run black --check src
+        run: hatch run black --check src
         if: ${{ always() }}
       - name: Lint - isort
-        run: poetry run isort --check src
+        run: hatch run isort --check src
         if: ${{ always() }}
       - name: Lint - pylint (src/stocktracer)
-        run: poetry run pylint -E src/stocktracer
+        run: hatch run pylint -E src/stocktracer
         if: ${{ always() }}
       # - name: Lint - pydocstyle
       #   run: |
       #     pydocstyle
       #   if: ${{ always() }}
       - name: Lint - pydoctest
-        run: PYTHONPATH=src poetry run pydoctest --config pydocktest.json
+        run: PYTHONPATH=src hatch run pydoctest --config pydocktest.json
         if: ${{ always() }}
 
   verify-packaging:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install poetry
+      - name: Install Hatch
         run: |
-          pipx install poetry
+          pip install hatch hatch-uv
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-          cache: "poetry"
-      - run: poetry install
+          cache: "pip"
+      - run: hatch env create
       - name: Run Test
         run: |
           ./verify-packaging.sh
@@ -181,15 +181,15 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # so we get the correct modification date
-      - name: Install poetry
+      - name: Install Hatch
         run: |
-          pipx install poetry
+          pip install hatch hatch-uv
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-          cache: "poetry"
-      - run: poetry install --with docs
+          cache: "pip"
+      - run: hatch env create --extras docs
       - uses: actions/download-artifact@v3
         with:
           name: smoke-results 3.10
@@ -197,8 +197,8 @@ jobs:
       - name: Test
         if: github.ref != 'refs/heads/main'
         run: |
-          poetry run mkdocs build --strict
+          hatch run mkdocs build --strict
       - name: Deploy
         if: github.ref == 'refs/heads/main'
         run: |
-          poetry run mkdocs gh-deploy --force
+          hatch run mkdocs gh-deploy --force

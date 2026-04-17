@@ -1,42 +1,151 @@
+[project]
+name = "stocktracer"
+version = "0.4.0"
+description = "Tools for aggregating efficient ways to consume and process publically traded equities on the US stock market. Includes support for SEC quarterly data processing."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Gary Yund", email = "gyund@users.noreply.github.com" },
+]
+requires-python = ">=3.11,<=3.14"
+keywords = ["sec-tools", "fundamental analysis", "stocks"]
+classifiers = [
+    "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Intended Audience :: Science/Research",
+    "Development Status :: 2 - Pre-Alpha",
+]
+
+dependencies = [
+    "alive-progress ~=3.2.0",
+    "beartype ~=0.19.0",
+    "diskcache ~=5.6.1",
+    "fire ~=0.5.0",
+    "pandas ~=2.2.0",
+    "platformdirs >=4.0.0,<5.0.0",
+    "python-dateutil ~=2.9.0",
+    "requests ~=2.32.0",
+    "requests-cache ~=1.2.0",
+    "tabulate ~=0.9.0",
+]
+
+[project.scripts]
+stocktracer = "stocktracer.__main__:main_cli"
+
+[project.urls]
+"Bug Tracker" = "https://github.com/gyund/fundamental-analysis/issues"
+Repository = "https://github.com/gyund/fundamental-analysis/"
+Documentation = "https://gyund.github.io/fundamental-analysis/"
+
+[project.optional-dependencies]
+tensorflow = ["tensorflow-decision-forests >=1.9.0,<2.0.0"]
+
+dev = [
+    "black >=24.1.0,<25.0.0",
+    "build >=1.0.0,<2.0.0",
+    "coverage",
+    "coveralls >=3.3.1,<4.0.0",
+    "isort >=5.13.0,<6.0.0",
+    "jupyter >=1.1.1,<2.0.0",
+    "mock ~=5.1.0",
+    "pydocstyle[toml] ~=6.3.0",
+    "pydoctest ~=0.1.22",
+    "pylint ~=3.0.0",
+    "pytest ~=8.1.0",
+    "pytest-benchmark ~=4.0.0",
+    "pytest-cov ~=5.0.0",
+    "ruff ~=0.3.0",
+    "scikit-learn >=1.8.0,<2.0.0",
+]
+
+docs = [
+    "mkdocs-gen-files ~=0.5.0",
+    "mkdocs-git-revision-date-localized-plugin ~=1.2.0",
+    "mkdocs-literate-nav ~=0.6.0",
+    "mkdocs-material >=9.1.14,<9.4.0",
+    "mkdocs-material-extensions ~=1.1.1",
+    "mkdocs-section-index ~=0.3.5",
+    "mkdocs-jupyter ~=0.26.2",
+    "properdocs ~=1.6.7",
+    "properdocs-theme-mkdocs ~=1.6.7",
+
+    # mkdocstrings compatibility pins
+    "mkdocstrings ==0.22.0",
+    "mkdocstrings-python ==1.7.0",
+    "mkdocs-autorefs ~=0.4.1",
+    "griffe <0.45",
+]
+
+# ---------------------------------------------------------------------------
+# Testing Tools
+# ---------------------------------------------------------------------------
+
 [tool.pytest.ini_options]
-# log_cli = true
 log_cli_level = "INFO"
 log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(pathname)s:%(lineno)s)"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
-testpaths = [
-    "src/tests",
-]
-# addopts = [
-#     "--import-mode=importlib",
-# ]
+testpaths = ["src/tests"]
 
-markers =[
+markers = [
     "webtest: mark a test as a webtest. These kinds of tests can trigger downloads or other network interactions.",
-    "slow: mark test as slow."
-    ]
+    "slow: mark test as slow.",
+]
+
+# ---------------------------------------------------------------------------
+# Linting & Formatting
+# ---------------------------------------------------------------------------
 
 [tool.ruff]
-
-select = [
-    # stop the build if there are Python syntax errors or undefined names
-    "E9",
-    "F63",
-    "F7",
-    "F82"
-
-]
-
+select = ["E9", "F63", "F7", "F82"]
 format = "github"
-
-# fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
-# unfixable = []
-
-
 target-version = "py310"
 line-length = 88
 
-[tool.isort] 
+[tool.isort]
 profile = "black"
+
+[tool.pylint.main]
+source-roots = ["src"]
+fail-under = 9.5
+fail-on = [
+    "unused-variable",
+    "unused-import",
+    "no-self-argument",
+    "use-list-literal",
+    "no-else-return",
+    "no-member",
+]
+
+[tool.pylint."messages control"]
+logging-format-style = "new"
+disable = [
+    "line-too-long",
+    "logging-fstring-interpolation",
+    "too-few-public-methods",
+]
+
+[tool.pylint.format]
+max-line-length = "88"
+
+[tool.pylint.reports]
+output-format = ["colorized"]
+
+# ---------------------------------------------------------------------------
+# Documentation Quality
+# ---------------------------------------------------------------------------
+
+[tool.pydocstyle]
+inherit = false
+match = '(?!(test_|conftest)).*\.py'
+match_dir = '^(?!(venv|tests|poc)).*'
+convention = "pep257"
+ignore_self_only_init = true
+
+# ---------------------------------------------------------------------------
+# Coverage
+# ---------------------------------------------------------------------------
 
 [tool.coverage.run]
 branch = true
@@ -51,131 +160,24 @@ exclude_lines = [
     "raise AssertionError",
     "raise NotImplementedError",
     "if 0:",
-    "if __name__ == .__main__.:"
-    ]
-
-[tool.pydocstyle]
-inherit = false
-match = '(?!(test_|conftest)).*\.py'
-match_dir = '^(?!(venv|tests|poc)).*'
-convention = "pep257"
-ignore_self_only_init = true
-
-[tool.pylint.main]
-source-roots = ["src"]
-fail-under = 9.5
-fail-on = [
-    # "redefined-builtin",    # unintended sideaffects
-    "unused-variable",      # cleaner code
-    "unused-import",        # cleaner code
-    "no-self-argument",     # possible bug, annotate correctly
-    "use-list-literal",     # cleaner code
-    "no-else-return",       # cleaner code
-    "no-member",            # make explicit for clarity 
-    # "invalid-name",         # consistency
-    ]
-
-[tool.pylint."messages control"]
-
-logging-format-style = "new"
-disable = ["line-too-long", "logging-fstring-interpolation", "too-few-public-methods"]
-# disable=["W1203"]
-# disable=["all"]
-
-[tool.pylint.format]
-max-line-length = "88"
-
-[tool.pylint.reports]
-output-format = ["colorized"]
-
-
-[tool.poetry]
-name = "stocktracer"
-version = "0.4.0"
-description = "Tools for aggregating efficient ways to consume and process publically traded equities on the US stock market. Includes support for SEC quarterly data processing."
-authors = ["Gary Yund <gyund@users.noreply.github.com>"]
-# Per https://github.com/python-poetry/poetry/issues/7786
-# license = "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)"
-readme = "README.md"
-# homepage = "https://gyund.github.io/fundamental-analysis/"
-repository = "https://github.com/gyund/fundamental-analysis/"
-documentation = "https://gyund.github.io/fundamental-analysis/"
-keywords = [ "sec-tools", "fundamental analysis", "stocks" ]
-classifiers = [
-    "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
-    "Operating System :: OS Independent",
-    "Topic :: Scientific/Engineering :: Information Analysis",
-    "Topic :: Office/Business :: Financial :: Investment",
-    "Intended Audience :: Science/Research",
-    "Development Status :: 2 - Pre-Alpha"
+    "if __name__ == .__main__.:",
 ]
 
-packages = [
-    { include = "stocktracer", from = "src" },
-]
+# ---------------------------------------------------------------------------
+# Hatch Build & Environments
+# ---------------------------------------------------------------------------
 
-[tool.poetry.urls]
-"Bug Tracker" = "https://github.com/gyund/fundamental-analysis/issues"
+[tool.hatch.build.targets.wheel]
+packages = ["src/stocktracer"]
 
-[tool.poetry.scripts]
-stocktracer = "stocktracer.__main__:main_cli"
+[tool.hatch.envs.default]
+installer = "uv"
+features = ["dev", "docs"]
 
-[tool.poetry.dependencies]
-python = ">=3.11, <3.14"
-alive-progress = "~3.2.0"
-beartype = "~0.19.0"
-diskcache = "~5.6.1"
-fire = "~0.5.0"
-pandas = "~2.2.0"
-platformdirs = ">=4.0.0,<5.0.0"
-python-dateutil = "~2.9.0"
-requests = "~2.32.0"
-requests-cache = "~1.2.0"
-tabulate = "~0.9.0"
-tensorflow-decision-forests = { version = "^1.9.0", optional = true }
-
-[tool.poetry.group.dev]
-optional = true
-
-[tool.poetry.group.dev.dependencies]
-black = "^24.1.0"
-build = "^1.0.0"
-coverage = "*"
-coveralls = "^3.3.1"
-isort = "^5.13.0"
-jupyter = "^1.1.1"
-mock = "~5.1.0"
-pydocstyle = {extras = ["toml"], version = "~6.3.0"}
-pydoctest = "~0.1.22"
-pylint = "~3.0.0"
-pytest = "~8.1.0"
-pytest-benchmark = "~4.0.0"
-pytest-cov = "~5.0.0"
-ruff = "~0.3.0"
-scikit-learn = "^1.8.0"
-
-[tool.poetry.extras]
-
-tensorflow = ["tensorflow-decision-forests"]
-
-[tool.poetry.group.docs]
-optional = true
-
-[tool.poetry.group.docs.dependencies]
-mkdocs-gen-files = "~0.5.0"
-mkdocs-git-revision-date-localized-plugin = "~1.2.0"
-mkdocs-literate-nav = "~0.6.0"
-mkdocs-material = ">=9.1.14,<9.4.0"
-mkdocs-material-extensions = "~1.1.1"
-mkdocs-section-index = "~0.3.5"
-mkdocstrings-python = "1.7.0"
-mkdocs-jupyter = "^0.26.2"
-properdocs = "^1.6.7"
-properdocs-theme-mkdocs = "^1.6.7"
-griffe = "<0.45"
-mkdocstrings = "0.22.0"
-mkdocs-autorefs = "0.4.1"
+# ---------------------------------------------------------------------------
+# Build System
+# ---------------------------------------------------------------------------
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling>=1.14.0,<2.0.0"]
+build-backend = "hatchling.build"
