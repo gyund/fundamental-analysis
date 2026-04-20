@@ -79,7 +79,7 @@ jobs:
       #     format: python
       #   if: ${{ success() }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           retention-days: 5
           name: smoke-results ${{ matrix.python-version }}
@@ -87,7 +87,7 @@ jobs:
         if: ${{ !github.event.pull_request.draft && matrix.python-version == '3.10'}}
 
       # - name: Upload pytest test results
-      #   uses: actions/upload-artifact@v3
+      #   uses: actions/upload-artifact@v4
       #   with:
       #     name: pytest-results-${{ matrix.python-version }}
       #     path: junit/test-results-${{ matrix.python-version }}.xml
