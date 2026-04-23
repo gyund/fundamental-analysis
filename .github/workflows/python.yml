@@ -47,7 +47,7 @@ jobs:
       - run: poetry install
         if: ${{ matrix.python-version != '3.10' }}
       - name: Cache Network Requests
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: sqlite-${{ hashFiles('**/tests/fixtures/network.py', '**/stocktracer/cache.py', 'smoke-test.sh') }}
           path: |
